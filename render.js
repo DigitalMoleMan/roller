@@ -25,7 +25,8 @@ class Renderer {
                 bandsJump: this.importSprite('img/player/bands_jump', 8),
             },
             tiles: {
-                X: this.importImage('img/tiles/block.png')
+                "X": this.importImage('img/tiles/block.png'),
+                "-": this.importImage('img/tiles/platform.png')
             }
         }
     }

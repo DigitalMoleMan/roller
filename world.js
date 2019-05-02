@@ -24,7 +24,7 @@ class World {
                         x: block(x),
                         y: block(y),
                         width: block(1),
-                        height: block(.1),
+                        height: block(.25),
                         type: '-'
                     })
                 }
