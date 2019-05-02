@@ -18,7 +18,7 @@ function loop() {
     world.update();
     player.readInput(input)
     player.updatePos();
-    
+
     render.update('game');
     cam.follow(player.pos);
 }
@@ -26,7 +26,7 @@ function loop() {
 
 
 var scenes = {
-    game: () => { 
+    game: () => {
         // background
         render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
@@ -39,11 +39,11 @@ var scenes = {
         onScreen.forEach(tile => {
             if (tile.x > cam.x - 32 && tile.x < (render.canvas.width + cam.x) &&
                 tile.y > cam.y - 32 && tile.y < (render.canvas.height + cam.y)) {
-                    try{
-                render.img(render.sprt.tiles[tile.type], tile.x, tile.y);
-                    }catch{
-                        render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
-                    }
+                try {
+                    render.img(render.sprt.tiles[tile.type], tile.x, tile.y);
+                } catch {
+                    render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
+                }
             }
         })
     }

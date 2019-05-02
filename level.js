@@ -7,12 +7,12 @@ const level = [
     'X                         XXXXXXXXXX                             X',
     'X                                                                X',
     'X                                                                X',
-    'X                                                                X',
+    'X                                              XX                X',
     'X                XXXXXXXXX         X                             X',
+    'X                        X         X     XX                      X',
     'X                        X         X                             X',
-    'X                        X         X                             X',
-    'X                        XXXXXXXXXXX                             X',
+    'X        ____XXXX        XXXXXXXXXXX                             X',
     'X                                                                X',
-    'X       ________                                                 X',
+    'X                                                                X',
     'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
 ]

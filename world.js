@@ -36,7 +36,7 @@ class World {
         this.tiles.forEach(tile => {
             switch(tile.type){
                 case '_':
-                tile.y--;
+                tile.y;
                 break
             }
         });
