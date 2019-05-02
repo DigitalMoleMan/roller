@@ -4,7 +4,6 @@ class Player {
             x: 64,
             y: 225,
         }
-
         this.vel = {
             x: 0,
             y: 0
@@ -30,7 +29,7 @@ class Player {
             time: 0,
         }
 
-        this.look = 0;
+        this.look = 6;
 
         this.activeGfx = {
             body: render.sprt.player.body,
@@ -49,22 +48,19 @@ class Player {
     }
 
     updatePos() {
-        if (!this.collision('x')) {
-            this.pos.x += this.vel.x;
-        } else this.vel.x = 0;
-        if (this.collision('y')) this.vel.x *= this.dec;
-        else this.vel.x *= this.dec + .01;
+        !this.collision('x') ? this.pos.x += this.vel.x : this.vel.x = 0;
+
+        this.collision('y') ? this.vel.x *= this.dec : this.vel.x *= this.dec + .01;
+
         if (!this.collision('y')) {
             this.pos.y += this.vel.y;
             this.vel.y += .3;
             this.activeGfx.bands = render.sprt.player.bandsJump;
         } else {
             this.vel.y = 0;
-
         }
 
-        if (this.vel.y < 0) this.activeGfx.bands = render.sprt.player.bandsJump;
-        else this.activeGfx.bands = render.sprt.player.bands;
+        this.vel.y < 0 ? this.activeGfx.bands = render.sprt.player.bandsJump : this.activeGfx.bands = render.sprt.player.bands;
     }
 
     moveUp() {
@@ -77,12 +73,12 @@ class Player {
 
     moveLeft() {
         this.vel.x -= this.acc;
-        if(this.look > -5) this.look--;
+        if (this.look > 0) this.look--;
     }
 
     moveRight() {
         this.vel.x += this.acc;
-        if(this.look < 5) this.look++;
+        if (this.look < 12) this.look++;
     }
 
     jump() {
@@ -90,8 +86,9 @@ class Player {
     }
 
     collision(axis) {
-        for (var i = 0; i < world.blocks.length; i++) {
-            var wall = world.blocks[i];
+
+        for (var i = 0; i < onScreen.length; i++) {
+            var wall = onScreen[i];
             if (this.hitbox[axis].left() < wall.x + wall.width &&
                 this.hitbox[axis].right() > wall.x &&
                 this.hitbox[axis].top() < wall.y + wall.height &&
