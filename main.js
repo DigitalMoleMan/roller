@@ -14,8 +14,6 @@ function loop() {
         tile.x > (cam.x - 32) && tile.x < (render.canvas.width + cam.x) &&
         tile.y > (cam.y - 32) && tile.y < (render.canvas.height + cam.y)
     ));
-
-    world.update();
     player.readInput(input)
     player.updatePos();
 

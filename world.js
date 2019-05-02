@@ -19,26 +19,17 @@ class World {
                         type: 'X'
                     })
                     break
-                    case '_':
+                    case '-':
                     this.tiles.push({
                         x: block(x),
-                        y: block(y + .9),
+                        y: block(y),
                         width: block(1),
                         height: block(.1),
-                        type: '_'
+                        type: '-'
                     })
                 }
 
             }
         }
-    }
-    update(){
-        this.tiles.forEach(tile => {
-            switch(tile.type){
-                case '_':
-                tile.y;
-                break
-            }
-        });
     }
 }

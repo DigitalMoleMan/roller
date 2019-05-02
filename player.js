@@ -2,7 +2,7 @@ class Player {
     constructor() {
         this.pos = {
             x: 64,
-            y: 225,
+            y: 420,
         }
         this.vel = {
             x: 0,
@@ -13,13 +13,13 @@ class Player {
             x: {
                 left: () => (this.pos.x) + this.vel.x,
                 right: () => (this.pos.x + this.hitbox.padding) + this.vel.x,
-                top: () => this.pos.y,
+                top: () => this.pos.y + 8,
                 bottom: () => this.pos.y + this.hitbox.padding
             },
             y: {
                 left: () => this.pos.x,
                 right: () => this.pos.x + this.hitbox.padding,
-                top: () => (this.pos.y) + this.vel.y,
+                top: () => (this.pos.y + 8) + this.vel.y,
                 bottom: () => (this.pos.y + this.hitbox.padding) + this.vel.y
             }
         }
@@ -88,11 +88,16 @@ class Player {
     collision(axis) {
 
         for (var i = 0; i < onScreen.length; i++) {
-            var wall = onScreen[i];
-            if (this.hitbox[axis].left() < wall.x + wall.width &&
-                this.hitbox[axis].right() > wall.x &&
-                this.hitbox[axis].top() < wall.y + wall.height &&
-                this.hitbox[axis].bottom() > wall.y) {
+            var tile = onScreen[i];
+            if (this.hitbox[axis].left() < tile.x + tile.width &&
+                this.hitbox[axis].right() > tile.x &&
+                this.hitbox[axis].top() < tile.y + tile.height &&
+                this.hitbox[axis].bottom() > tile.y) {
+                    switch(tile.type){
+                        case '-':
+                        if (this.pos.y + 32 < tile.y) return true;
+                        else return false
+                    }
                 return true;
             };
         }
