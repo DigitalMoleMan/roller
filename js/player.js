@@ -38,7 +38,7 @@ class Player {
     }
 
     readInput(inp) {
-        //if (inp.keys[inp.binds.up]) this.moveUp()
+        if (inp.keys[inp.binds.up]) this.moveUp()
         //if (inp.keys[inp.binds.down]) this.moveDown()
         if (inp.keys[inp.binds.left]) this.moveLeft()
         if (inp.keys[inp.binds.right]) this.moveRight()

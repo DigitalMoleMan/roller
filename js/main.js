@@ -5,8 +5,6 @@ let player = new Player();
 
 let cam = new Camera();
 
-var debug = 1;
-
 var onScreen;
 
 function loop() {
@@ -17,7 +15,7 @@ function loop() {
     player.readInput(input)
     player.updatePos();
 
-    render.update('game');
+    //render.update('game');
     cam.follow(player.pos);
 }
 
@@ -25,6 +23,8 @@ function loop() {
 
 var scenes = {
     game: () => {
+        requestAnimationFrame(scenes.game)
+
         // background
         render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
@@ -44,6 +44,8 @@ var scenes = {
                 }
             }
         })
+
+        
     }
 }
 
@@ -51,4 +53,6 @@ var scenes = {
 
 window.onload = () => {
     setInterval(() => loop(), 1000 / 60);
+    scenes.game();
 }
+

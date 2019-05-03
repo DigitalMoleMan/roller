@@ -27,6 +27,9 @@ class Renderer {
             tiles: {
                 "X": this.importImage('img/tiles/block.png'),
                 "-": this.importImage('img/tiles/platform.png')
+            },
+            enemies: {
+                roamer: this.importSprite('img/npc/enemies/roamer', 4)
             }
         }
     }
@@ -62,8 +65,8 @@ class Renderer {
     /**
      * @param {String} scene 
      */
-    update(scene) {
-        scenes[scene]();
+    update() {
+        scenes['game']();
     }
 
     /**

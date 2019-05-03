@@ -13,7 +13,12 @@ class Input{
             sprint: 'shift'
         }
 
+        
         document.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
         document.addEventListener('keyup', (e) => this.keys[e.key.toLowerCase()] = false);
+    }
+
+    setBinds(newBinds){
+        this.binds = newBinds;
     }
 }
