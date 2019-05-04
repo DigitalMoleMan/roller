@@ -37,13 +37,13 @@ class Player {
         }
     }
 
-    readInput(inp) {
-        if (inp.keys[inp.binds.up]) this.moveUp()
-        //if (inp.keys[inp.binds.down]) this.moveDown()
-        if (inp.keys[inp.binds.left]) this.moveLeft()
-        if (inp.keys[inp.binds.right]) this.moveRight()
-        if (inp.keys[inp.binds.jump]) this.jump()
-        if (inp.keys[inp.binds.sprint]) this.acc = .3;
+    readInput(input) {
+        if (input.keys[input.binds.up]) this.moveUp()
+        //if (input.keys[input.binds.down]) this.moveDown()
+        if (input.keys[input.binds.left]) this.moveLeft()
+        if (input.keys[input.binds.right]) this.moveRight()
+        if (input.keys[input.binds.jump]) this.jump()
+        if (input.keys[input.binds.sprint]) this.acc = .3;
         else this.acc = .2;
     }
 
@@ -94,11 +94,15 @@ class Player {
                 this.hitbox[axis].top() < tile.y + tile.height &&
                 this.hitbox[axis].bottom() > tile.y) {
                     switch(tile.type){
+                        case 'X':
+                        return true
                         case '-':
-                        if (this.pos.y + 32 < tile.y) return true;
-                        else return false
+                        if (this.pos.y + 32 < tile.y){ 
+                            this.vel.y = tile.velY
+                            
+                            return false;
+                        } else return false
                     }
-                return true;
             };
         }
         return false;

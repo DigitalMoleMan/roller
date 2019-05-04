@@ -5,6 +5,7 @@ let player = new Player();
 
 let cam = new Camera();
 
+var gameClock = 0;
 var onScreen;
 
 function loop() {
@@ -14,9 +15,11 @@ function loop() {
     ));
     player.readInput(input)
     player.updatePos();
-
+    world.update();
     //render.update('game');
     cam.follow(player.pos);
+
+    gameClock++;
 }
 
 
