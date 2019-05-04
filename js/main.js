@@ -1,4 +1,4 @@
-let render = new Renderer();
+let render = new Renderer(940, 470);
 let input = new Input();
 let world = new World(level);
 let player = new Player();
@@ -7,6 +7,12 @@ let cam = new Camera();
 
 var gameClock = 0;
 var onScreen;
+
+window.onload = () => {
+    
+    setInterval(() => loop(), 1000 / 60);
+    scenes.game();
+}
 
 function loop() {
     onScreen = world.tiles.filter((tile) => (
@@ -32,9 +38,9 @@ var scenes = {
         render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
         // player
-        render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x, player.pos.y);
-        render.img(player.activeGfx.body[player.look], player.pos.x, player.pos.y);
-
+        render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding);
+        render.img(player.activeGfx.body[player.look], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding);
+        
 
         // world
         onScreen.forEach(tile => {
@@ -53,9 +59,4 @@ var scenes = {
 }
 
 
-
-window.onload = () => {
-    setInterval(() => loop(), 1000 / 60);
-    scenes.game();
-}
 

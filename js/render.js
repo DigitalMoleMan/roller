@@ -1,12 +1,16 @@
 class Renderer {
-    constructor() {
+    constructor(canvasWidth, canvasHeight) {
 
         //canvas
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
 
-        this.canvas.width = 940;
-        this.canvas.height = 470;
+        
+
+       
+
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
 
         document.body.insertBefore(this.canvas, null);
 
@@ -18,6 +22,8 @@ class Renderer {
     }
     
     init() {
+        this.ctx.imageSmoothingEnabled = false;
+        //this.ctx.scale(2, 2);
         this.sprt = {
             player: {
                 body: this.importSprite('img/player/body', 13),
@@ -102,6 +108,7 @@ class Renderer {
      * @param {Number} y 
      */
     img(src, x, y) {
+        
         this.ctx.drawImage(src, x - cam.x, y - cam.y);
     }
 

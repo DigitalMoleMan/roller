@@ -9,17 +9,17 @@ class Player {
             y: 0
         }
         this.hitbox = {
-            padding: 32,
+            padding: 16,
             x: {
-                left: () => (this.pos.x) + this.vel.x,
+                left: () => (this.pos.x - this.hitbox.padding) + this.vel.x,
                 right: () => (this.pos.x + this.hitbox.padding) + this.vel.x,
-                top: () => this.pos.y + 8,
+                top: () => this.pos.y - this.hitbox.padding / 2,
                 bottom: () => this.pos.y + this.hitbox.padding
             },
             y: {
-                left: () => this.pos.x,
+                left: () => this.pos.x - this.hitbox.padding,
                 right: () => this.pos.x + this.hitbox.padding,
-                top: () => (this.pos.y + 8) + this.vel.y,
+                top: () => (this.pos.y - this.hitbox.padding / 2) + this.vel.y,
                 bottom: () => (this.pos.y + this.hitbox.padding) + this.vel.y
             }
         }
@@ -97,11 +97,9 @@ class Player {
                         case 'X':
                         return true
                         case '-':
-                        if (this.pos.y + 32 < tile.y){ 
-                            this.vel.y = tile.velY
-                            
-                            return false;
-                        } else return false
+                        if (this.hitbox.x.bottom() < tile.y){ 
+                            return true;
+                        } else return false;
                     }
             };
         }

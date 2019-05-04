@@ -8,12 +8,14 @@ class Camera {
         }
     }
 
+    
 
     /**
      * 
      * @param {Object} target
      */
     follow(target) {
+        
         if (target.x <= (this.x + render.canvas.width / 2)) {
             this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
         }
@@ -26,5 +28,6 @@ class Camera {
         if ((target.y - render.canvas.height / 2) >= this.y) {
             this.y += ((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
         }
+        
     }
 }

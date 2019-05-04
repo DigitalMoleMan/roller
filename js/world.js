@@ -16,7 +16,7 @@ class World {
                             width: block(1),
                             height: block(1),
                             type: 'X'
-                        })
+                        });
                         break
                     case '-':
                         this.tiles.push({
@@ -26,6 +26,14 @@ class World {
                             height: block(.25),
                             velY: 0,
                             type: '-'
+                        });
+                        break
+                        case '=':
+                        this.tiles.push({
+                            x: block(x),
+                            y: block(y),
+                            width: block(1),
+                            height: block(.5),
                         })
                 }
 
@@ -36,7 +44,7 @@ class World {
     update() {
         this.tiles.forEach((tile) => {
             switch (tile.type) {
-                case '-':
+                case '=':
                 tile.velY -= .01;
 
                 tile.y += tile.velY;
