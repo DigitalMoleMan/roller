@@ -15,4 +15,4 @@ const level = [
     "X       X           XXX                                          X",
     "X                   XXX                                          X",
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-]
+];

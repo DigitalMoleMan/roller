@@ -5,8 +5,6 @@ class Renderer {
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
 
-        
-
        
 
         this.canvas.width = canvasWidth;
@@ -24,6 +22,7 @@ class Renderer {
     init() {
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.scale(2, 2);
+        
         this.sprt = {
             player: {
                 body: this.importSprite('img/player/body', 13),
@@ -68,6 +67,10 @@ class Renderer {
         return sprite
     }
 
+    attatchCamera(camera){
+        this.camera = camera;
+    }
+
     /**
      * @param {String} scene 
      */
@@ -85,7 +88,7 @@ class Renderer {
      */
     rect(x, y, width, height, color) {
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(x - cam.x, y - cam.y, width, height);
+        this.ctx.fillRect(x - this.camera.x, y - this.camera.y, width, height);
     }
 
    /**
@@ -108,8 +111,11 @@ class Renderer {
      * @param {Number} y 
      */
     img(src, x, y) {
-        
-        this.ctx.drawImage(src, x - cam.x, y - cam.y);
+        try{
+        this.ctx.drawImage(src, x - this.camera.x, y - this.camera.y);
+        } catch {
+            this.ctx.rect(x - this.camera.x, y - this.camera.y, 32, 32, '#fff');
+        }
     }
 
     imgStatic(src, x, y) {

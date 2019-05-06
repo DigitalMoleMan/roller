@@ -1,7 +1,8 @@
 class Camera {
-    constructor() {
-        this.x = 0;
-        this.y = 0;
+    constructor(startX = 0, startY = 0) {
+
+        this.x = startX;
+        this.y = startY;
         this.speed = {
             x: 15,
             y: 10
@@ -29,5 +30,6 @@ class Camera {
             this.y += ((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
         }
         
+        //console.log('x: ' + this.x + ' y: ' + this.y);
     }
 }
