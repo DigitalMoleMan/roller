@@ -31,7 +31,12 @@ class Renderer {
             },
             tiles: {
                 "X": this.importImage('img/tiles/block.png'),
-                "-": this.importImage('img/tiles/platform.png')
+                "-": this.importImage('img/tiles/platform.png'),
+                "^": this.importImage('img/tiles/elevator.png'),
+                "v": this.importImage('img/tiles/elevator.png'),
+                "<": this.importImage('img/tiles/elevator.png'),
+                ">": this.importImage('img/tiles/elevator.png'),
+                "M": this.importImage('img/tiles/spikes.png')
             },
             enemies: {
                 roamer: this.importSprite('img/npc/enemies/roamer', 4)
@@ -111,11 +116,7 @@ class Renderer {
      * @param {Number} y 
      */
     img(src, x, y) {
-        try{
         this.ctx.drawImage(src, x - this.camera.x, y - this.camera.y);
-        } catch {
-            this.ctx.rect(x - this.camera.x, y - this.camera.y, 32, 32, '#fff');
-        }
     }
 
     imgStatic(src, x, y) {

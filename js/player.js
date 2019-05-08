@@ -1,7 +1,7 @@
 class Player {
     constructor() {
         this.pos = {
-            x: 64,
+            x: 48,
             y: 420,
         }
         this.vel = {
@@ -30,6 +30,7 @@ class Player {
         }
 
         this.look = 6;
+        this.band = 0;
     }
 
     readInput(input) {
@@ -54,9 +55,12 @@ class Player {
             this.vel.y = .1;
         }
 
-        if(this.vel.y < 0 && !(input.keys[input.binds.jump])){
+        if (this.vel.y < 0 && !(input.keys[input.binds.jump])) {
             this.vel.y += .2;
         }
+
+        this.band += this.vel.x;
+        if (this.band < 0) this.band = 8;
     }
 
     moveUp() {
@@ -81,10 +85,15 @@ class Player {
         if (this.collision('y')) this.vel.y = (-7 * (1 + this.acc))
     }
 
+    kill() {
+        this.pos.x = 48;
+        this.pos.y = 420;
+    }
+
     collision(axis) {
 
-        for (var i = 0; i < onScreen.length; i++) {
-            var tile = onScreen[i];
+        for (var i = 0; i < nearPlayer.length; i++) {
+            var tile = nearPlayer[i];
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
@@ -95,6 +104,32 @@ class Player {
                     case '-':
                         if (this.hitbox.x.bottom() <= tile.y) return true
                         else return false;
+                    case '^':
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.pos.y += tile.velY / 2;
+                            //this.pos.y = tile.y - 17;
+
+                            return true
+                        } else return false;
+                    case 'v':
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.pos.y += tile.velY / 2;
+                            //this.pos.y = tile.y - 17;
+                            return true;
+                        } else return false;
+                    case '<':
+                        if (this.hitbox.x.bottom() <= tile.y) {
+                            this.pos.x += tile.velX / 2;
+                            return true;
+                        } else return false;
+                    case '>':
+                        if (this.hitbox.x.bottom() <= tile.y) {
+                            this.pos.x += tile.velX / 2;
+                            return true;
+                        } else return false;
+                    case 'M':
+                        this.kill();
+                        return false;
                 }
             };
         }
