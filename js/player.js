@@ -31,6 +31,7 @@ class Player {
 
         this.look = 6;
         this.band = 0;
+        this.rotation = 0;
     }
 
     readInput(input) {
@@ -61,6 +62,7 @@ class Player {
 
         this.band += this.vel.x;
         if (this.band < 0) this.band = 8;
+        this.rotation = this.vel.x / 100;
     }
 
     moveUp() {
@@ -105,31 +107,35 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true
                         else return false;
                     case '^':
-                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.pos.y += tile.velY / 2;
-                            //this.pos.y = tile.y - 17;
-
-                            return true
-                        } else return false;
+                    if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 2);
+                        return true
+                    }
+                    break;   
                     case 'v':
-                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.pos.y += tile.velY / 2;
-                            //this.pos.y = tile.y - 17;
-                            return true;
-                        } else return false;
+                    if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 2);
+                        return true
+                    }
+                    break;   
                     case '<':
                         if (this.hitbox.x.bottom() <= tile.y) {
                             this.pos.x += tile.velX / 2;
                             return true;
-                        } else return false;
+                        }
+                        break;
                     case '>':
                         if (this.hitbox.x.bottom() <= tile.y) {
                             this.pos.x += tile.velX / 2;
                             return true;
-                        } else return false;
+                        }
+                        break;  
                     case 'M':
                         this.kill();
                         return false;
+                        break;
+                        case '/':
+                        player.rotation = .25
                 }
             };
         }

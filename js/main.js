@@ -57,12 +57,12 @@ var scenes = {
         // background
         render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
+
         // player
         render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
 
         if ((player.vel.y < 0) && !player.collision('y')) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
         else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
-
         //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
         
 
@@ -77,6 +77,10 @@ var scenes = {
                     render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
                 }
             }
+        })
+
+        world.enemies.forEach(enemy => {
+            render.img(render.sprt.enemies[enemy.type], enemy.x, enemy.y);
         })
 
 
