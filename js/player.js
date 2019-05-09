@@ -89,7 +89,7 @@ class Player {
 
     kill() {
         this.pos.x = 48;
-        this.pos.y = 420;
+        this.pos.y = 920;
     }
 
     collision(axis) {
@@ -107,14 +107,14 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true
                         else return false;
                     case '^':
-                    if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 2);
+                    if (this.pos.y <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 4);
                         return true
                     }
                     break;   
                     case 'v':
-                    if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 2);
+                    if (this.pos.y <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 4);
                         return true
                     }
                     break;   
