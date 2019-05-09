@@ -79,16 +79,19 @@ class World {
                             width: block(1),
                             height: block(.1),
                             type: tile
-                        })
+                        });
                         break;
                         case 'R':
                         this.enemies.push({
                             x: block(x),
-                            y: block(y + .75),
+                            y: block(y),
                             width: block(1),
-                            height: block(.1),
+                            height: block(1),
+                            velX: 0,
+                            frame: 0,
                             type: tile
                         })
+                        break;
                 }
                 
 
@@ -102,25 +105,26 @@ class World {
                 case '^':
                     tile.velY = Math.fround(-Math.sin((gameClock % 6000) / 48));
                     tile.y += tile.velY;
-                    console.log(tile.velY);
                     break;
                 case 'v':
                     tile.velY = Math.fround(Math.sin((gameClock % 6000) / 48));
                     tile.y += tile.velY;
-                    //tile.y += Math.sin(gameClock % 60);
                     break;
                 case '<':
                     tile.velX = Math.fround(-Math.sin((gameClock % 6000) / 48));
-
                     tile.x += tile.velX;
-                    //tile.y += Math.sin(gameClock % 60);
                     break;
                 case '>':
                     tile.velX = Math.fround(Math.sin((gameClock % 6000) / 48));
-
                     tile.x += tile.velX;
-                    //tile.y += Math.sin(gameClock % 60);
                     break;
+            }
+        })
+        this.enemies.forEach(enemy => {
+            switch (enemy.type) {
+                case 'R':
+                enemy.velX = Math.fround(Math.sin((gameClock % 6000) / 48));
+                enemy.x += enemy.velX;
             }
         })
     }

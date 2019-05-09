@@ -2,7 +2,7 @@ class Player {
     constructor() {
         this.pos = {
             x: 48,
-            y: 420,
+            y: 920,
         }
         this.vel = {
             x: 0,

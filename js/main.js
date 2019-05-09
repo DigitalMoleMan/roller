@@ -11,6 +11,29 @@ var gameClock = 0;
 var nearPlayer = [];
 var onScreen = [];
 
+
+//textures
+render.sprt = {
+    player: {
+        body: render.importSprite('img/player/body', 13),
+        bands: render.importSprite('img/player/bands', 8),
+        bandsJump: render.importSprite('img/player/bands_jump', 8),
+    },
+    tiles: {
+        "X": render.importImage('img/tiles/block.png'),
+        "-": render.importImage('img/tiles/platform.png'),
+        "^": render.importImage('img/tiles/elevator.png'),
+        "v": render.importImage('img/tiles/elevator.png'),
+        "<": render.importImage('img/tiles/elevator.png'),
+        ">": render.importImage('img/tiles/elevator.png'),
+        "M": render.importImage('img/tiles/spikes.png')
+    },
+    enemies: {
+        "R": render.importSprite('img/enemies/roamer', 4)
+    }
+}
+
+
 window.onload = () => {
     render.attatchCamera(cam);
     //music[0].play();
@@ -69,18 +92,20 @@ var scenes = {
 
         // world
         onScreen.forEach(tile => {
-            if (tile.x > cam.x - 32 && tile.x < (render.canvas.width + cam.x) &&
-                tile.y > cam.y - 32 && tile.y < (render.canvas.height + cam.y)) {
                 try {
                     render.img(render.sprt.tiles[tile.type], tile.x, tile.y);
                 } catch {
                     render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
                 }
-            }
         })
 
         world.enemies.forEach(enemy => {
-            render.img(render.sprt.enemies[enemy.type], enemy.x, enemy.y);
+            //try {
+                render.img(render.sprt.enemies[enemy.type][Math.round(enemy.x / 2) % render.sprt.enemies[enemy.type].length], enemy.x, enemy.y);
+            //} catch {
+                //console.log(render.sprt.enemies[enemy.type]);
+             //   render.rect(enemy.x, enemy.y, enemy.width, enemy.height, '#fff');
+           // }
         })
 
 

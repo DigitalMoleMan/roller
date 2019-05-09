@@ -3,45 +3,21 @@ class Renderer {
 
         //canvas
         this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d');
-
-       
 
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
+
+        this.ctx = this.canvas.getContext('2d');
+
+        this.ctx.imageSmoothingEnabled = false;
+        //this.ctx.scale(2, 2);
+       
 
         document.body.insertBefore(this.canvas, null);
 
         //textures
         this.sprt;
-
-        this.init();
-
-    }
-    
-    init() {
-        this.ctx.imageSmoothingEnabled = false;
-        //this.ctx.scale(2, 2);
         
-        this.sprt = {
-            player: {
-                body: this.importSprite('img/player/body', 13),
-                bands: this.importSprite('img/player/bands', 8),
-                bandsJump: this.importSprite('img/player/bands_jump', 8),
-            },
-            tiles: {
-                "X": this.importImage('img/tiles/block.png'),
-                "-": this.importImage('img/tiles/platform.png'),
-                "^": this.importImage('img/tiles/elevator.png'),
-                "v": this.importImage('img/tiles/elevator.png'),
-                "<": this.importImage('img/tiles/elevator.png'),
-                ">": this.importImage('img/tiles/elevator.png'),
-                "M": this.importImage('img/tiles/spikes.png')
-            },
-            enemies: {
-                roamer: this.importSprite('img/npc/enemies/roamer', 4)
-            }
-        }
     }
 
     /**
