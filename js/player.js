@@ -107,14 +107,14 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true
                         else return false;
                     case '^':
-                    if (this.pos.y <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 4);
+                    if ((this.hitbox.x.bottom() - this.vel.y) <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 2);
                         return true
                     }
                     break;   
                     case 'v':
-                    if (this.pos.y <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 4);
+                    if ((this.hitbox.x.bottom() - this.vel.y) <= tile.y - tile.velY) {
+                        this.pos.y += (tile.velY / 2);
                         return true
                     }
                     break;   

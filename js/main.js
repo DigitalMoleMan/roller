@@ -36,7 +36,7 @@ render.sprt = {
 
 window.onload = () => {
     render.attatchCamera(cam);
-    music[0].play();
+    //music[0].play();
 
 
     setInterval(() => loop(), 1000 / 60);
