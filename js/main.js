@@ -36,7 +36,7 @@ render.sprt = {
 
 window.onload = () => {
     render.attatchCamera(cam);
-    music[0].play();
+    //music[0].play();
 
 
     setInterval(() => loop(), 1000 / 60);
@@ -84,7 +84,7 @@ var scenes = {
         // player
         render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
 
-        if ((player.vel.y < 0) && !player.collision('y')) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
+        if ((player.midJump)) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
         else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
         //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
         
