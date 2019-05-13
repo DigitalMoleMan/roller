@@ -1,8 +1,8 @@
 class Player {
     constructor() {
         this.pos = {
-            x: 48,
-            y: 920,
+            x: 80,
+            y: 910,
         }
         this.vel = {
             x: 0,
@@ -31,6 +31,7 @@ class Player {
 
         this.look = 6;
         this.band = 0;
+        this.midJump = false;
         this.rotation = 0;
     }
 
@@ -62,6 +63,8 @@ class Player {
 
         this.band += this.vel.x;
         if (this.band < 0) this.band = 8;
+
+        if (this.vel.y >= 0) this.midJump = false;
         this.rotation = this.vel.x / 100;
     }
 
@@ -84,7 +87,12 @@ class Player {
     }
 
     jump() {
-        if (this.collision('y')) this.vel.y = (-7 * (1 + this.acc))
+        if (this.collision('y')) {
+
+            this.vel.y = (-7 * (1 + this.acc))
+
+            this.midJump = true;
+        }
     }
 
     kill() {
@@ -107,17 +115,18 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true
                         else return false;
                     case '^':
-                    if ((this.hitbox.x.bottom() - this.vel.y) <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 2);
-                        return true
-                    }
-                    break;   
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.vel.y = tile.velY;
+                            //this.pos.y += (tile.velY / 2) - 1;
+                            return false;
+                        }
+                        break;
                     case 'v':
-                    if ((this.hitbox.x.bottom() - this.vel.y) <= tile.y - tile.velY) {
-                        this.pos.y += (tile.velY / 2);
-                        return true
-                    }
-                    break;   
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.pos.y += tile.velY;
+                            return false
+                        }
+                        break;
                     case '<':
                         if (this.hitbox.x.bottom() <= tile.y) {
                             this.pos.x += tile.velX / 2;
@@ -129,12 +138,12 @@ class Player {
                             this.pos.x += tile.velX / 2;
                             return true;
                         }
-                        break;  
+                        break;
                     case 'M':
                         this.kill();
                         return false;
                         break;
-                        case '/':
+                    case '/':
                         player.rotation = .25
                 }
             };
