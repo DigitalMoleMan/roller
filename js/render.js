@@ -15,6 +15,9 @@ class Renderer {
 
         document.body.insertBefore(this.canvas, null);
 
+
+        this.activeScene = 'game';
+
         //textures
         this.sprt;
         
@@ -56,7 +59,8 @@ class Renderer {
      * @param {String} scene 
      */
     update() {
-        scenes['game']();
+        requestAnimationFrame(render.update)
+        scenes[render.activeScene]();
     }
 
     /**
@@ -69,7 +73,7 @@ class Renderer {
      */
     rect(x, y, width, height, color) {
         this.ctx.fillStyle = color;
-        this.ctx.fillRect(x - this.camera.x, y - this.camera.y, width, height);
+        this.ctx.fillRect(x - (this.camera.x), y - (this.camera.y), width, height);
     }
 
    /**
@@ -92,10 +96,43 @@ class Renderer {
      * @param {Number} y 
      */
     img(src, x, y) {
-        this.ctx.drawImage(src, x - this.camera.x, y - this.camera.y);
+        this.ctx.drawImage(src, (x - this.camera.x), (y - this.camera.y));
     }
 
     imgStatic(src, x, y) {
         this.ctx.drawImage(src, x, y);
     }
+}
+
+class Camera {
+    constructor(startX = 0, startY = 0) {
+        this.x = startX;
+        this.y = startY;
+        this.speed = {
+            x: 15,
+            y: 10
+        }
+    }
+
+    /**
+     * 
+     * @param {Object} target
+     */
+    follow(target) {
+            if (target.x <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
+                this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
+                
+            }
+            if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
+                this.x += ((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
+            }
+            if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
+                this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
+            }
+            if ((target.y - render.canvas.height / 2) >= this.y && (this.y + render.canvas.height) < world.height) {
+                this.y += Math.round((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
+            }
+            //console.log(this)
+    }
+   
 }
