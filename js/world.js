@@ -1,5 +1,5 @@
 /*
-const level = [
+    const level = [
     "X                                                                                X",
     "X                                                                                X",
     "X                                                                                X",
@@ -16,8 +16,9 @@ const level = [
     "X        @                         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-];
+    ];
 */
+/*
 const level = [
     "X                                                                     X",
     "X                                                                     X",
@@ -33,8 +34,8 @@ const level = [
     "X                    X                                                X",
     "X                    X                                                X",
     "X                                                                     X",
-    "X                M                                                    X",
-    "X                X                                                    X",
+    "X             MMMM                                                    X",
+    "X             XXXX                                                    X",
     "XXXXXXXXXXXXXXXXXXXXXX-                                               X",
     "X                    X                                                X",
     "X                    X   vv                                           X",
@@ -46,12 +47,69 @@ const level = [
     "X      vv  X         XXXXXXXXXX---   ---X                             X",
     "X          X         X        X         X     XX                      X",
     "X          X         X        X         X                             X",
-    "X  ^^      X         X        X   ---   X                             X",
+    "X  ^^      X   MM    X        X   ---   X                             X",
     "X                       XXXX                                          X",
     "X    @        R         XXXX                                          X",
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ];
+*/
+
+const level = [
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X      @                                                              X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                     X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "X              XXXX                                                          X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "X                                                                            X",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+];
+
+/*
+const level = [
+    "XXXXXXXXXXXXXXXXXXXX",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X                  X",
+    "X    @ ^^          X",
+    "XXXXXXXXXXXXXXXXXXXX",
+]
+*/
 
 block = (n) => n * 32;
 
@@ -59,19 +117,19 @@ class World {
     constructor(lvl) {
 
         this.build = {
-            "@": 'spawnpoint',
-            "X": 'block',
-            "-": 'platform',
-            "^": 'elevator.png',
-            "v": 'elevator.png',
-            "<": 'img/tiles/elevator.png',
-            ">": 'img/tiles/elevator.png',
-            "M": 'img/tiles/spikes.png',
-            "¤": 'img/tiles/cog',
-            "#": 'img/tiles/break_block',
-        },
+                "@": 'spawnpoint',
+                "X": 'block',
+                "-": 'platform',
+                "^": 'elevator.png',
+                "v": 'elevator.png',
+                "<": 'img/tiles/elevator.png',
+                ">": 'img/tiles/elevator.png',
+                "M": 'img/tiles/spikes.png',
+                "¤": 'img/tiles/cog',
+                "#": 'img/tiles/break_block',
+            },
 
-        this.width = block(lvl[0].length);
+            this.width = block(lvl[0].length);
         this.height = block(lvl.length);
 
         this.spawn = {};
@@ -84,8 +142,8 @@ class World {
                 var tile = lvl[y][x];
                 switch (tile) {
                     case '@':
-                    this.spawn.x = block(x) + 16;
-                    this.spawn.y = block(y) + 16;
+                        this.spawn.x = block(x) + 16;
+                        this.spawn.y = block(y) + 16;
                     case 'X':
                         this.tiles.push({
                             x: block(x),
@@ -151,11 +209,11 @@ class World {
                             x: block(x),
                             y: block(y + .75),
                             width: block(1),
-                            height: block(.1),
+                            height: block(.05),
                             type: tile
                         });
                         break;
-                        case '¤':
+                    case '¤':
                         this.tiles.push({
                             x: block(x),
                             y: block(y),
@@ -164,7 +222,7 @@ class World {
                             type: tile
                         });
                         break;
-                        case '#':
+                    case '#':
                         this.tiles.push({
                             x: block(x),
                             y: block(y),

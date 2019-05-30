@@ -13,7 +13,7 @@ class Player {
             x: {
                 left: () => (this.pos.x - this.hitbox.padding) + this.vel.x,
                 right: () => (this.pos.x + this.hitbox.padding) + this.vel.x,
-                top: () => this.pos.y - this.hitbox.padding / 2,
+                top: () => this.pos.y - (this.hitbox.padding / 2),
                 bottom: () => this.pos.y + this.hitbox.padding
             },
             y: {
@@ -48,7 +48,7 @@ class Player {
     }
 
     updatePos() {
-
+        console.log(this.vel.x);
         var col = {
                 x: this.collision('x'),
                 y: this.collision('y')
@@ -62,8 +62,12 @@ class Player {
             this.pos.y += this.vel.y;
             this.vel.y += .3;
         } else {
-            this.vel.y = .1;
+            this.vel.y /= 1.5;
+            if (this.vel.y < 0) this.vel.y = 0;
         }
+
+
+        if (col.y && this.vel.y > 0) this.midJump = false;
 
         if (this.vel.y < 0 && !(input.keys[input.binds.jump])) {
             this.vel.y += .2;
@@ -71,8 +75,6 @@ class Player {
 
         this.band += this.vel.x;
         if (this.band < 0) this.band = 8;
-
-        if (this.vel.y >= 0) this.midJump = false;
 
         if (this.pos.y >= world.height) this.kill();
     }
@@ -96,7 +98,7 @@ class Player {
     }
 
     jump() {
-        if (this.collision('y')) {
+        if (!this.midJump) {
             this.vel.y = (-7 * (1 + this.acc))
             this.midJump = true;
         }
@@ -124,13 +126,17 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true
                     case '^':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.midJump = false;
                             this.vel.y = tile.velY;
+                            this.vel.y -= .1;
                             return false;
                         }
                         break;
                     case 'v':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.midJump = false;
                             this.vel.y = tile.velY;
+                            this.vel.y -= .1;
                             return false;
                         }
                         break;
@@ -147,8 +153,10 @@ class Player {
                         }
                         break;
                     case 'M':
+                            if (this.hitbox.x.bottom() <= tile.y) {
                         this.kill();
-                        break;
+                        }
+                        return false;
                     case '#':
                         return true;
                 }

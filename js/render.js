@@ -11,7 +11,7 @@ class Renderer {
 
         this.ctx.imageSmoothingEnabled = false;
         //this.ctx.scale(2, 2);
-       
+
 
         document.body.insertBefore(this.canvas, null);
 
@@ -20,7 +20,7 @@ class Renderer {
 
         //textures
         this.sprt;
-        
+
     }
 
     /**
@@ -51,7 +51,7 @@ class Renderer {
         return sprite
     }
 
-    attatchCamera(camera){
+    attatchCamera(camera) {
         this.camera = camera;
     }
 
@@ -76,7 +76,7 @@ class Renderer {
         this.ctx.fillRect(x - (this.camera.x), y - (this.camera.y), width, height);
     }
 
-   /**
+    /**
      * 
      * @param {Number} x 
      * @param {Number} y 
@@ -87,6 +87,19 @@ class Renderer {
     rectStatic(x, y, width, height, color) {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x, y, width, height);
+    }
+
+    rectStroke(x, y, width, height, color) {
+        this.ctx.strokeStyle = color;
+        this.ctx.strokeRect(x - (this.camera.x), y - (this.camera.y), width, height);
+    }
+
+    line(x1,y1,x2,y2,color){
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x1  - (this.camera.x),y1  - (this.camera.y));
+        this.ctx.lineTo(x2  - (this.camera.x),y2  - (this.camera.y));
+        this.ctx.stroke();
     }
 
     /**
@@ -119,20 +132,20 @@ class Camera {
      * @param {Object} target
      */
     follow(target) {
-            if (target.x <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
-                this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
-                
-            }
-            if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
-                this.x += ((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
-            }
-            if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
-                this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
-            }
-            if ((target.y - render.canvas.height / 2) >= this.y && (this.y + render.canvas.height) < world.height) {
-                this.y += Math.round((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
-            }
-            //console.log(this)
+        if (target.x <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
+            this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
+
+        }
+        if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
+            this.x += ((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
+        }
+        if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
+            this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
+        }
+        if ((target.y - render.canvas.height / 2) >= this.y && (this.y + render.canvas.height) < world.height) {
+            this.y += Math.round((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
+        }
+        //console.log(this)
     }
-   
+
 }

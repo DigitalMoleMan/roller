@@ -8,16 +8,19 @@ jump: Spacebar
 
 sprint: Shift
 
-
-
 ## TODO
 
-* [ ] Menu
 * [ ] Game
+* [ ] Menu
+	* [ ] Logic
+	* [ ] Graphics
 * [ ] Level editor
-	* [ ] Add in game editor.
-	* [ ] Exporting levels.
+	* [ ] Logic
 	* [ ] Graphics
 * [ ] Online
-	* [ ] Uploading levels
 	* [ ] Level browser
+		* [ ] Logic
+			* [ ] Uploading levels
+		* [ ] Graphics
+* [ ] Bugs
+	* [ ] Jump reset when hitting roof.
