@@ -153,9 +153,7 @@ class Player {
                         }
                         break;
                     case 'M':
-                            if (this.hitbox.x.bottom() <= tile.y) {
                         this.kill();
-                        }
                         return false;
                     case '#':
                         return true;

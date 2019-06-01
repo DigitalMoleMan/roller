@@ -4,9 +4,9 @@ let input = new Input();
 let world = new World(level);
 let player = new Player(world.spawn.x, world.spawn.y);
 
-let camera = new Camera(0, 0);
+let camera = new Camera(world.spawn.x, world.spawn.y);
 
-var debug = 1;
+var debug = 0
 
 var gameClock = 0;
 var nearPlayer = [];
@@ -43,7 +43,7 @@ var music = [
 
 window.onload = () => {
     render.attatchCamera(camera);
-    //music[0].play();
+    music[0].play();
 
     setInterval(() => loop(), 1000 / 60);
     render.update();
@@ -91,10 +91,10 @@ var scenes = {
 
 
         // player
-        //render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
+        render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
 
-        //if (player.midJump) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
-        //else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
+        if (player.midJump) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
+        else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
         //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
 
         // world
@@ -130,7 +130,6 @@ var scenes = {
             render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
             render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
 
-            render.rectStroke(1,1,1,1,"#fff")
             //render.line(player.pos.x, player.pos.y, player.pos.x + (player.vel.x * 5), player.pos.y + (player.vel.y * 5), "#ff0")
         }
 
