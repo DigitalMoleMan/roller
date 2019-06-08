@@ -2,8 +2,9 @@
 let render = new Renderer(640, 512);
 let input = new Input();
 let world = new World(level);
-let player = new Player(world.spawn.x, world.spawn.y);
 
+
+let player = new Player(world.spawn.x, world.spawn.y);
 let camera = new Camera(world.spawn.x, world.spawn.y);
 
 var debug = 0
@@ -33,6 +34,9 @@ render.sprt = {
     },
     enemies: {
         "R": render.importSprite('img/enemies/roamer', 4)
+    },
+    backgrounds: {
+        main: render.importImage('img/backgrounds/main.png')
     }
 }
 
@@ -42,8 +46,11 @@ var music = [
 
 
 window.onload = () => {
+    world.loadLevel(level)
+    player.pos.x = world.spawn.x;
+    player.pos.y = world.spawn.y;
     render.attatchCamera(camera);
-    music[0].play();
+    //music[0].play();
 
     setInterval(() => loop(), 1000 / 60);
     render.update();
@@ -79,21 +86,31 @@ function loop() {
 var scenes = {
     menu: () => {
 
+
         // background
-        render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
+
+
+        //render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
 
     },
     game: () => {
 
         // background
-        render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
+        for (y = 0; y < render.canvas.width + 64; y += 64) {
+            for (x = 0; x < render.canvas.width + 64; x += 64) {
+
+                render.img(render.sprt.backgrounds.main, x + camera.x - (camera.x / 3) % 64, y + camera.y - (camera.y / 3) % 64);
+            }
+        }
+
+        //render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
 
         // player
         render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
 
-        if (player.midJump) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % 8], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
+        if (player.midJump) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % render.sprt.player.bandsJump.length], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
         else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
         //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
 
@@ -120,7 +137,7 @@ var scenes = {
                 render.rect(enemy.x, enemy.y, enemy.width, enemy.height, '#fff');
             }
         })
-        
+
         //debug
         if (debug) {
             //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
