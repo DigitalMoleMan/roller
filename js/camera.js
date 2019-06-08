@@ -21,7 +21,7 @@ class Camera {
             }
             if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
                 this.x += Math.round((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
-            }
+            } 
             if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
                 this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
             }
