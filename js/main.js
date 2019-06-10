@@ -1,3 +1,9 @@
+/**
+ * Roller - main.js
+ */
+const mainDOM = document.getElementById("main");
+var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 //let menu = new Menu();
 let render = new Renderer(640, 512);
 let input = new Input();
@@ -13,8 +19,10 @@ var gameClock = 0;
 var nearPlayer = [];
 var onScreen = [];
 
+
+
 //loading textures
-render.sprt = {
+var sprites = {
     player: {
         body: render.importSprite('img/player/body', 13),
         bands: render.importSprite('img/player/bands', 8),
@@ -24,13 +32,14 @@ render.sprt = {
         "@": render.importImage('img/tiles/break_block_0.png'),
         "X": render.importImage('img/tiles/block.png'),
         "-": render.importImage('img/tiles/platform.png'),
-        "^": render.importImage('img/tiles/elevator.png'),
-        "v": render.importImage('img/tiles/elevator.png'),
-        "<": render.importImage('img/tiles/elevator.png'),
-        ">": render.importImage('img/tiles/elevator.png'),
+        "^": render.importSprite('img/tiles/elevator', 8),
+        "v": render.importSprite('img/tiles/elevator', 8),
+        "<": render.importSprite('img/tiles/elevator', 8),
+        ">": render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes.png'),
         "¤": render.importSprite('img/tiles/cog', 4),
-        "#": render.importImage('img/tiles/break_block', 2),
+
+        //"#": render.importImage('img/tiles/break_block', 2),
     },
     enemies: {
         "R": render.importSprite('img/enemies/roamer', 4)
@@ -46,6 +55,7 @@ var music = [
 
 
 window.onload = () => {
+    console.log(onMobile);
     world.loadLevel(level)
     player.pos.x = world.spawn.x;
     player.pos.y = world.spawn.y;
@@ -57,7 +67,7 @@ window.onload = () => {
 }
 
 function loop() {
-
+    gameClock++;
     onScreen = world.tiles.filter((tile) => (
         tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
         tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
@@ -77,8 +87,7 @@ function loop() {
     world.update();
 
     //render.camera.follow(player.pos);
-    gameClock++;
-
+    
 }
 
 
@@ -100,7 +109,7 @@ var scenes = {
         for (y = 0; y < render.canvas.width + 64; y += 64) {
             for (x = 0; x < render.canvas.width + 64; x += 64) {
 
-                render.img(render.sprt.backgrounds.main, x + camera.x - (camera.x / 3) % 64, y + camera.y - (camera.y / 3) % 64);
+                render.img(sprites.backgrounds.main, x + camera.x - (camera.x / 3) % 64, y + camera.y - (camera.y / 3) % 64, 64, 64);
             }
         }
 
@@ -108,19 +117,25 @@ var scenes = {
 
 
         // player
-        render.img(render.sprt.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
+        render.img(sprites.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding), 32, 32);
 
-        if (player.midJump) render.img(render.sprt.player.bandsJump[Math.floor(player.band) % render.sprt.player.bandsJump.length], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
-        else render.img(render.sprt.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
+        if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
+        else render.img(sprites.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
         //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
 
         // world
         onScreen.forEach(tile => {
 
             try {
-                var texture = render.sprt.tiles[tile.type];
+                var texture = sprites.tiles[tile.type];
 
-                render.img(texture, tile.x, tile.y);
+                if (texture.length > 1) {
+                    render.img(texture[gameClock % texture.length], tile.x, tile.y);
+                } else {
+
+
+                    render.img(texture, tile.x, tile.y);
+                }
 
             } catch {
                 render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
@@ -131,9 +146,9 @@ var scenes = {
 
         world.enemies.forEach(enemy => {
             try {
-                render.img(render.sprt.enemies[enemy.type][Math.round(enemy.x / 2) % render.sprt.enemies[enemy.type].length], enemy.x, enemy.y);
+                render.img(sprites.enemies[enemy.type][Math.round(enemy.x / 2) % sprites.enemies[enemy.type].length], enemy.x, enemy.y);
             } catch {
-                console.log(render.sprt.enemies[enemy.type]);
+                console.log(sprites.enemies[enemy.type]);
                 render.rect(enemy.x, enemy.y, enemy.width, enemy.height, '#fff');
             }
         })

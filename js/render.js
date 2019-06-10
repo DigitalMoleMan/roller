@@ -10,10 +10,15 @@ class Renderer {
         this.ctx = this.canvas.getContext('2d');
 
         this.ctx.imageSmoothingEnabled = false;
+
+
+        //text
+        this.ctx.font = "8px monospace";
+        this.ctx.textBaseline = "top";
         //this.ctx.scale(2, 2);
 
 
-        document.body.insertBefore(this.canvas, null);
+        mainDOM.appendChild(this.canvas);
 
 
         this.activeScene = 'game';
@@ -94,11 +99,11 @@ class Renderer {
         this.ctx.strokeRect(x - (this.camera.x), y - (this.camera.y), width, height);
     }
 
-    line(x1,y1,x2,y2,color){
+    line(x1, y1, x2, y2, color) {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
-        this.ctx.moveTo(x1  - (this.camera.x),y1  - (this.camera.y));
-        this.ctx.lineTo(x2  - (this.camera.x),y2  - (this.camera.y));
+        this.ctx.moveTo(x1 - (this.camera.x), y1 - (this.camera.y));
+        this.ctx.lineTo(x2 - (this.camera.x), y2 - (this.camera.y));
         this.ctx.stroke();
     }
 
@@ -108,12 +113,24 @@ class Renderer {
      * @param {Number} x 
      * @param {Number} y 
      */
-    img(src, x, y) {
-        this.ctx.drawImage(src, (x - this.camera.x), (y - this.camera.y));
+    img(src, x, y, width, height) {
+        try {
+            this.ctx.drawImage(src, (x - this.camera.x), (y - this.camera.y));
+        } catch {
+           this.rect(x, y, width, height, "#f00");
+           this.rectStroke(x, y, width, height, "#fff")
+            this.text(src, x, y, width, "#fff")
+        }
     }
 
     imgStatic(src, x, y) {
         this.ctx.drawImage(src, x, y);
+    }
+
+    text(text, x, y, width, color) {
+        this.ctx.fillStyle = color;
+        
+        this.ctx.fillText(text, (x - this.camera.x), (y - this.camera.y));
     }
 }
 
@@ -136,11 +153,11 @@ class Camera {
             this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
 
         }
-        
+
         if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
             this.x += ((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
-        } 
-        
+        }
+
         if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
             this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
         }
@@ -154,7 +171,7 @@ class Camera {
         if ((this.x + render.canvas.width) > world.width) {
             this.x = world.width - render.canvas.width;
         }
-        
+
         if ((this.y + render.canvas.height) > world.height) {
             this.y = world.height - render.canvas.height;
         }

@@ -48,7 +48,6 @@ class Player {
     }
 
     updatePos() {
-        console.log(this.vel.x);
         var col = {
                 x: this.collision('x'),
                 y: this.collision('y')
@@ -59,7 +58,7 @@ class Player {
         col.y ? (this.vel.x *= this.dec) : (this.vel.x *= this.dec + .01);
 
         if (!col.y) {
-            this.pos.y += this.vel.y;
+            this.pos.y += Math.fround(this.vel.y);
             this.vel.y += .3;
         } else {
             this.vel.y /= 1.5;
@@ -130,6 +129,8 @@ class Player {
                             this.vel.y = tile.velY;
                             this.vel.y -= .1;
                             return false;
+                        } else {
+                            this.pos.y -= 1
                         }
                         break;
                     case 'v':
@@ -138,6 +139,8 @@ class Player {
                             this.vel.y = tile.velY;
                             this.vel.y -= .1;
                             return false;
+                        } else {
+                            this.pos.y -= 1
                         }
                         break;
                     case '<':
@@ -145,6 +148,7 @@ class Player {
                             this.pos.x += tile.velX;
                             return true;
                         }
+
                         break;
                     case '>':
                         if (this.hitbox.x.bottom() <= tile.y) {

@@ -16,6 +16,28 @@ class Input {
 
         document.addEventListener('keydown', (e) => this.keys[e.key.toLowerCase()] = true);
         document.addEventListener('keyup', (e) => this.keys[e.key.toLowerCase()] = false);
+
+
+        if(onMobile){
+            var mobileButtons = [
+                '^',
+                'v',
+                '<',
+                '>'
+            ]
+            mobileButtons.forEach(input => {
+                var button = document.createElement('button');
+                
+                button.onclick = console.log(input);
+                button.innerHTML = input;
+
+                mainDOM.appendChild(button);
+            })
+        }
+    }
+
+    mobileInput(input){
+        console.log(input)
     }
 
     defaultBinds() {
