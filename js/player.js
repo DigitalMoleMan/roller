@@ -9,7 +9,7 @@ class Player {
             y: 0
         }
         this.hitbox = {
-            padding: 16,
+            padding: 15.5,
             x: {
                 left: () => (this.pos.x - this.hitbox.padding) + this.vel.x,
                 right: () => (this.pos.x + this.hitbox.padding) + this.vel.x,
@@ -26,15 +26,13 @@ class Player {
         this.acc = .3;
         this.dec = .95;
 
+        this.jumpHeight = () => (-6.7 * (1 + this.acc));
+
         this.col;
-        this.jumpStats = {
-            time: 0,
-        }
 
         this.look = 6;
         this.band = 0;
         this.midJump = false;
-        this.rotation = 0;
     }
 
     readInput(input) {
@@ -98,7 +96,7 @@ class Player {
 
     jump() {
         if (!this.midJump) {
-            this.vel.y = (-7 * (1 + this.acc))
+            this.vel.y = this.jumpHeight();
             this.midJump = true;
         }
     }
@@ -130,7 +128,7 @@ class Player {
                             this.vel.y -= .1;
                             return false;
                         } else {
-                            this.pos.y -= 1
+                            this.pos.y -= .1
                         }
                         break;
                     case 'v':
@@ -140,7 +138,7 @@ class Player {
                             this.vel.y -= .1;
                             return false;
                         } else {
-                            this.pos.y -= 1
+                            this.pos.y -= .1
                         }
                         break;
                     case '<':
@@ -157,8 +155,9 @@ class Player {
                         }
                         break;
                     case 'M':
-                        this.kill();
-                        return false;
+                        if (this.hitbox.x.bottom() <= tile.y) this.kill();
+                        case 'W':
+                                if (this.hitbox.x.top() >= (tile.y + tile.height)) this.kill();
                     case '#':
                         return true;
                 }

@@ -7,7 +7,7 @@ class Renderer {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', {alpha: false});
 
         this.ctx.imageSmoothingEnabled = false;
 
@@ -18,7 +18,7 @@ class Renderer {
         //this.ctx.scale(2, 2);
 
 
-        mainDOM.appendChild(this.canvas);
+        canvasContainer.appendChild(this.canvas);
 
 
         this.activeScene = 'game';

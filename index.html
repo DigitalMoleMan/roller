@@ -9,16 +9,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="style.css">
     <link rel="icon" id="icon">
-    
+
 </head>
 
 <body>
     <main id="main">
-
+        <div id="canvasContainer"></div>
+        <div class="mobileControls" id="mobileControls">
+            <input type="range" id="LRstick" class="LRstick" min="-2" max="2">
+            <a id="mobileJump">Jump</a>
+        </div>
     </main>
+
     <script src="js/menu.js"></script>
     <script src="js/render.js"></script>
-    
+
     <script src="js/input.js"></script>
     <script src="js/player.js"></script>
     <script src="js/world.js"></script>

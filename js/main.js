@@ -2,7 +2,14 @@
  * Roller - main.js
  */
 const mainDOM = document.getElementById("main");
+const canvasContainer = document.getElementById("canvasContainer");
+
+//Mobile
 var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const mobileControls = document.getElementById("mobileControls");
+const mobileLRstick = document.getElementById("LRstick");
+const mobileJump = document.getElementById("mobileJump");
+var stickDown = false;
 
 //let menu = new Menu();
 let render = new Renderer(640, 512);
@@ -36,7 +43,8 @@ var sprites = {
         "v": render.importSprite('img/tiles/elevator', 8),
         "<": render.importSprite('img/tiles/elevator', 8),
         ">": render.importSprite('img/tiles/elevator', 8),
-        "M": render.importImage('img/tiles/spikes.png'),
+        "M": render.importImage('img/tiles/spikes_floor.png'),
+        "W": render.importImage('img/tiles/spikes_roof.png'),
         "¤": render.importSprite('img/tiles/cog', 4),
 
         //"#": render.importImage('img/tiles/break_block', 2),
@@ -56,7 +64,8 @@ var music = [
 
 window.onload = () => {
     console.log(onMobile);
-    world.loadLevel(level)
+    (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
+    world.loadLevel(level[1])
     player.pos.x = world.spawn.x;
     player.pos.y = world.spawn.y;
     render.attatchCamera(camera);
@@ -78,7 +87,13 @@ function loop() {
         tile.y > (player.pos.y - 64) && tile.y < (player.pos.y + 32)
     ));
 
+    if (onMobile) {
+        console.log(mobileLRstick < 0);
+        input.keys[input.binds.left] = (mobileLRstick.value < 0);
+        input.keys[input.binds.right] = (mobileLRstick.value > 0);
 
+        input.keys[input.binds.sprint] = ((mobileLRstick.value < -1) || (mobileLRstick.value > 1)) 
+    }
     player.readInput(input)
     player.updatePos();
 
@@ -87,7 +102,7 @@ function loop() {
     world.update();
 
     //render.camera.follow(player.pos);
-    
+
 }
 
 
@@ -117,11 +132,11 @@ var scenes = {
 
 
         // player
-        render.img(sprites.player.body[player.look], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding), 32, 32);
+        render.img(sprites.player.body[player.look], (player.pos.x - 16), (player.pos.y - 16), 32, 32);
 
-        if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding) + 2);
-        else render.img(sprites.player.bands[Math.floor(player.band % 8)], (player.pos.x - player.hitbox.padding), (player.pos.y - player.hitbox.padding));
-        //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - player.hitbox.padding, player.pos.y - player.hitbox.padding)
+        if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.pos.x - 16), (player.pos.y - 16) + 2);
+        else render.img(sprites.player.bands[Math.floor(player.band % 8)], (player.pos.x - 16), (player.pos.y - 16));
+        //render.img(player.activeGfx.bands[Math.floor(player.pos.x) % 8], player.pos.x - 16, player.pos.y - 16)
 
         // world
         onScreen.forEach(tile => {
