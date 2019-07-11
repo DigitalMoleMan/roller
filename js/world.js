@@ -1,3 +1,5 @@
+block = (n) => n * 32;
+
 const level = [{
         name: "GA valley",
         layout: [
@@ -57,6 +59,34 @@ const level = [{
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         ],
+        advancedLayer: [{
+            type: "X",
+            x: block(4),
+            y: block(4),
+            width: block(1),
+            height: block(1),
+
+        }]
+    },
+    {
+        layout: [
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                       X X",
+            "                   -----------------      ",
+            "                                          ",
+            " @               -                        ",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ]
     },
     {
         layout: [
@@ -101,7 +131,7 @@ const level = [{
 ];
 
 
-block = (n) => n * 32;
+
 
 class World {
     constructor(lvl) {
@@ -155,7 +185,7 @@ class World {
                             x: block(x),
                             y: block(y),
                             width: block(1),
-                            height: block(.25),
+                            height: block(.125),
                             velY: 0,
                             type: tile
                         });
@@ -164,9 +194,8 @@ class World {
                         this.tiles.push({
                             x: block(x),
                             y: block(y),
-                            oy: block(y),
                             width: block(1),
-                            height: block(.5),
+                            height: block(0.1875),
                             velY: 0,
                             type: tile
                         });
@@ -176,7 +205,7 @@ class World {
                             x: block(x),
                             y: block(y),
                             width: block(1),
-                            height: block(.5),
+                            height: block(0.1875),
                             velY: 0,
                             type: tile
                         });
@@ -186,7 +215,7 @@ class World {
                             x: block(x),
                             y: block(y),
                             width: block(1),
-                            height: block(.5),
+                            height: block(0.1875),
                             velX: 0,
                             type: tile
                         });
@@ -196,7 +225,7 @@ class World {
                             x: block(x),
                             y: block(y),
                             width: block(1),
-                            height: block(.5),
+                            height: block(0.1875),
                             velX: 0,
                             type: tile
                         });
@@ -210,7 +239,7 @@ class World {
                             type: tile
                         });
                         break;
-                        case 'W':
+                    case 'W':
                         this.tiles.push({
                             x: block(x),
                             y: block(y),
@@ -251,6 +280,10 @@ class World {
                 }
             }
         }
+
+        lvl.advancedLayer.forEach(element => {
+            this.tiles.push(element);
+        });
     }
 
     update() {

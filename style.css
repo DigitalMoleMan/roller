@@ -1,15 +1,21 @@
 body{
+    display: flex;
+    flex-direction: column;
     margin: 0;
-    background-color: #222;
+    height: 100%;
+    min-height: 100%;
+    background-color: #111;
     overflow: hidden;
+
+    
 }
 
 main{
     position: relative;
     display: block;
     margin: 0 auto;
-    width: fit-content;
-    height: fit-content;
+    width: 100vw;
+    height: 100vh;
     object-fit: contain;
 }
 
@@ -17,57 +23,71 @@ canvas{
     position: relative;
     display: block;
     margin: 0 auto;
-    max-height: 512px;
-    height: 100vh;
 }
 
 .canvasContainer {
+    position: fixed;
     margin: 0 auto;
-    width: fit-content;
-    height: fit-content;
+    width: 100vw;
+    height: 100vw;
   
 }
 
 .mobileControls{
-    position: sticky;
-    display: block;
-    margin: 1rem;
-    padding: 2rem;
-    background: #444;
+    position: fixed;
+    display: none;
+    bottom: 2.5rem;
+    margin: 0 auto;
+    width: 100vw;
+    height: fit-content;
     user-select: none;
 }
-.mobileControls a {
-    position: relative;
-    display: block;
-    float: right;
-    margin: 1rem;
-    padding: 1rem;
-    width: 10rem;
-    height: 10rem;
-    background-color: #555;
-}
 
-.mobileControls .LRstick {
+.mobileDirections{
     position: relative;
     display: block;
     float: left;
-    -webkit-appearance: none;
-    width: 16em;
-    background: transparent;
+    left: 1.25rem;
+    padding: .5rem;
 }
 
-.LRstick::-webkit-slider-thumb {
-    -webkit-appearance: none;
-  height:6rem;
-  width: 6rem;
-  border-radius: 3rem;
-  background: #cc3333;
-  margin-top: -5rem;
+.mobileActions{
+    position: relative;
+    display: block;
+    float: right;
+    right: 2.5rem;
+    padding: .5rem;
 }
 
-.LRstick::-webkit-slider-runnable-track {
-    width: 100%;
+
+.mobileButton {
+    position: relative;
+    display: inline-block;
+    padding: 0rem;
+    width: 4rem;
+    height: 4rem;
+    background-color: #224;
+    color: #fff;
+    text-align: center;
+    line-height: 4rem;
+    opacity: .75;
+    border-radius: .5rem;
+    
+}
+
+
+.mobileButton:active {
+    background-color: #112;
+    color: #fff;
+    opacity: .5;
+}
+
+
+.slow{
+    bottom: -.25rem;
+    padding: 0rem;
+    width: 4rem;
     height: 2rem;
-    background: #111;
-    border-radius: 1rem;
-  }
+    line-height: 2rem;
+    }
+    

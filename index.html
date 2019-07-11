@@ -6,19 +6,38 @@
     <meta name="Description" content="A 2d platformer">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" type="text/css" media="screen" href="style.css">
+    <link rel="manifest" href="js/manifest.webmanifest">
     <link rel="icon" id="icon">
+    <link rel="apple-touch-icon" id="icon">
 
 </head>
 
 <body>
     <main id="main">
-        <div id="canvasContainer"></div>
+        <div class="canvasContainer" id="canvasContainer"></div>
         <div class="mobileControls" id="mobileControls">
-            <input type="range" id="LRstick" class="LRstick" min="-2" max="2">
-            <a id="mobileJump">Jump</a>
+            <div class="mobileDirections">
+                <div>
+                    <a class="mobileButton" id="mobileFastLeft">
+                        <<</a> <a class="mobileButton" id="mobileFastRight">>>
+                    </a>
+                </div>
+                <div>
+                    <a class="mobileButton slow" id="mobileLeft">
+                        <</a> <a class="mobileButton slow" id="mobileRight">>
+                    </a>
+                </div>
+
+            </div>
+            <div class="mobileActions">
+                <a class="mobileButton" id="mobileJump">^</a>
+            </div>
         </div>
+
     </main>
 
     <script src="js/menu.js"></script>

@@ -1,0 +1,10 @@
+{
+    "name": "Roller",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "icon.ico",
+            "sizes": "16x16"
+        }
+    ]
+}

@@ -7,7 +7,7 @@ class Renderer {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
-        this.ctx = this.canvas.getContext('2d', {alpha: false});
+        this.ctx = this.canvas.getContext('2d');
 
         this.ctx.imageSmoothingEnabled = false;
 
@@ -127,10 +127,10 @@ class Renderer {
         this.ctx.drawImage(src, x, y);
     }
 
-    text(text, x, y, width, color) {
+    text(text, x, y, scrollFactor, color) {
         this.ctx.fillStyle = color;
         
-        this.ctx.fillText(text, (x - this.camera.x), (y - this.camera.y));
+        this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)) , (y - (this.camera.y * scrollFactor)));
     }
 }
 
@@ -148,21 +148,21 @@ class Camera {
      * 
      * @param {Object} target
      */
-    follow(target) {
-        if (target.x <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
-            this.x -= (((this.x + render.canvas.width / 2) - target.x) / this.speed.x);
+    follow(targetX, targetY) {
+        if (targetX <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
+            this.x -= (((this.x + render.canvas.width / 2) - targetX) / this.speed.x);
 
         }
 
-        if (target.x >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
-            this.x += ((target.x - (this.x + render.canvas.width / 2)) / this.speed.x);
+        if (targetX >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
+            this.x += ((targetX - (this.x + render.canvas.width / 2)) / this.speed.x);
         }
 
-        if ((target.y - render.canvas.height / 2) <= this.y && (this.y > 0)) {
-            this.y -= Math.round(((this.y + render.canvas.height / 2) - target.y) / this.speed.y);
+        if ((targetY - render.canvas.height / 2) <= this.y && (this.y > 0)) {
+            this.y -= Math.round(((this.y + render.canvas.height / 2) - targetY) / this.speed.y);
         }
-        if ((target.y - render.canvas.height / 2) >= this.y && (this.y + render.canvas.height) < world.height) {
-            this.y += Math.round((target.y - (this.y + render.canvas.height / 2)) / this.speed.y);
+        if ((targetY - (render.canvas.height / 2)) >= this.y && (this.y + render.canvas.height) < world.height) {
+            this.y += Math.round((targetY - (this.y + render.canvas.height / 2)) / this.speed.y);
         }
 
         if (this.x < 0) {

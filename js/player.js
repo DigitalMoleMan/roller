@@ -1,38 +1,38 @@
 class Player {
     constructor(posX = 80, posY = 360) {
-        this.pos = {
-            x: posX,
-            y: posY,
-        }
-        this.vel = {
-            x: 0,
-            y: 0
-        }
+
+        this.posX = posX;
+        this.posY = posY;
+        this.velX = 0;
+        this.velY = 0;
         this.hitbox = {
             padding: 15.5,
             x: {
-                left: () => (this.pos.x - this.hitbox.padding) + this.vel.x,
-                right: () => (this.pos.x + this.hitbox.padding) + this.vel.x,
-                top: () => this.pos.y - (this.hitbox.padding / 2),
-                bottom: () => this.pos.y + this.hitbox.padding
+                left: () => (this.posX - this.hitbox.padding) + this.velX,
+                right: () => (this.posX + this.hitbox.padding) + this.velX,
+                top: () => this.posY - (this.hitbox.padding / 2),
+                bottom: () => this.posY + this.hitbox.padding
             },
             y: {
-                left: () => this.pos.x - this.hitbox.padding,
-                right: () => this.pos.x + this.hitbox.padding,
-                top: () => (this.pos.y - this.hitbox.padding / 2) + this.vel.y,
-                bottom: () => (this.pos.y + this.hitbox.padding) + this.vel.y
+                left: () => this.posX - this.hitbox.padding,
+                right: () => this.posX + this.hitbox.padding,
+                top: () => (this.posY - this.hitbox.padding / 2) + this.velY,
+                bottom: () => (this.posY + this.hitbox.padding) + this.velY
             }
         }
-        this.acc = .3;
-        this.dec = .95;
+        this.acc = .2;
+        this.dec = .93;
 
-        this.jumpHeight = () => (-6.7 * (1 + this.acc));
+        this.jumpHeight = 0;
+        this.midJump = false;
 
-        this.col;
+        this.colX = false;
+        this.colY = false;
 
         this.look = 6;
         this.band = 0;
-        this.midJump = false;
+
+
     }
 
     readInput(input) {
@@ -41,71 +41,98 @@ class Player {
         if (input.keys[input.binds.left]) this.moveLeft();
         if (input.keys[input.binds.right]) this.moveRight();
         if (input.keys[input.binds.jump]) this.jump();
-        if (input.keys[input.binds.sprint]) this.acc = .3;
-        else this.acc = .2;
+        if (input.keys[input.binds.sprint]) this.acc = .4;
+        else this.acc = .16;
+
+        
     }
 
     updatePos() {
         var col = {
-                x: this.collision('x'),
-                y: this.collision('y')
-            }
+            x: this.collision('x'),
+            y: this.collision('y')
+        }
 
-            !col.x ? (this.pos.x += this.vel.x) : (this.vel.x = 0);
+        this.colX = col.x
+        this.colY = col.y
 
-        col.y ? (this.vel.x *= this.dec) : (this.vel.x *= this.dec + .01);
+        //console.log(`col.x = ${col.x}`)
+
+
+        if (col.x && col.y) {
+            this.posX -= this.velX;
+            this.posY -= this.velY;
+        }
+
+        !col.x ? (this.posX += this.velX) : (this.velX = 0);
+
+        col.y ? (this.velX *= this.dec) : (this.velX *= this.dec + .01);
+
+
+
 
         if (!col.y) {
-            this.pos.y += Math.fround(this.vel.y);
-            this.vel.y += .3;
+
+            this.posY += this.velY;
+            (this.velY <= 0) ? this.velY += .3: this.velY += .4;
         } else {
-            this.vel.y /= 1.5;
-            if (this.vel.y < 0) this.vel.y = 0;
+            if (!this.midJump) this.velY = 0;
+            else this.velY *= .01;
         }
 
 
-        if (col.y && this.vel.y > 0) this.midJump = false;
 
-        if (this.vel.y < 0 && !(input.keys[input.binds.jump])) {
-            this.vel.y += .2;
+        if (col.y && this.velY >= 0) {
+            this.midJump = false;
+            this.velY = 0;
         }
 
-        this.band += this.vel.x;
+        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.jump])) this.velY *= .9;
+
+
+        if (this.velX < .01 && this.velX > -.01) {
+            this.velX = 0;
+            this.posX = Math.round(this.posX);
+        }
+
+        if (this.velY < .01 && this.velY > -.01) {
+            this.velY = 0;
+        }
+
+
+        this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1)));
+
+        this.band += this.velX;
+
         if (this.band < 0) this.band = 8;
-
-        if (this.pos.y >= world.height) this.kill();
-    }
-
-    moveUp() {
-        this.vel.y -= this.acc;
-    }
-
-    moveDown() {
-        this.vel.y += this.acc;
+        if (this.posY >= world.height) this.kill();
     }
 
     moveLeft() {
-        this.vel.x -= this.acc;
+        this.velX -= this.acc;
         if (this.look > 0) this.look--;
     }
 
     moveRight() {
-        this.vel.x += this.acc;
+        this.velX += this.acc;
         if (this.look < 12) this.look++;
     }
 
     jump() {
         if (!this.midJump) {
-            this.vel.y = this.jumpHeight();
+            if(player.velY > 0) player.velY = 0;
+            this.velY += this.jumpHeight;
             this.midJump = true;
         }
     }
 
     kill() {
-        this.pos.x = world.spawn.x;
-        this.pos.y = world.spawn.y;
-        this.vel.x = 0;
-        this.vel.y = 0;
+        this.posX = world.spawn.x;
+        this.posY = world.spawn.y;
+        this.velX = 0;
+        this.velY = 0;
+        camera.x = world.spawn.x - render.canvas.width / 2;
+        camera.y = world.spawn.y - render.canvas.width / 2;
     }
 
     collision(axis) {
@@ -124,40 +151,55 @@ class Player {
                     case '^':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.midJump = false;
-                            this.vel.y = tile.velY;
-                            this.vel.y -= .1;
+                            this.velY = tile.velY;
+                            this.velY -= .1;
                             return false;
                         } else {
-                            this.pos.y -= .1
+                            this.posY -= .1
                         }
                         break;
                     case 'v':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.midJump = false;
-                            this.vel.y = tile.velY;
-                            this.vel.y -= .1;
+                            this.velY = tile.velY;
+                            this.velY -= .1;
                             return false;
                         } else {
-                            this.pos.y -= .1
+                            this.posY -= .1
                         }
                         break;
                     case '<':
                         if (this.hitbox.x.bottom() <= tile.y) {
-                            this.pos.x += tile.velX;
-                            return true;
+                            this.midJump = false;
+
+                            this.posX += tile.velX;
+
+                            this.velY = 0;
+                            return false;
                         }
 
                         break;
                     case '>':
                         if (this.hitbox.x.bottom() <= tile.y) {
-                            this.pos.x += tile.velX;
-                            return true;
+                            this.midJump = false;
+                            this.posX += tile.velX;
+                            this.velY = 0;
+                            return false;
                         }
                         break;
                     case 'M':
-                        if (this.hitbox.x.bottom() <= tile.y) this.kill();
-                        case 'W':
-                                if (this.hitbox.x.top() >= (tile.y + tile.height)) this.kill();
+                        if (this.hitbox.x.bottom() <= tile.y) {
+                            this.kill();
+                            return false;
+                        }
+                        
+                        
+                    case 'W':
+                        if (this.hitbox.x.top() >= (tile.y + tile.height)) {
+                            this.kill();
+                            return false;
+                        }
+                        
                     case '#':
                         return true;
                 }
