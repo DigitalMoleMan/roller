@@ -44,7 +44,7 @@ class Player {
         if (input.keys[input.binds.sprint]) this.acc = .4;
         else this.acc = .16;
 
-        
+
     }
 
     updatePos() {
@@ -72,7 +72,6 @@ class Player {
 
 
         if (!col.y) {
-
             this.posY += this.velY;
             (this.velY <= 0) ? this.velY += .3: this.velY += .4;
         } else {
@@ -100,7 +99,7 @@ class Player {
         }
 
 
-        this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1)));
+        (col.y) ? this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1))) : this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1)));
 
         this.band += this.velX;
 
@@ -120,9 +119,21 @@ class Player {
 
     jump() {
         if (!this.midJump) {
-            if(player.velY > 0) player.velY = 0;
-            this.velY += this.jumpHeight;
+            (this.velY > 0) ? this.velY = this.jumpHeight : this.velY += this.jumpHeight;
             this.midJump = true;
+
+            for (var i = 0; i < 100; i++) {
+                var colVal = 192 + Math.random() * 64;
+                render.pe.addParticle({
+                    x: player.posX,
+                    y: (player.posY + 12),
+                    velX: (Math.random() - .5) * 1.5,
+                    velY: .2 +(Math.random() + .5) / 4,
+                    lifetime: (Math.random() * 25),
+                    size: 1 + (Math.random() * 3),
+                    color: `rgba(${colVal},${colVal},${colVal})`
+                })
+            }
         }
     }
 
@@ -180,7 +191,7 @@ class Player {
 
                         break;
                     case '>':
-                        if (this.hitbox.x.bottom() <= tile.y) {
+                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
                             this.midJump = false;
                             this.posX += tile.velX;
                             this.velY = 0;
@@ -192,14 +203,15 @@ class Player {
                             this.kill();
                             return false;
                         }
+
                         
-                        
+
                     case 'W':
                         if (this.hitbox.x.top() >= (tile.y + tile.height)) {
                             this.kill();
                             return false;
-                        }
-                        
+                        }                        
+
                     case '#':
                         return true;
                 }

@@ -25,7 +25,7 @@ const level = [{
         name: "Toybox",
         layout: [
             "X                                                                      X",
-            "X                                                                      X",
+            "X                                                        XXXXXX        X",
             "X                                                                      X",
             "X                                                                      X",
             "X                                                                      X",
@@ -40,7 +40,7 @@ const level = [{
             "X                                                                      X",
             "X              MMMM                                                    X",
             "X              XXXX                                                    X",
-            "XXXXXXXXXXXXXXXXXXXXXXX-                                               X",
+            "XXXXXXXXXXXXXXXXXXXXXXX-        XXXXXXXXXX                             X",
             "XXXXXXXXXXXXXXXXXXXXXXX                                                X",
             "X                  XX                                                  X",
             "X                  XX                                                  X",
@@ -110,23 +110,323 @@ const level = [{
     },
     {
         layout: [
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X         @        X",
             "XXXXXXXXXXXXXXXXXXXX",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X      >   v       X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X      ^   <       X",
-            "X                  X",
-            "X    @             X",
             "XXXXXXXXXXXXXXXXXXXX",
-        ]
+            "XXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [{
+            type: "v",
+            x: block(1),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 1,
+        }, {
+            type: "v",
+            x: block(2),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 2,
+        }, {
+            type: "v",
+            x: block(3),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 3,
+        },
+        {
+            type: "v",
+            x: block(4),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 4,
+        },
+        {
+            type: "v",
+            x: block(5),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 5,
+        },{
+            type: "v",
+            x: block(6),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 6,
+        },{
+            type: "v",
+            x: block(7),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 7,
+        },{
+            type: "v",
+            x: block(8),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 8,
+        },{
+            type: "v",
+            x: block(9),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 9,
+        },{
+            type: "v",
+            x: block(10),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 9,
+        },{
+            type: "v",
+            x: block(11),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 8,
+        },{
+            type: "v",
+            x: block(12),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 7,
+        },{
+            type: "v",
+            x: block(13),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 6,
+        },{
+            type: "v",
+            x: block(14),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 5,
+        },{
+            type: "v",
+            x: block(15),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 4,
+        },{
+            type: "v",
+            x: block(16),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 3,
+        },{
+            type: "v",
+            x: block(17),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 2,
+        },{
+            type: "v",
+            x: block(18),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 1,
+        },{
+            type: "^",
+            x: block(1),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 1,
+        }, {
+            type: "^",
+            x: block(2),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 2,
+        }, {
+            type: "^",
+            x: block(3),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 3,
+        },
+        {
+            type: "^",
+            x: block(4),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 4,
+        },
+        {
+            type: "^",
+            x: block(5),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 5,
+        },{
+            type: "^",
+            x: block(6),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 6,
+        },{
+            type: "^",
+            x: block(7),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 7,
+        },{
+            type: "^",
+            x: block(8),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 8,
+        },{
+            type: "^",
+            x: block(9),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 9,
+        },{
+            type: "^",
+            x: block(10),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 9,
+        },{
+            type: "^",
+            x: block(11),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 8,
+        },{
+            type: "^",
+            x: block(12),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 7,
+        },{
+            type: "^",
+            x: block(13),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 6,
+        },{
+            type: "^",
+            x: block(14),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 5,
+        },{
+            type: "^",
+            x: block(15),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 4,
+        },{
+            type: "^",
+            x: block(16),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 3,
+        },{
+            type: "^",
+            x: block(17),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 2,
+        },{
+            type: "^",
+            x: block(18),
+            y: block(10),
+            width: block(1),
+            height: block(1),
+            range: block(2),
+            speed: 1,
+        },
+    ]
     }
 ];
 
@@ -134,7 +434,7 @@ const level = [{
 
 
 class World {
-    constructor(lvl) {
+    constructor() {
 
         this.build = {
                 "@": 'spawnpoint',
@@ -197,6 +497,8 @@ class World {
                             width: block(1),
                             height: block(0.1875),
                             velY: 0,
+                            range: 64,
+                            speed: 1,
                             type: tile
                         });
                         break;
@@ -207,6 +509,8 @@ class World {
                             width: block(1),
                             height: block(0.1875),
                             velY: 0,
+                            range: 64,
+                            speed: 1,
                             type: tile
                         });
                         break;
@@ -217,6 +521,8 @@ class World {
                             width: block(1),
                             height: block(0.1875),
                             velX: 0,
+                            range: 64,
+                            speed: 1,
                             type: tile
                         });
                         break;
@@ -227,6 +533,8 @@ class World {
                             width: block(1),
                             height: block(0.1875),
                             velX: 0,
+                            range: 64,
+                            speed: 1,
                             type: tile
                         });
                         break;
@@ -281,28 +589,26 @@ class World {
             }
         }
 
-        lvl.advancedLayer.forEach(element => {
-            this.tiles.push(element);
-        });
+        lvl.advancedLayer.forEach((element) => this.tiles.push(element));
     }
 
     update() {
         this.tiles.forEach((tile) => {
             switch (tile.type) {
                 case '^':
-                    tile.velY = -Math.sin(gameClock / 64);
+                    tile.velY = -Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
                     tile.y += tile.velY;
                     break;
                 case 'v':
-                    tile.velY = Math.sin(gameClock / 64);
+                    tile.velY = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
                     tile.y += tile.velY;
                     break;
                 case '<':
-                    tile.velX = -Math.sin(gameClock / 64);
+                    tile.velX = -Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
                     tile.x += tile.velX;
                     break;
                 case '>':
-                    tile.velX = Math.sin(gameClock / 64);
+                    tile.velX = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
                     tile.x += tile.velX;
                     break;
             }

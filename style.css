@@ -13,7 +13,6 @@ body{
 main{
     position: relative;
     display: block;
-    margin: 0 auto;
     width: 100vw;
     height: 100vh;
     object-fit: contain;
@@ -23,6 +22,14 @@ canvas{
     position: relative;
     display: block;
     margin: 0 auto;
+}
+
+.disable-selection {
+    -moz-user-select: none; /* Firefox */
+     -ms-user-select: none; /* Internet Explorer */
+  -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
+ -webkit-user-select: none; /* Chrome, Safari, and Opera */
+ -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
 }
 
 .canvasContainer {
@@ -40,7 +47,6 @@ canvas{
     margin: 0 auto;
     width: 100vw;
     height: fit-content;
-    user-select: none;
 }
 
 .mobileDirections{

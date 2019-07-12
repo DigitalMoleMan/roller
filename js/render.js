@@ -7,7 +7,9 @@ class Renderer {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', {
+            alpha: false
+        });
 
         this.ctx.imageSmoothingEnabled = false;
 
@@ -22,6 +24,8 @@ class Renderer {
 
 
         this.activeScene = 'game';
+
+        this.pe = new ParticleEngine();
 
         //textures
         this.sprt;
@@ -65,7 +69,13 @@ class Renderer {
      */
     update() {
         requestAnimationFrame(render.update)
+        
         scenes[render.activeScene]();
+
+    }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     /**
@@ -94,8 +104,9 @@ class Renderer {
         this.ctx.fillRect(x, y, width, height);
     }
 
-    rectStroke(x, y, width, height, color) {
+    rectStroke(x, y, width, height, color, lineWidth = 1) {
         this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
         this.ctx.strokeRect(x - (this.camera.x), y - (this.camera.y), width, height);
     }
 
@@ -117,8 +128,8 @@ class Renderer {
         try {
             this.ctx.drawImage(src, (x - this.camera.x), (y - this.camera.y));
         } catch {
-           this.rect(x, y, width, height, "#f00");
-           this.rectStroke(x, y, width, height, "#fff")
+            this.rect(x, y, width, height, "#f00");
+            this.rectStroke(x, y, width, height, "#fff")
             this.text(src, x, y, width, "#fff")
         }
     }
@@ -129,18 +140,18 @@ class Renderer {
 
     text(text, x, y, scrollFactor, color) {
         this.ctx.fillStyle = color;
-        
-        this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)) , (y - (this.camera.y * scrollFactor)));
+
+        this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)), (y - (this.camera.y * scrollFactor)));
     }
 }
 
 class Camera {
-    constructor(startX = 0, startY = 0) {
+    constructor(startX = 0, startY = 0, xSpeed = 15, ySpeed = 10) {
         this.x = startX;
         this.y = startY;
         this.speed = {
-            x: 15,
-            y: 10
+            x: xSpeed,
+            y: ySpeed
         }
     }
 
@@ -178,4 +189,34 @@ class Camera {
         //console.log(this)
     }
 
+}
+
+class ParticleEngine {
+    constructor() {
+        this.particles = [];
+    }
+
+    tick() {
+        
+        this.particles.forEach((particle, index) => {
+            render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
+            particle.x += particle.velX;
+            particle.y += particle.velY;
+            particle.size -= .05;
+            (particle.lifetime > 0) ? particle.lifetime--: this.particles.splice(index, 1);
+        })
+    }
+
+
+    addParticle(particle = {
+        x: 0,
+        y: 0,
+        velX: 0,
+        vely: 0,
+        lifetime: 10,
+        size: 10,
+        color: "#fff",
+    }) {
+        this.particles.push(particle);
+    }
 }
