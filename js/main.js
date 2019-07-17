@@ -15,7 +15,7 @@ if (onMobile) {
             render.canvas.height = canvasHeight;
             console.log(screen.orientation)
         }, 100)
-        
+
     })
 }
 const mobileControls = document.getElementById("mobileControls");
@@ -32,15 +32,22 @@ if (onMobile) {
 
 let render = new Renderer(canvasWidth, canvasHeight);
 let input = new Input({ //Binds
-    //directions
+    //movement
     up: 'w',
     down: 's',
     left: 'a',
     right: 'd',
 
+    //aim
+    aimUp: 'arrowup',
+    aimLeft: 'arrowleft',
+    aimRight: 'arrowright',
+    aimDown: 'arrowdown',
+
     //actions
     jump: ' ',
     sprint: 'shift',
+    use: 'm',
 
     //dev
     toggleDebug: 'f',
@@ -68,6 +75,7 @@ var sprites = {
         bands: render.importSprite('img/player/bands', 8),
         bandsJump: render.importSprite('img/player/bands_jump', 8),
         cannon: render.importSprite('img/player/cannon', 13),
+        hookshot: render.importSprite('img/player/hookshot', 5)
     },
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
@@ -116,9 +124,9 @@ musicPlayer.loopEnd = 15;
 window.onload = () => {
     console.log(onMobile);
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
-    world.loadLevel(level[1])
+    world.loadLevel(level[5])
 
-    
+
     player.posX = world.spawn.x;
     player.posY = world.spawn.y;
 
@@ -127,7 +135,7 @@ window.onload = () => {
 
 
     render.attatchCamera(camera);
-    //playMusic(1);
+    //playMusic(0);
     setInterval(() => loop(), 1000 / 60);
     render.update();
 }
@@ -149,7 +157,7 @@ function loop() {
         tile.y > (player.posY - 64) && tile.y < (player.posY + 32)
     ));
 
-   
+
 
     player.readInput(input)
     player.updatePos();
@@ -157,7 +165,7 @@ function loop() {
     camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
 
-    
+
     //if(input.keys[input.binds.toggleDebug]) debug = !debug;
 
     //render.camera.follow(player.pos);
@@ -190,8 +198,15 @@ var scenes = {
 
         //render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
 
-        
+
         // player
+
+        
+
+        render.line(player.posX,player.posY,player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
+
+        render.img(sprites.player.hookshot[player.aim], player.activeEquipment.posX - 6, player.activeEquipment.posY  - 6, 32, 32);
+
         render.img(sprites.player.body[player.look], (player.posX - 16), (player.posY - 16), 32, 32);
 
         
@@ -200,16 +215,16 @@ var scenes = {
         else render.img(sprites.player.bands[Math.floor((player.band) % 8)], (player.posX - 16), (player.posY - 16));
         //render.img(player.activeGfx.bands[Math.floor(player.posX) % 8], player.posX - 16, player.posY - 16)
 
-        //render.img(sprites.player.cannon[player.look], (player.posX - 24), (player.posY - 24), 32, 32);
-
         
+
+
         // world
         onScreen.forEach(tile => {
 
             try {
                 var texture = sprites.tiles[tile.type];
 
-                (texture.length > 1) ? render.img(texture[gameClock % texture.length], tile.x, tile.y) : render.img(texture, tile.x, tile.y);
+                (texture.length > 1) ? render.img(texture[gameClock % texture.length], tile.x, tile.y): render.img(texture, tile.x, tile.y);
 
             } catch {
                 render.rect(tile.x, tile.y, tile.width, tile.height, '#fff');
@@ -228,8 +243,9 @@ var scenes = {
         })
 
         
+
         render.pe.tick()
-       
+
 
         //debug
         if (debug) {
@@ -239,8 +255,8 @@ var scenes = {
 
             render.rectStroke(hb.x.left(), hb.y.top(), hb.x.right() - hb.x.left(), hb.y.bottom() - hb.y.top(), "#ff0");
 
-            //render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
-            //render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
+            render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
+            render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
 
             render.rectStroke((player.posX - 32), (player.posY - 32) - Math.abs(player.velY), 64, 64 + Math.abs(player.velY), "#00f")
 
@@ -249,7 +265,7 @@ var scenes = {
             })
 
             nearPlayer.forEach(tile => {
-                render.rectStroke(tile.x,tile.y,tile.width,tile.height, "#0f0")
+                render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
             })
 
 
