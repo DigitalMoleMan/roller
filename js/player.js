@@ -50,7 +50,7 @@ class Player {
         if (input.keys[input.binds.sprint]) this.acc = .4;
         else this.acc = .16;
 
-        if (input.keys[input.binds.use]) this.use();
+       // if (input.keys[input.binds.use]) this.use();
 
         //aim
         if (input.keys[input.binds.aimLeft]) this.aim = 0;
@@ -94,7 +94,7 @@ class Player {
 
         if (!col.y) {
             this.posY += this.velY;
-            (this.velY <= 0) ? this.velY += .3 : this.velY += .4;
+            (this.velY <= 0) ? this.velY += .3: this.velY += .4;
         } else {
             if (!this.midJump) this.velY = 0;
             else if (this.velY < 0) this.velY *= .01;
@@ -175,10 +175,6 @@ class Player {
                 })
             }
         }
-    }
-
-    use() {
-        this.activeEquipment.use(this.aim);
     }
 
     kill() {
@@ -276,14 +272,14 @@ class Hookshot extends Equipment {
         super(posX, posY);
 
         this.velX = 0;
-        this.velY = -10;
+        this.velY = -20;
         this.state = "retracted";
 
         this.length = 0;
     }
 
     update() {
-
+        this.velX = (player.look - 6) * 2;
         if (input.keys[input.binds.jump]) this.state = "retracting";
 
         switch (this.state) {
@@ -291,12 +287,10 @@ class Hookshot extends Equipment {
                 this.posX = player.posX;
                 this.posY = player.posY;
                 this.length = 0;
+                if (input.keys[input.binds.use]) this.state = "shooting";
                 break;
             case "shooting":
-                
-
-
-
+                    if (input.keys[input.binds.use]){
                 var col = this.checkCollision(onScreen);
                 if (col) {
                     this.state = "hooked";
@@ -305,53 +299,38 @@ class Hookshot extends Equipment {
                     this.posX += this.velX;
                     this.posY += this.velY;
                 }
+            } else {
+                this.state = "retracting";
+            }
                 break;
 
             case "hooked": {
 
-                player.midJump = false;
-                var dist = (Math.abs(player.posX - this.posX) + Math.abs(player.posY - this.posY))
+                if (input.keys[input.binds.use]) {
+                    player.midJump = false;
+                    var dist = (Math.abs(player.posX - this.posX) + Math.abs(player.posY - this.posY))
 
-                if (dist > this.length) {
-                    player.velX += (this.posX - player.posX) / 500;
-                    player.velY += (this.posY - player.posY) / 500;
+                    if (dist > this.length) {
+                        player.velX += (this.posX - player.posX) / 500;
+                        player.velY += (this.posY - player.posY) / 500;
+                    }
+
+                } else {
+                    this.state = "retracting";
                 }
             }
             break;
         case "retracting":
             this.length = 0;
-            this.posX += (player.posX - this.posX) / 2;
-            this.posY += (player.posY - this.posY) / 2;
+            this.posX += (player.posX - this.posX);
+            this.posY += (player.posY - this.posY);
 
-            if (Math.round(this.posX) == Math.round(player.posX) && Math.round(this.posY) == Math.round(player.posY)) this.state = "retracted";
+            if (Math.round(player.posX - this.posX ) == 0 && Math.round(player.posY - this.posY ) == 0) this.state = "retracted";
 
             break;
         }
 
         if (this.posX < camera.x - 128 || this.posX > camera.x + render.canvas.width + 128 || this.posY < camera.y - 128 || this.posY > camera.y + render.canvas.height + 128) this.state = "retracting"
-
-    }
-    use(dir) {
-
-        switch (this.state) {
-            case "retracting":
-                    this.posX = player.posX;
-                    this.posY = player.posY;
-                    this.length = 0;
-                (player.velX <= 0) ? this.velX = -20: this.velX = 20;
-                this.velY = -20
-                this.state = "shooting";
-                break;
-            case "retracted":
-                (player.velX <= 0) ? this.velX = -20: this.velX = 20;
-                this.velY = -20
-                this.state = "shooting";
-                break;
-            case "hooked":
-                this.state = "retracting";
-                break;
-
-        }
 
     }
 

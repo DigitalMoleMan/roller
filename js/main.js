@@ -212,7 +212,7 @@ var scenes = {
         
 
         if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.posX - 16), (player.posY - 16) + 2);
-        else render.img(sprites.player.bands[Math.floor((player.band) % 8)], (player.posX - 16), (player.posY - 16));
+        else render.img(sprites.player.bands[Math.floor((player.band) % sprites.player.bands.length)], (player.posX - 16), (player.posY - 16));
         //render.img(player.activeGfx.bands[Math.floor(player.posX) % 8], player.posX - 16, player.posY - 16)
 
         
