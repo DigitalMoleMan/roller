@@ -33,8 +33,6 @@ class Player {
 
         this.activeEquipment = new Hookshot(0, 0);
 
-        this.aim = 0;
-
         this.look = 6;
         this.band = 0;
 
@@ -50,15 +48,7 @@ class Player {
         if (input.keys[input.binds.sprint]) this.acc = .4;
         else this.acc = .16;
 
-       // if (input.keys[input.binds.use]) this.use();
-
-        //aim
-        if (input.keys[input.binds.aimLeft]) this.aim = 0;
-        if (input.keys[input.binds.aimUp]) this.aim = 2;
-        if (input.keys[input.binds.aimRight]) this.aim = 4;
-
-        if (input.keys[input.binds.aimLeft] && input.keys[input.binds.aimUp]) this.aim = 1;
-        if (input.keys[input.binds.aimRight] && input.keys[input.binds.aimUp]) this.aim = 3;
+        // if (input.keys[input.binds.use]) this.use();
     }
 
     updatePos() {
@@ -75,6 +65,7 @@ class Player {
         this.colY = col.y
 
         //console.log(`col.x = ${col.x}`)
+        this.activeEquipment.update();
 
         this.posX += this.extVelX;
         this.posY += this.extVelY;
@@ -141,10 +132,10 @@ class Player {
         this.band += this.velX;
 
         if (this.band < 0) this.band = 8;
-        if (this.posY >= world.height) this.kill();
+        if (this.posY >= world.height + 128) this.kill();
 
 
-        this.activeEquipment.update();
+
     }
 
     moveLeft() {
@@ -184,6 +175,7 @@ class Player {
         this.velY = 0;
         camera.x = world.spawn.x - render.canvas.width / 2;
         camera.y = world.spawn.y - render.canvas.width / 2;
+        this.activeEquipment.state = "reset";
     }
 
     collision(axis) {
@@ -195,12 +187,23 @@ class Player {
                 this.hitbox[axis].top() < tile.y + tile.height &&
                 this.hitbox[axis].bottom() > tile.y) {
                 switch (tile.type) {
-                    case 'X':
+                    case 'X': {
                         return true
+                    }
                     case '-':
                         if (this.hitbox.x.bottom() <= tile.y) return true
                     case '^':
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.midJump = false;
+                            this.velY = tile.velY;
+                            this.velY -= .1;
+                            return false;
+                        } else {
+                            this.posY -= .1
+                        }
+                        /*
                         if (this.hitbox.x.bottom() <= tile.y + tile.height) {
+                            
                             this.velY -= ((this.hitbox.x.bottom() - tile.y))
 
                             if (this.hitbox.x.bottom() <= tile.y) {
@@ -208,6 +211,7 @@ class Player {
                             }
 
                         }
+                        */
                         break;
                     case 'v':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
@@ -237,21 +241,32 @@ class Player {
                         }
                         break;
                     case 'M':
-                        if (this.hitbox.x.bottom() <= tile.y) {
+                        
                             this.kill();
                             return false;
-                        }
+                        
 
+                        break;
 
+                    case 'W':
+                        
+                            this.kill();
+                            return false;
+                        break;
+                    case '#':
+                        return true;
+                        break;
+                    case 'E':
 
-                        case 'W':
-                            if (this.hitbox.x.top() >= (tile.y + tile.height)) {
-                                this.kill();
-                                return false;
-                            }
+                        world.loadLevel(level[tile.exit]);
+                        gameClock = 0;
+                        player.posX = tile.exitX;
+                        player.posY = tile.exitY;
+                        render.camera.x = tile.exitX;
+                        render.camera.y = tile.exitY;
 
-                            case '#':
-                                return true;
+                        return true;
+                        break;
                 }
             };
         }
@@ -259,60 +274,153 @@ class Player {
     };
 }
 
-class Equipment {
+
+class Hookshot {
     constructor(posX, posY) {
         this.posX = posX;
         this.posY = posY;
-    }
-}
+        this.name = "Hookshoot"
 
 
-class Hookshot extends Equipment {
-    constructor(posX, posY) {
-        super(posX, posY);
-
-        this.velX = 0;
-        this.velY = -20;
+        this.speed = 16;
         this.state = "retracted";
 
+        this.maxLength = 256;
         this.length = 0;
+
+        this.angle = 0;
+
+        this.closest;
+        this.target;
     }
 
     update() {
-        this.velX = (player.look - 6) * 2;
-        if (input.keys[input.binds.jump]) this.state = "retracting";
 
+        
+        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        this.closest = undefined;
+        hookpoints.forEach(point => {
+            point.fromPlayer = Math.sqrt(Math.pow(player.posX - (point.x + point.width / 2), 2) + Math.pow(player.posY - (point.y + point.height / 2), 2));
+
+
+            //console.log(nodes)
+            //render.clear();
+
+            point.blocked = () => {
+                var nodes = []
+
+                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+                for (i = 0; i < point.fromPlayer; i += 8) {
+                    nodes.push({
+                        x: player.posX + (Math.cos(rotation) * i),
+                        y: player.posY + (Math.sin(rotation) * i)
+                    })
+                }
+                for(i=0;i<nodes.length;i++) {
+                    
+
+                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
+                    
+                    //render.rect(nodes[i].x, nodes[i].y, 1, 1, "#fff");
+                }
+
+                return false;
+            }
+        })
+        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
+        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
+        if(hookpoints.length > 0) {
+            this.closest = hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
+        }
+        //console.log(this.closest)
         switch (this.state) {
+            case "reset":
+                this.state = "retracted";
+                this.length = 0;
+                this.angle = 0;
+                break;
             case "retracted":
                 this.posX = player.posX;
                 this.posY = player.posY;
                 this.length = 0;
-                if (input.keys[input.binds.use]) this.state = "shooting";
+                this.nodes = [];
+                try {
+                    if (input.keys[input.binds.use] && this.closest != undefined) {
+
+                        this.state = "shooting";
+                        this.target = this.closest;
+
+
+                        playSound(1);
+                    }
+                } catch {
+
+                }
                 break;
             case "shooting":
-                    if (input.keys[input.binds.use]){
-                var col = this.checkCollision(onScreen);
-                if (col) {
-                    this.state = "hooked";
-                    this.length = (Math.abs(player.posX - this.posX) + Math.abs(player.posY - this.posY));
+
+
+                if (this.checkCollision(this.posX, this.posY, onScreen)) this.state = "retracting";
+
+                if (Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)) > this.maxLength) this.state = "retracting";
+
+                if (input.keys[input.binds.use]) {
+                    try {
+                        if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) && this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
+                            playSound(0);
+                            this.state = "hooked";
+
+                            this.posX = (this.target.x + (this.target.width / 2))
+                            this.posY = (this.target.y + (this.target.height / 2))
+
+                            this.length = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
+
+
+                            player.midJump = false;
+                            var rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
+
+
+                            //player.velY += Math.sin(rotation) * 5;
+                            for (var i = 0; i < 10; i++) {
+                                var colVal = (Math.random() * 255);
+                                render.pe.addParticle({
+                                    x: this.posX + (Math.random() - .5) * 12,
+                                    y: this.posY + (Math.random() - .5) * 12,
+                                    velX: (Math.random() - .5) * 3,
+                                    velY: (Math.random() - .5) * 3,
+                                    lifetime: 5 + (Math.random() * 10),
+                                    size: 2 + (Math.random() - .5) * 2,
+                                    color: `rgba(255,${colVal},128,255)`
+                                })
+                            }
+
+                        } else {
+                            var rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
+
+                            this.posX += Math.cos(rotation) * this.speed //(this.posX - (this.target.x + (this.target.width / 2))) / 3;
+                            this.posY += Math.sin(rotation) * this.speed //(this.posY - (this.target.y + (this.target.height / 2))) / 3;
+
+
+
+                        }
+                    } catch {
+                        this.state = "retracting";
+                    }
                 } else {
-                    this.posX += this.velX;
-                    this.posY += this.velY;
+                    this.state = "retracting";
                 }
-            } else {
-                this.state = "retracting";
-            }
                 break;
 
             case "hooked": {
 
-                if (input.keys[input.binds.use]) {
-                    player.midJump = false;
-                    var dist = (Math.abs(player.posX - this.posX) + Math.abs(player.posY - this.posY))
+                //if(player.midJump) this.state = "retracting";
 
-                    if (dist > this.length) {
-                        player.velX += (this.posX - player.posX) / 500;
-                        player.velY += (this.posY - player.posY) / 500;
+                if (input.keys[input.binds.use]) {
+                    var dist = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
+                    var rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
+                    if (this.target.fromPlayer >= this.length) {
+                        player.velX += Math.cos(rotation); //(this.posX - player.posX) / 500;
+                        player.velY += Math.sin(rotation); //(this.posY - player.posY) / 500;
                     }
 
                 } else {
@@ -322,27 +430,30 @@ class Hookshot extends Equipment {
             break;
         case "retracting":
             this.length = 0;
-            this.posX += (player.posX - this.posX);
-            this.posY += (player.posY - this.posY);
 
-            if (Math.round(player.posX - this.posX ) == 0 && Math.round(player.posY - this.posY ) == 0) this.state = "retracted";
+            var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
+
+
+            this.posX += Math.cos(rotation) * (this.speed * 2);
+            this.posY += Math.sin(rotation) * (this.speed * 2);
+
+            if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
 
             break;
         }
 
-        if (this.posX < camera.x - 128 || this.posX > camera.x + render.canvas.width + 128 || this.posY < camera.y - 128 || this.posY > camera.y + render.canvas.height + 128) this.state = "retracting"
-
+        this.angle = (4 + (Math.round(((Math.atan2(player.posY - this.posY, player.posX - this.posX)) * 180 / Math.PI) / 45))) % 8;
     }
 
-    checkCollision(area) {
+    checkCollision(x, y, area) {
         for (var i = 0; i < area.length; i++) {
             var tile = area[i];
-            if (this.posX < tile.x + tile.width &&
-                this.posX > tile.x &&
-                this.posY < tile.y + tile.height &&
-                this.posY > tile.y) return true;
-
+            if (x < tile.x + tile.width &&
+                x > tile.x &&
+                y < tile.y + tile.height &&
+                y > tile.y) {
+                if (tile.type !== "G") return true;
+            }
         }
-        return false;
     }
 }

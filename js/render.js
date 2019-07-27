@@ -7,9 +7,7 @@ class Renderer {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
-        this.ctx = this.canvas.getContext('2d', {
-            alpha: false
-        });
+        this.ctx = this.canvas.getContext('2d')//, {alpha: false});
 
         this.ctx.imageSmoothingEnabled = false;
 
@@ -23,13 +21,18 @@ class Renderer {
         canvasContainer.appendChild(this.canvas);
 
 
-        this.activeScene = 'game';
+        this.activeScene //= 'game';
 
         this.pe = new ParticleEngine();
 
         //textures
         this.sprt;
 
+    }
+
+    refreshCanvas(){
+        this.canvas.remove();
+        canvasContainer.appendChild(this.canvas);
     }
 
     /**

@@ -13,6 +13,7 @@ if (onMobile) {
             canvasHeight = window.innerHeight;
             render.canvas.width = canvasWidth;
             render.canvas.height = canvasHeight;
+            //render.refreshCanvas();
             console.log(screen.orientation)
         }, 100)
 
@@ -33,25 +34,25 @@ if (onMobile) {
 let render = new Renderer(canvasWidth, canvasHeight);
 let input = new Input({ //Binds
     //movement
-    up: 'w',
-    down: 's',
+    up: 'arrowup',
+    down: 'arrowdown',
     left: 'a',
     right: 'd',
-
-    //aim
-    aimUp: 'arrowup',
-    aimLeft: 'arrowleft',
-    aimRight: 'arrowright',
-    aimDown: 'arrowdown',
 
     //actions
     jump: ' ',
     sprint: 'shift',
-    use: 'm',
+    use: 'n',
+
+    //misc
+    pause: 'p',
 
     //dev
     toggleDebug: 'f',
 });
+
+let menu = new Menu();
+
 let world = new World();
 
 world.loadLevel(level[1])
@@ -60,9 +61,12 @@ let player = new Player(world.spawn.x, world.spawn.y);
 let camera = new Camera();
 let particleEng = new ParticleEngine();
 
+
+
 var debug = false;
 
 var gameClock = 0;
+var activeScene
 var nearPlayer = [];
 var onScreen = [];
 
@@ -75,7 +79,7 @@ var sprites = {
         bands: render.importSprite('img/player/bands', 8),
         bandsJump: render.importSprite('img/player/bands_jump', 8),
         cannon: render.importSprite('img/player/cannon', 13),
-        hookshot: render.importSprite('img/player/hookshot', 5)
+        hookshot: render.importSprite('img/player/hookshot', 8)
     },
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
@@ -87,9 +91,16 @@ var sprites = {
         ">": render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes_floor.png'),
         "W": render.importImage('img/tiles/spikes_roof.png'),
+        "G": render.importImage('img/tiles/hookpoint.png'),
         "¤": render.importSprite('img/tiles/cog', 4),
 
+
         //"#": render.importImage('img/tiles/break_block', 2),
+    },
+    npcs: {
+        enemies: {
+            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 4)
+        },
     },
     enemies: {
         "R": render.importSprite('img/enemies/roamer', 4)
@@ -112,19 +123,30 @@ var music = [
     'audio/music/Persistent Foe.wav',
     'audio/music/Rambling Machine.wav',
     'audio/music/The Tribute.wav',
+    'audio/music/Chain Reactor.wav',
+    'audio/music/Hollow.wav',
+    'audio/music/Spaced Sax.wav',
 ];
+
+var sfx = [
+    new Audio('audio/sfx/hookshot_hook.wav'),
+    new Audio('audio/sfx/hookshot_shoot.wav'),
+    new Audio('audio/sfx/hookshot_wall.wav'),
+]
+
+
 
 const musicPlayer = new Audio();
 
 musicPlayer.loop = true;
-musicPlayer.loopStart = 5;
-musicPlayer.loopEnd = 15;
 
 
 window.onload = () => {
-    console.log(onMobile);
+
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
-    world.loadLevel(level[5])
+    setScene("game");
+
+    world.loadLevel(level[3])
 
 
     player.posX = world.spawn.x;
@@ -135,40 +157,87 @@ window.onload = () => {
 
 
     render.attatchCamera(camera);
-    //playMusic(0);
+    //playMusic(1);
     setInterval(() => loop(), 1000 / 60);
     render.update();
+
+    
 }
 
+window.onfocus = () => {
+    sfx.forEach(sound => {
+        sound.play();
+        sound.pause();
+    })
+}
+
+/**
+ * @param {Number} track index in music[]
+ */
 playMusic = (track) => {
     musicPlayer.src = music[track];
     musicPlayer.play();
 }
 
+/**
+ * @param {Number} sound index in sfx[]
+ */
+playSound = (sound, loop = false) => {
+    sfx[sound].loop = loop;
+    sfx[sound].play();
+}
+
+stopSound = (sound) => {
+    sfx[sound].pause();
+    sfx[sound].currentTime = 0;
+}
+
+/**
+ * @param {String} scene
+ */
+setScene = (scene) => {
+    activeScene = scene;
+    render.activeScene = scene;
+}
+
 function loop() {
-    gameClock++;
-    onScreen = world.tiles.filter((tile) => (
-        tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
-        tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
-    ));
+    switch (activeScene) {
+        case "game": {
+            gameClock++;
+            onScreen = world.tiles.filter((tile) => (
+                tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
+                tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
+            ));
 
-    nearPlayer = world.tiles.filter((tile) => (
-        tile.x > (player.posX - 64) && tile.x < (player.posX + 32) &&
-        tile.y > (player.posY - 64) && tile.y < (player.posY + 32)
-    ));
-
-
-
-    player.readInput(input)
-    player.updatePos();
-    world.update();
-    camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
+            nearPlayer = world.tiles.filter((tile) => (
+                tile.x > (player.posX - 64) && tile.x < (player.posX + 32) &&
+                tile.y > (player.posY - 64) && tile.y < (player.posY + 32)
+            ));
 
 
 
-    //if(input.keys[input.binds.toggleDebug]) debug = !debug;
+            player.readInput(input);
+            player.updatePos();
+            world.update();
+            camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
-    //render.camera.follow(player.pos);
+
+
+            //if(input.keys[input.binds.toggleDebug]) debug = !debug;
+
+            //render.camera.follow(player.pos);
+
+            //setScene("pauseMenu")
+            if(input.keys[input.binds.pause]) setScene("pauseMenu");
+            break;
+        }
+        case "pauseMenu" : {
+            menu.readInput(input);
+            if(input.keys[input.binds.pause]) setScene("game");
+            break;
+        }
+
+    }
 
 }
 
@@ -200,22 +269,19 @@ var scenes = {
 
 
         // player
+        render.line(player.posX, player.posY, player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
 
-        
-
-        render.line(player.posX,player.posY,player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
-
-        render.img(sprites.player.hookshot[player.aim], player.activeEquipment.posX - 6, player.activeEquipment.posY  - 6, 32, 32);
+        render.img(sprites.player.hookshot[player.activeEquipment.angle], player.activeEquipment.posX - 6, player.activeEquipment.posY - 6, 32, 32);
 
         render.img(sprites.player.body[player.look], (player.posX - 16), (player.posY - 16), 32, 32);
 
-        
+
 
         if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.posX - 16), (player.posY - 16) + 2);
         else render.img(sprites.player.bands[Math.floor((player.band) % sprites.player.bands.length)], (player.posX - 16), (player.posY - 16));
         //render.img(player.activeGfx.bands[Math.floor(player.posX) % 8], player.posX - 16, player.posY - 16)
 
-        
+
 
 
         // world
@@ -231,18 +297,8 @@ var scenes = {
             }
         })
 
+        world.npcs.forEach(npc => npc.draw());
 
-
-        world.enemies.forEach(enemy => {
-            try {
-                render.img(sprites.enemies[enemy.type][Math.round(enemy.x / 2) % sprites.enemies[enemy.type].length], enemy.x, enemy.y);
-            } catch {
-                console.log(sprites.enemies[enemy.type]);
-                render.rect(enemy.x, enemy.y, enemy.width, enemy.height, '#fff');
-            }
-        })
-
-        
 
         render.pe.tick()
 
@@ -251,6 +307,7 @@ var scenes = {
         if (debug) {
             //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
             //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');
+
             var hb = player.hitbox;
 
             render.rectStroke(hb.x.left(), hb.y.top(), hb.x.right() - hb.x.left(), hb.y.bottom() - hb.y.top(), "#ff0");
@@ -272,12 +329,15 @@ var scenes = {
 
             var playerInfo = JSON.stringify(player).split(',');
 
-            render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#111");
+            render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
             playerInfo.forEach((row, i) => {
                 render.text(row, 12, (i * 12) + 12, 0, "#fff");
             });
             //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
         }
 
+    },
+    pauseMenu: () => {
+        menu.draw();
     }
 }

@@ -7,10 +7,10 @@ class Input {
         right: 'd',
 
         //aim
-    aimUp: 'arrowup',
-    aimLeft: 'arrowleft',
-    aimRight: 'arrowright',
-    aimDown: 'arrowdown',
+        aimUp: 'arrowup',
+        aimLeft: 'arrowleft',
+        aimRight: 'arrowright',
+        aimDown: 'arrowdown',
 
         //actions
         jump: ' ',
@@ -44,6 +44,7 @@ class Input {
             const mobileFastLeft = document.getElementById("mobileFastLeft");
             const mobileFastRight = document.getElementById("mobileFastRight");
             const mobileJump = document.getElementById("mobileJump");
+            const mobileUse = document.getElementById("mobileUse");
 
             mobileLeft.addEventListener("touchstart", (e) => this.keys[this.binds.left] = true, {
                 passive: true
@@ -89,6 +90,13 @@ class Input {
                 passive: true
             })
             mobileJump.addEventListener("touchend", (e) => this.keys[this.binds.jump] = false, {
+                passive: true
+            })
+
+            mobileUse.addEventListener("touchstart", (e) => this.keys[this.binds.use] = true, {
+                passive: true
+            })
+            mobileUse.addEventListener("touchend", (e) => this.keys[this.binds.use] = false, {
                 passive: true
             })
         }
