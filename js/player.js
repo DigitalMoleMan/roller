@@ -1,6 +1,10 @@
 class Player {
     constructor(posX = 80, posY = 360) {
 
+        this.maxHp = 3;
+        this.hp = 3;
+        this.invsFrames = 0;
+
         this.posX = posX;
         this.posY = posY;
         this.velX = 0;
@@ -132,10 +136,19 @@ class Player {
         this.band += this.velX;
 
         if (this.band < 0) this.band = 8;
-        if (this.posY >= world.height + 128) this.kill();
+        if (this.posY >= world.height + 128) {
+            this.posX = world.spawn.x;
+            this.posY = world.spawn.y;
+            this.velX = 0;
+            this.velY = 0;
+            camera.x = world.spawn.x - render.canvas.width / 2;
+            camera.y = world.spawn.y - render.canvas.width / 2;
+            this.activeEquipment.state = "reset";
+            this.damage(1);
+        }
 
 
-
+        if (this.invsFrames > 0) this.invsFrames--;
     }
 
     moveLeft() {
@@ -168,11 +181,22 @@ class Player {
         }
     }
 
+    damage(amount) {
+        if (this.invsFrames <= 0) {
+            this.hp -= amount;
+
+            if (this.hp <= 0) this.kill();
+            else this.invsFrames = 60;
+        }
+    }
+
     kill() {
         this.posX = world.spawn.x;
         this.posY = world.spawn.y;
         this.velX = 0;
         this.velY = 0;
+
+        this.hp = this.maxHp;
         camera.x = world.spawn.x - render.canvas.width / 2;
         camera.y = world.spawn.y - render.canvas.width / 2;
         this.activeEquipment.state = "reset";
@@ -241,17 +265,17 @@ class Player {
                         }
                         break;
                     case 'M':
-                        
-                            this.kill();
-                            return false;
-                        
+
+                        this.damage(1);
+                        return true;
+
 
                         break;
 
                     case 'W':
-                        
-                            this.kill();
-                            return false;
+
+                        this.damage(1);
+                        return true;
                         break;
                     case '#':
                         return true;
@@ -272,6 +296,15 @@ class Player {
         }
         return false;
     };
+
+    draw() {
+        if (!(this.invsFrames % 3)) {
+            render.img(sprites.player.body[this.look], (this.posX - 16), (this.posY - 16), 32, 32);
+
+            if (this.midJump) render.img(sprites.player.bandsJump[Math.floor(this.band) % sprites.player.bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
+            else render.img(sprites.player.bands[Math.floor((this.band) % sprites.player.bands.length)], (this.posX - 16), (this.posY - 16));
+        }
+    }
 }
 
 
@@ -294,9 +327,39 @@ class Hookshot {
         this.target;
     }
 
+    getClosest() {
+
+        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        hookpoints.forEach(point => {
+
+            point.blocked = () => {
+                var nodes = []
+
+                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+                for (var i = 0; i < point.fromPlayer; i += 8) {
+                    nodes.push({
+                        x: player.posX + (Math.cos(rotation) * i),
+                        y: player.posY + (Math.sin(rotation) * i)
+                    })
+                }
+                for (var i = 0; i < nodes.length; i++) {
+
+
+                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
+                }
+
+                return false;
+            }
+        })
+        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
+        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
+
+        if (hookpoints.length > 0) return hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
+        else return null;
+    }
     update() {
 
-        
+
         var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
         this.closest = undefined;
         hookpoints.forEach(point => {
@@ -316,11 +379,11 @@ class Hookshot {
                         y: player.posY + (Math.sin(rotation) * i)
                     })
                 }
-                for(i=0;i<nodes.length;i++) {
-                    
+                for (i = 0; i < nodes.length; i++) {
+
 
                     if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
-                    
+
                     //render.rect(nodes[i].x, nodes[i].y, 1, 1, "#fff");
                 }
 
@@ -329,7 +392,7 @@ class Hookshot {
         })
         hookpoints = hookpoints.filter((point) => (point.blocked() == false));
         hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
-        if(hookpoints.length > 0) {
+        if (hookpoints.length > 0) {
             this.closest = hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
         }
         //console.log(this.closest)
@@ -344,18 +407,18 @@ class Hookshot {
                 this.posY = player.posY;
                 this.length = 0;
                 this.nodes = [];
-                try {
-                    if (input.keys[input.binds.use] && this.closest != undefined) {
+                //try {
+                if (input.keys[input.binds.use] && this.closest != undefined) {
 
-                        this.state = "shooting";
-                        this.target = this.closest;
+                    this.state = "shooting";
+                    this.target = this.closest;
 
 
-                        playSound(1);
-                    }
-                } catch {
-
+                    playSound(1);
                 }
+                //} catch {
+
+                //}
                 break;
             case "shooting":
 
@@ -455,5 +518,14 @@ class Hookshot {
                 if (tile.type !== "G") return true;
             }
         }
+    }
+
+    draw() {
+        if (this.state != "retracted") {
+            //Character
+            render.line(player.posX, player.posY, this.posX, this.posY, "#fff")
+            render.img(sprites.player.hookshot[this.angle], this.posX - 6, this.posY - 6, 12, 12);
+        }
+
     }
 }

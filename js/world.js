@@ -364,9 +364,7 @@ class SpikeGuard extends Enemy {
         this.velY *= this.deceleration;
 
         if(this.checkCollision()) {
-            player.kill();
-            this.posX = this.originX;
-            this.posY = this.originY;
+            player.damage(1);
         }
     }
 
@@ -443,8 +441,8 @@ const level = [{
             "X    XXXXX                                                             X",
             "X              MMMM                                                    X",
             "X              XXXX                                                    X",
-            "XXXXXXXXXXXXXXXXXXXXXXX-        XXXXXXXXXX                             X",
-            "XXXXXXXXXXXXXXXXXXXXXXX           G    G                               X",
+            "XXXXXXXXXXXXXXXXXXXXXXX-        XXXXXXXXXX                   XXX-------X",
+            "XXXXXXXXXXXXXXXXXXXXXXX           G    G                      G        X",
             "X          G       XX                                                  X",
             "X                  XX                                                  X",
             "X                  XX   ^^vv                                           X",
@@ -456,7 +454,7 @@ const level = [{
             "X          X          XXXXXXXXXX         X     XX                      X",
             "X                     X   WW   X         X     XX                      X",
             "X                     X        X         X     XX                      X",
-            "X  ^^                 X        X   ---   X     WW                      X",
+            "X  ^^                 X        X   ---   X                             X",
             "                          XX                                            ",
             "           @             XXXX                                           ",
             "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -483,7 +481,9 @@ const level = [{
             exitX: block(.5),
             exitY: block(8.5),
         }],
-        npcs: []
+        npcs: [
+            //new SpikeGuard(block(66), block(15)),
+        ]
     },
     {
         name: "Mryo Worl",

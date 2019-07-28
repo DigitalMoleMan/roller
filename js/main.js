@@ -74,6 +74,17 @@ var onScreen = [];
 
 //Loading sprites
 var sprites = {
+    ui: {
+        label: {
+            hp: render.importImage('img/ui/hp_label.png'),
+        },
+        statbar: {
+            left: render.importSprite('img/ui/statbar_left', 2),
+            right: render.importSprite('img/ui/statbar_right', 2),
+            mid: render.importSprite('img/ui/statbar_mid', 2),
+            point: render.importImage('img/ui/hp_point.png', 2),
+        },
+    },
     player: {
         body: render.importSprite('img/player/body', 13),
         bands: render.importSprite('img/player/bands', 8),
@@ -107,6 +118,7 @@ var sprites = {
     },
     backgrounds: {
         main: render.importImage('img/backgrounds/main.png'),
+        main2: render.importImage('img/backgrounds/main2.png'),
         metal: render.importImage('img/backgrounds/metal_bg.png')
     }
 }
@@ -146,7 +158,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[3])
+    world.loadLevel(level[6])
 
 
     player.posX = world.spawn.x;
@@ -161,13 +173,14 @@ window.onload = () => {
     setInterval(() => loop(), 1000 / 60);
     render.update();
 
-    
+
 }
 
 window.onfocus = () => {
     sfx.forEach(sound => {
         sound.play();
         sound.pause();
+        sound.currentTime = 0;
     })
 }
 
@@ -228,12 +241,12 @@ function loop() {
             //render.camera.follow(player.pos);
 
             //setScene("pauseMenu")
-            if(input.keys[input.binds.pause]) setScene("pauseMenu");
+            if (input.keys[input.binds.pause]) setScene("pauseMenu");
             break;
         }
-        case "pauseMenu" : {
+        case "pauseMenu": {
             menu.readInput(input);
-            if(input.keys[input.binds.pause]) setScene("game");
+            if (input.keys[input.binds.pause]) setScene("game");
             break;
         }
 
@@ -269,16 +282,19 @@ var scenes = {
 
 
         // player
-        render.line(player.posX, player.posY, player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
+        //render.line(player.posX, player.posY, player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
 
-        render.img(sprites.player.hookshot[player.activeEquipment.angle], player.activeEquipment.posX - 6, player.activeEquipment.posY - 6, 32, 32);
+        player.activeEquipment.draw();
 
-        render.img(sprites.player.body[player.look], (player.posX - 16), (player.posY - 16), 32, 32);
+        player.draw();
+
+       // render.img(sprites.player.body[player.look], (player.posX - 16), (player.posY - 16), 32, 32);
 
 
-
+/*
         if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.posX - 16), (player.posY - 16) + 2);
         else render.img(sprites.player.bands[Math.floor((player.band) % sprites.player.bands.length)], (player.posX - 16), (player.posY - 16));
+        */
         //render.img(player.activeGfx.bands[Math.floor(player.posX) % 8], player.posX - 16, player.posY - 16)
 
 
@@ -301,6 +317,17 @@ var scenes = {
 
 
         render.pe.tick()
+
+        //ui
+        render.imgStatic(sprites.ui.label.hp, 16, 16);
+
+        for (var i = 0; i < player.maxHp; i++) {
+            var hp = (i < player.hp) ? 1 : 0;
+            console.log(player.hp)
+            if (i == 0) render.imgStatic(sprites.ui.statbar.left[hp], 32, 16);
+            else if (i == player.maxHp - 1) render.imgStatic(sprites.ui.statbar.right[hp], 32 + (i * 16), 16)
+            else render.imgStatic(sprites.ui.statbar.mid[hp], 32 + (i * 16), 16);
+        }
 
 
         //debug
