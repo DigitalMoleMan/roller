@@ -286,6 +286,7 @@ class Player {
                         gameClock = 0;
                         player.posX = tile.exitX;
                         player.posY = tile.exitY;
+                        player.activeEquipment.state = "reset";
                         render.camera.x = tile.exitX;
                         render.camera.y = tile.exitY;
 

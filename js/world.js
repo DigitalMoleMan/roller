@@ -139,7 +139,7 @@ class World {
                             x: block(x),
                             y: block(y + .5),
                             width: block(1),
-                            height: block(.5),
+                            height: block(.25),
                             type: tile
                         });
                         break;
@@ -148,7 +148,7 @@ class World {
                             x: block(x),
                             y: block(y),
                             width: block(1),
-                            height: block(.5),
+                            height: block(.25),
                             type: tile
                         });
                         break;

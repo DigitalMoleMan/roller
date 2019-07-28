@@ -158,7 +158,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[6])
+    world.loadLevel(level[3])
 
 
     player.posX = world.spawn.x;
