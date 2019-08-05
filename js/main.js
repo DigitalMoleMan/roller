@@ -23,8 +23,8 @@ const mobileControls = document.getElementById("mobileControls");
 
 //let menu = new Menu();
 
-var canvasWidth = 640;
-var canvasHeight = 512;
+var canvasWidth = 960;
+var canvasHeight = 540;
 
 if (onMobile) {
     canvasWidth = window.innerWidth;
@@ -44,6 +44,10 @@ let input = new Input({ //Binds
     sprint: 'shift',
     use: 'n',
 
+    //hotkeys
+    prevItem: 'arrowleft',
+    nextItem: 'arrowright',
+
     //misc
     pause: 'p',
 
@@ -55,10 +59,13 @@ let menu = new Menu();
 
 let world = new World();
 
-world.loadLevel(level[1])
+world.loadLevel(level[3])
 
 let player = new Player(world.spawn.x, world.spawn.y);
 let camera = new Camera();
+
+let lighting = new LightingEngine();
+
 let particleEng = new ParticleEngine();
 
 
@@ -75,22 +82,37 @@ var onScreen = [];
 //Loading sprites
 var sprites = {
     ui: {
-        label: {
-            hp: render.importImage('img/ui/hp_label.png'),
+        hp: {
+            label: render.importImage('img/ui/hp_label.png'),
+            statbar: {
+                left: render.importSprite('img/ui/statbar_left', 2),
+                right: render.importSprite('img/ui/statbar_right', 2),
+                mid: render.importSprite('img/ui/statbar_mid', 2),
+                point: render.importImage('img/ui/hp_point.png', 2),
+            },
         },
-        statbar: {
-            left: render.importSprite('img/ui/statbar_left', 2),
-            right: render.importSprite('img/ui/statbar_right', 2),
-            mid: render.importSprite('img/ui/statbar_mid', 2),
-            point: render.importImage('img/ui/hp_point.png', 2),
-        },
+        activeItem: {
+            label: render.importImage('img/ui/activeItem/label.png'),
+            border: render.importImage('img/ui/activeItem/border.png'),
+            bar: render.importImage('img/ui/activeItem/bar.png'),
+            //items
+            hookshot: render.importImage('img/ui/activeItem/hookshot.png'),
+            booster: render.importImage('img/ui/activeItem/booster.png'),
+        }
     },
     player: {
         body: render.importSprite('img/player/body', 13),
         bands: render.importSprite('img/player/bands', 8),
         bandsJump: render.importSprite('img/player/bands_jump', 8),
         cannon: render.importSprite('img/player/cannon', 13),
-        hookshot: render.importSprite('img/player/hookshot', 8)
+        hookshot: render.importSprite('img/player/hookshot', 8),
+        equipment: {
+            booster: {
+                inactive: render.importImage('img/player/equipment/booster/inactive.png'),
+                active: render.importSprite('img/player/equipment/booster/active', 3),
+                cooldown: render.importImage('img/player/equipment/booster/cooldown.png'),
+            }
+        }
     },
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
@@ -110,7 +132,12 @@ var sprites = {
     },
     npcs: {
         enemies: {
-            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 4)
+            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 4),
+            laserTurret: {
+                base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
+                arm: render.importImage('img/npcs/enemies/laser_turret/arm.png'),
+                laser: render.importImage('img/npcs/enemies/laser_turret/laser.png'),
+            }
         },
     },
     enemies: {
@@ -144,6 +171,9 @@ var sfx = [
     new Audio('audio/sfx/hookshot_hook.wav'),
     new Audio('audio/sfx/hookshot_shoot.wav'),
     new Audio('audio/sfx/hookshot_wall.wav'),
+    new Audio('audio/sfx/player/hurt_0.wav'),
+    new Audio('audio/sfx/player/hurt_1.wav'),
+    new Audio('audio/sfx/player/hurt_2.wav'),
 ]
 
 
@@ -158,7 +188,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[3])
+    world.loadLevel(level[1])
 
 
     player.posX = world.spawn.x;
@@ -178,7 +208,14 @@ window.onload = () => {
 
 window.onfocus = () => {
     sfx.forEach(sound => {
-        sound.play();
+        var promise = sound.play();
+        if (promise !== undefined) {
+            promise.then(_ => {
+
+            }).catch(error => {
+                console.log(error);
+            })
+        }
         sound.pause();
         sound.currentTime = 0;
     })
@@ -195,8 +232,8 @@ playMusic = (track) => {
 /**
  * @param {Number} sound index in sfx[]
  */
-playSound = (sound, loop = false) => {
-    sfx[sound].loop = loop;
+playSound = (sound) => {
+    //sfx[sound].loop = loop;
     sfx[sound].play();
 }
 
@@ -282,22 +319,8 @@ var scenes = {
 
 
         // player
-        //render.line(player.posX, player.posY, player.activeEquipment.posX, player.activeEquipment.posY, "#fff")
-
-        player.activeEquipment.draw();
 
         player.draw();
-
-       // render.img(sprites.player.body[player.look], (player.posX - 16), (player.posY - 16), 32, 32);
-
-
-/*
-        if (player.midJump) render.img(sprites.player.bandsJump[Math.floor(player.band) % sprites.player.bandsJump.length], (player.posX - 16), (player.posY - 16) + 2);
-        else render.img(sprites.player.bands[Math.floor((player.band) % sprites.player.bands.length)], (player.posX - 16), (player.posY - 16));
-        */
-        //render.img(player.activeGfx.bands[Math.floor(player.posX) % 8], player.posX - 16, player.posY - 16)
-
-
 
 
         // world
@@ -319,16 +342,38 @@ var scenes = {
         render.pe.tick()
 
         //ui
-        render.imgStatic(sprites.ui.label.hp, 16, 16);
+        var hpUi = sprites.ui.hp;
+
+        render.ctx.save();
+        render.ctx.translate(-hpUi.label.width, 0);
+
+        render.imgStatic(hpUi.label, 48, 16);
+        render.ctx.restore();
 
         for (var i = 0; i < player.maxHp; i++) {
             var hp = (i < player.hp) ? 1 : 0;
-            console.log(player.hp)
-            if (i == 0) render.imgStatic(sprites.ui.statbar.left[hp], 32, 16);
-            else if (i == player.maxHp - 1) render.imgStatic(sprites.ui.statbar.right[hp], 32 + (i * 16), 16)
-            else render.imgStatic(sprites.ui.statbar.mid[hp], 32 + (i * 16), 16);
+            if (i == 0) render.imgStatic(hpUi.statbar.left[hp], 48, 16);
+            else if (i == player.maxHp - 1) render.imgStatic(hpUi.statbar.right[hp], 48 + (i * 16), 16)
+            else render.imgStatic(hpUi.statbar.mid[hp], 48 + (i * 16), 16);
         }
 
+
+
+        var itemUi = sprites.ui.activeItem;
+        render.ctx.save();
+        render.ctx.translate(-itemUi.label.width, 0);
+
+        render.imgStatic(itemUi.label, 48, 32);
+
+        render.ctx.restore();
+        render.imgStatic(itemUi.border, 48, 32);
+
+        render.imgStatic(itemUi[player.activeItem.name], 48, 32);
+
+
+
+        //lighting.update();
+        
 
         //debug
         if (debug) {

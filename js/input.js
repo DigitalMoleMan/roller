@@ -6,11 +6,9 @@ class Input {
         left: 'a',
         right: 'd',
 
-        //aim
-        aimUp: 'arrowup',
-        aimLeft: 'arrowleft',
-        aimRight: 'arrowright',
-        aimDown: 'arrowdown',
+        //hotkeys
+        prevItem: 'arrowleft',
+        nextItem: 'arrowright',
 
         //actions
         jump: ' ',
@@ -27,7 +25,9 @@ class Input {
         //
         //if(!onMobile) {
         document.addEventListener('keydown', (e) => {
+            //console.log(e);
             var pressedKey = e.key.toLowerCase();
+            if(this.keys[pressedKey] !== true) document.dispatchEvent(new Event(pressedKey))
             this.keys[pressedKey] = true
         });
         document.addEventListener('keyup', (e) => {
@@ -93,7 +93,10 @@ class Input {
                 passive: true
             })
 
-            mobileUse.addEventListener("touchstart", (e) => this.keys[this.binds.use] = true, {
+            mobileUse.addEventListener("touchstart", (e) => {
+                document.dispatchEvent(new Event(this.binds.use));
+                this.keys[this.binds.use] = true
+            }, {
                 passive: true
             })
             mobileUse.addEventListener("touchend", (e) => this.keys[this.binds.use] = false, {

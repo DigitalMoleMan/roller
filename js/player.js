@@ -1,16 +1,14 @@
 class Player {
-    constructor(posX = 80, posY = 360) {
+    constructor(posX = 0, posY = 0) {
 
         this.maxHp = 3;
-        this.hp = 3;
+        this.hp = this.maxHp;
         this.invsFrames = 0;
 
         this.posX = posX;
         this.posY = posY;
         this.velX = 0;
         this.velY = 0;
-        this.extVelX = 0;
-        this.extVelY = 0;
         this.hitbox = {
             padding: 15.5,
             x: {
@@ -26,7 +24,7 @@ class Player {
                 bottom: () => (this.posY + this.hitbox.padding) + this.velY
             }
         }
-        this.acc = .2;
+        this.acc = .16;
         this.dec = .93;
 
         this.jumpHeight = 0;
@@ -35,12 +33,15 @@ class Player {
         this.colX = false;
         this.colY = false;
 
-        this.activeEquipment = new Hookshot(0, 0);
-
         this.look = 6;
         this.band = 0;
 
+        document.addEventListener(input.binds.use, (e) => player.activeItem.use())
+        //document.addEventListener(input.binds.jump, (e) => player.jump())
 
+        this.activeItem = new Hookshot(0, 0) //new Booster()
+
+        
     }
 
     readInput(input) {
@@ -52,13 +53,19 @@ class Player {
         if (input.keys[input.binds.sprint]) this.acc = .4;
         else this.acc = .16;
 
+        /** 
+        if((input.keys[input.binds.prevItem])) this.activeIndex--;
+        if((input.keys[input.binds.nextItem])) this.activeIndex++;
+
+        this.activeIndex %= this.items.length;
+        if(this.activeIndex <= 0) this.activeIndex = this.items.length - 1;
+
+        */
+
         // if (input.keys[input.binds.use]) this.use();
     }
 
     updatePos() {
-
-        this.extVelX = 0;
-        this.extVelY = 0;
 
         var col = {
             x: this.collision('x'),
@@ -69,10 +76,7 @@ class Player {
         this.colY = col.y
 
         //console.log(`col.x = ${col.x}`)
-        this.activeEquipment.update();
-
-        this.posX += this.extVelX;
-        this.posY += this.extVelY;
+        this.activeItem.update();
 
 
         if (col.x && col.y) {
@@ -89,15 +93,16 @@ class Player {
 
         if (!col.y) {
             this.posY += this.velY;
-            (this.velY <= 0) ? this.velY += .3: this.velY += .4;
+            (this.velY < 0) ? this.velY += .3: this.velY += .4;
         } else {
             if (!this.midJump) this.velY = 0;
-            else if (this.velY < 0) this.velY *= .01;
+            else if (this.velY < 0) this.velY *= .1;
+            this.posY = Math.round(this.posY)
         }
 
 
 
-        if (col.y && this.velY >= 0) {
+        if (col.y && this.velY > 0) {
 
             if (this.midJump) {
                 for (var i = 0; i < 25; i++) {
@@ -114,39 +119,20 @@ class Player {
                 }
             }
             this.midJump = false;
-            this.velY -= .1;
+            //this.velY -= .1;
 
         }
 
         if (this.velY < 0 && this.midJump && !(input.keys[input.binds.jump])) this.velY *= .9;
 
 
-        if (this.velX < .01 && this.velX > -.01) {
-            this.velX = 0;
-            this.posX = Math.round(this.posX);
-        }
+        this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1)));
 
-        if (this.velY < .01 && this.velY > -.01) {
-            this.velY = 0;
-        }
-
-
-        (col.y) ? this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1))): this.jumpHeight = (-9 - ((Math.abs(this.velX) * .1)));
 
         this.band += this.velX;
 
-        if (this.band < 0) this.band = 8;
-        if (this.posY >= world.height + 128) {
-            this.posX = world.spawn.x;
-            this.posY = world.spawn.y;
-            this.velX = 0;
-            this.velY = 0;
-            camera.x = world.spawn.x - render.canvas.width / 2;
-            camera.y = world.spawn.y - render.canvas.width / 2;
-            this.activeEquipment.state = "reset";
-            this.damage(1);
-        }
-
+        if (this.band < 0) this.band = sprites.player.bands.length;
+        if (this.posY >= world.height + 128) this.kill();
 
         if (this.invsFrames > 0) this.invsFrames--;
     }
@@ -183,10 +169,11 @@ class Player {
 
     damage(amount) {
         if (this.invsFrames <= 0) {
+            this.invsFrames = 60;
             this.hp -= amount;
-
+            
+            playSound(3 + Math.round(Math.random() * 2));
             if (this.hp <= 0) this.kill();
-            else this.invsFrames = 60;
         }
     }
 
@@ -197,15 +184,16 @@ class Player {
         this.velY = 0;
 
         this.hp = this.maxHp;
+        this.invsFrames = 0;
         camera.x = world.spawn.x - render.canvas.width / 2;
         camera.y = world.spawn.y - render.canvas.width / 2;
-        this.activeEquipment.state = "reset";
+        this.activeItem.state = "reset";
     }
 
     collision(axis) {
 
         for (var i = 0; i < nearPlayer.length; i++) {
-            var tile = nearPlayer[i];
+            var tile = (nearPlayer[i]);
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
@@ -217,6 +205,7 @@ class Player {
                     case '-':
                         if (this.hitbox.x.bottom() <= tile.y) return true
                     case '^':
+                        /*
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.midJump = false;
                             this.velY = tile.velY;
@@ -225,7 +214,8 @@ class Player {
                         } else {
                             this.posY -= .1
                         }
-                        /*
+                        */
+                       
                         if (this.hitbox.x.bottom() <= tile.y + tile.height) {
                             
                             this.velY -= ((this.hitbox.x.bottom() - tile.y))
@@ -235,7 +225,7 @@ class Player {
                             }
 
                         }
-                        */
+                        
                         break;
                     case 'v':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
@@ -286,7 +276,7 @@ class Player {
                         gameClock = 0;
                         player.posX = tile.exitX;
                         player.posY = tile.exitY;
-                        player.activeEquipment.state = "reset";
+                        player.activeItem.state = "reset";
                         render.camera.x = tile.exitX;
                         render.camera.y = tile.exitY;
 
@@ -300,7 +290,11 @@ class Player {
 
     draw() {
         if (!(this.invsFrames % 3)) {
+
+            this.activeItem.draw();
             render.img(sprites.player.body[this.look], (this.posX - 16), (this.posY - 16), 32, 32);
+
+
 
             if (this.midJump) render.img(sprites.player.bandsJump[Math.floor(this.band) % sprites.player.bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
             else render.img(sprites.player.bands[Math.floor((this.band) % sprites.player.bands.length)], (this.posX - 16), (this.posY - 16));
@@ -311,10 +305,10 @@ class Player {
 
 class Hookshot {
     constructor(posX, posY) {
+        
+        this.name = "hookshot"
         this.posX = posX;
         this.posY = posY;
-        this.name = "Hookshoot"
-
 
         this.speed = 16;
         this.state = "retracted";
@@ -328,74 +322,25 @@ class Hookshot {
         this.target;
     }
 
-    getClosest() {
 
-        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
-        hookpoints.forEach(point => {
+    use(){
+        if (this.state == "retracted") {
 
-            point.blocked = () => {
-                var nodes = []
-
-                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
-                for (var i = 0; i < point.fromPlayer; i += 8) {
-                    nodes.push({
-                        x: player.posX + (Math.cos(rotation) * i),
-                        y: player.posY + (Math.sin(rotation) * i)
-                    })
-                }
-                for (var i = 0; i < nodes.length; i++) {
-
-
-                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
-                }
-
-                return false;
+            this.target =  this.getClosest();
+            if(this.target !== undefined){
+            this.state = "shooting";
+            playSound(1);
             }
-        })
-        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
-        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
-
-        if (hookpoints.length > 0) return hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
-        else return null;
+        }
     }
     update() {
 
 
         var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
         this.closest = undefined;
-        hookpoints.forEach(point => {
-            point.fromPlayer = Math.sqrt(Math.pow(player.posX - (point.x + point.width / 2), 2) + Math.pow(player.posY - (point.y + point.height / 2), 2));
+        hookpoints.forEach(point => point.fromPlayer = Math.sqrt(Math.pow((player.posX + (player.velX)) - (point.x + point.width / 2), 2) + Math.pow((player.posY + (player.velY)) - (point.y + point.height / 2), 2)));
 
-
-            //console.log(nodes)
-            //render.clear();
-
-            point.blocked = () => {
-                var nodes = []
-
-                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
-                for (i = 0; i < point.fromPlayer; i += 8) {
-                    nodes.push({
-                        x: player.posX + (Math.cos(rotation) * i),
-                        y: player.posY + (Math.sin(rotation) * i)
-                    })
-                }
-                for (i = 0; i < nodes.length; i++) {
-
-
-                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
-
-                    //render.rect(nodes[i].x, nodes[i].y, 1, 1, "#fff");
-                }
-
-                return false;
-            }
-        })
-        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
-        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
-        if (hookpoints.length > 0) {
-            this.closest = hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
-        }
+        //this.closest = this.getClosest();
         //console.log(this.closest)
         switch (this.state) {
             case "reset":
@@ -408,18 +353,6 @@ class Hookshot {
                 this.posY = player.posY;
                 this.length = 0;
                 this.nodes = [];
-                //try {
-                if (input.keys[input.binds.use] && this.closest != undefined) {
-
-                    this.state = "shooting";
-                    this.target = this.closest;
-
-
-                    playSound(1);
-                }
-                //} catch {
-
-                //}
                 break;
             case "shooting":
 
@@ -430,7 +363,8 @@ class Hookshot {
 
                 if (input.keys[input.binds.use]) {
                     try {
-                        if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) && this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
+                        if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) &&
+                            this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
                             playSound(0);
                             this.state = "hooked";
 
@@ -509,6 +443,38 @@ class Hookshot {
         this.angle = (4 + (Math.round(((Math.atan2(player.posY - this.posY, player.posX - this.posX)) * 180 / Math.PI) / 45))) % 8;
     }
 
+    getClosest() {
+
+        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
+        hookpoints.forEach(point => {
+
+            point.blocked = () => {
+                var nodes = []
+
+                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+                for (var i = 0; i < point.fromPlayer; i += 8) {
+                    nodes.push({
+                        x: player.posX + (Math.cos(rotation) * i),
+                        y: player.posY + (Math.sin(rotation) * i)
+                    })
+                }
+                for (var i = 0; i < nodes.length; i++) {
+
+
+                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreen)) return true;
+                }
+
+                return false;
+            }
+        })
+        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
+        
+
+        if (hookpoints.length > 0) return hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
+        else return undefined;
+    }
+
     checkCollision(x, y, area) {
         for (var i = 0; i < area.length; i++) {
             var tile = area[i];
@@ -528,5 +494,94 @@ class Hookshot {
             render.img(sprites.player.hookshot[this.angle], this.posX - 6, this.posY - 6, 12, 12);
         }
 
+        if (debug) {
+
+            try {
+                render.rectStroke(this.closest.x - 4, this.closest.y - 4, 24, 24, "#fff")
+            } catch {
+
+            }
+        }
     }
+}
+
+class Booster {
+    constructor() {
+        this.name = "booster";
+
+        this.state = "active";
+
+        this.fuel = 20;
+
+
+        this.sprite = () => sprites.player.equipment.booster[this.state];
+        this.dir = () => ((player.look - 6) / 6);
+
+    }
+
+    update() {
+        switch (this.state) {
+            case "inactive":
+                this.fuel = 20;
+                if (input.keys[input.binds.use]) this.state = "active";
+                break;
+            case "active":
+                player.velX += this.dir() / 2;
+                this.fuel--;
+                if (this.fuel <= 0) {
+                    this.state = "cooldown"
+                    this.cooldown = 100;
+                }
+                break;
+            case "cooldown":
+                this.cooldown--;
+                if (this.cooldown <= 0) {
+                    this.fuel = 20;
+                    this.state = "inactive";
+                }
+                break;
+        }
+    }
+
+    draw() {
+
+
+        render.ctx.save();
+
+
+
+        render.ctx.scale(this.dir(), 1)
+
+        switch (this.state) {
+            case "inactive":
+                render.img(this.sprite(), ((player.posX) - (32 * this.dir())), player.posY - 32)
+
+                break;
+            case "active":
+
+                render.img(this.sprite()[Math.round(gameClock / 4) % this.sprite().length], (player.posX) - (32 * this.dir()), player.posY - 32);
+
+                var colVal = () => (Math.random() * 128);
+
+                for (var i = 0; i < 1; i++) {
+                    render.pe.addParticle({
+                        x: (player.posX - (22 * this.dir())) + (Math.random() - .5) * 4,
+                        y: (player.posY + 3) + (Math.random() - .5) * 4,
+                        velX: (Math.random()) * (-this.dir()),
+                        velY: (Math.random() - .5) * 1,
+                        lifetime: 10 + (Math.random() * 10),
+                        size: 4 + (Math.random() - .5) * 4,
+                        color: `rgba(255,${128 + colVal()},0,255)`
+                    })
+                }
+
+                break;
+            case "cooldown":
+                render.img(this.sprite(), ((player.posX) - (32 * this.dir())), player.posY - 32)
+                break;
+        }
+        render.ctx.restore();
+    }
+
+
 }

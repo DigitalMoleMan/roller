@@ -48,6 +48,8 @@ class World {
 
         this.tiles = [];
         this.npcs = [];
+
+        this.segements = [];
     }
 
     loadLevel(lvl) {
@@ -94,6 +96,7 @@ class World {
                             width: block(1),
                             height: block(0.1875),
                             velY: 0,
+                            velX: 0,
                             range: 64,
                             speed: 1,
                             type: tile
@@ -335,10 +338,8 @@ class SpikeGuard extends Enemy {
         this.acceleration = .3;
         this.deceleration = .9;
         this.detectionRadius = 256;
-
-        //rendering
     }
-    
+
 
     update() {
         this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
@@ -352,7 +353,7 @@ class SpikeGuard extends Enemy {
             this.velY += Math.sin(rotation) * this.acceleration
 
         } else {
-            
+
             var rotation = Math.atan2(this.originY - this.posY, this.originX - this.posX);
             this.velX += Math.cos(rotation) * this.acceleration
             this.velY += Math.sin(rotation) * this.acceleration
@@ -363,7 +364,7 @@ class SpikeGuard extends Enemy {
         this.velX *= this.deceleration;
         this.velY *= this.deceleration;
 
-        if(this.checkCollision()) {
+        if (this.checkCollision()) {
             player.damage(1);
         }
     }
@@ -371,7 +372,7 @@ class SpikeGuard extends Enemy {
     checkCollision() {
         if (player.posX + 16 < this.posX + this.width &&
             player.posX + 16 > this.posX &&
-            player.posY + 16< this.posY + this.height &&
+            player.posY + 16 < this.posY + this.height &&
             player.posY + 16 > this.posY) return true;
         else return false;
     }
@@ -381,11 +382,32 @@ class SpikeGuard extends Enemy {
         render.img(this.sprite[0], this.posX - (this.width / 2), this.posY - (this.height / 2))
 
         if (this.fromPlayer < this.detectionRadius) {
-        var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
-        render.rect((this.posX - 2) + Math.cos(rotation) * 2, (this.posY - 2) + Math.sin(rotation) * 2, 4, 4, "#29adff");
+            var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
+            render.rect((this.posX - 2) + Math.cos(rotation) * 2, (this.posY - 2) + Math.sin(rotation) * 2, 4, 4, "#29adff");
         } else {
             render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#29adff");
         }
+    }
+}
+
+class LaserTurret extends Enemy {
+    constructor(posX, posY) {
+        super(posX + block(.5), posY + block(.5))
+
+        this.angle = 0;
+
+        this.sprite = () => sprites.npcs.enemies.laserTurret;
+    }
+
+    update() {
+        this.angle = Math.atan2(player.posY - this.posY, player.posX - this.posX) * 180 / Math.PI;
+    }
+
+    draw() {
+        render.img(this.sprite().base, this.posX, this.posY);
+        render.img(this.sprite().arm, this.posX, this.posY)
+
+        render.img(this.sprite().laser, this.posX, this.posY, 32,32, this.posX, this.posY, this.angle + 180);
     }
 }
 
@@ -439,11 +461,11 @@ const level = [{
             "X        X            X                        G                       X",
             "X    MMMMX            X                                                X",
             "X    XXXXX                                                             X",
-            "X              MMMM                                                    X",
-            "X              XXXX                                                    X",
-            "XXXXXXXXXXXXXXXXXXXXXXX-        XXXXXXXXXX                   XXX-------X",
+            "X                                                                      X",
+            "X                                                                      X",
+            "XXXXXXXXXXXXXMMMMMMXXXX-        XXXXXXXXXX                   XXX-------X",
             "XXXXXXXXXXXXXXXXXXXXXXX           G    G                      G        X",
-            "X          G       XX                                                  X",
+            "X                  XX                                                  X",
             "X                  XX                                                  X",
             "X                  XX   ^^vv                                           X",
             "X      vv  X       XX                                                  X",
@@ -483,6 +505,7 @@ const level = [{
         }],
         npcs: [
             //new SpikeGuard(block(66), block(15)),
+           // new LaserTurret(block(20), block(31)),
         ]
     },
     {
@@ -893,13 +916,14 @@ const level = [{
                 height: block(1),
                 range: block(2),
                 speed: 1,
-            },
+            }
         ]
     },
     {
         name: "MNKO Swinging Course - Hall",
         layout: [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                               XXX                                                             XXX",
             "X            G                  XXX                                                             XXX",
             "X                               XXX                G                                            XXX",
             "X                               XXX                                                             XXX",
@@ -919,7 +943,7 @@ const level = [{
         advancedLayer: [{
             type: "E",
             x: block(0),
-            y: block(7),
+            y: block(9),
             width: block(0),
             height: block(2),
             exit: 1,
@@ -928,7 +952,7 @@ const level = [{
         }, {
             type: "E",
             x: block(99),
-            y: block(13),
+            y: block(15),
             width: block(0),
             height: block(2),
             exit: 6,

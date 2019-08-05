@@ -7,7 +7,9 @@ class Renderer {
         this.canvas.width = canvasWidth;
         this.canvas.height = canvasHeight;
 
-        this.ctx = this.canvas.getContext('2d')//, {alpha: false});
+        this.ctx = this.canvas.getContext('2d', {
+            alpha: false
+        });
 
         this.ctx.imageSmoothingEnabled = false;
 
@@ -15,7 +17,7 @@ class Renderer {
         //text
         this.ctx.font = "8px monospace";
         this.ctx.textBaseline = "top";
-        //this.ctx.scale(2, 2);
+        // this.ctx.scale(2, 2);
 
 
         canvasContainer.appendChild(this.canvas);
@@ -30,7 +32,7 @@ class Renderer {
 
     }
 
-    refreshCanvas(){
+    refreshCanvas() {
         this.canvas.remove();
         canvasContainer.appendChild(this.canvas);
     }
@@ -72,7 +74,7 @@ class Renderer {
      */
     update() {
         requestAnimationFrame(render.update)
-        
+
         scenes[render.activeScene]();
 
     }
@@ -127,7 +129,15 @@ class Renderer {
      * @param {Number} x 
      * @param {Number} y 
      */
-    img(src, x, y, width, height) {
+    img(src, x, y, width, height, originX, originY, rotation) {
+        this.ctx.save();
+
+        this.ctx.translate(originX - this.camera.x, originY - this.camera.y);
+        this.ctx.rotate(rotation * (Math.PI / 180));
+        this.ctx.translate(-(originX - this.camera.x), -(originY - this.camera.y));
+
+
+
         try {
             this.ctx.drawImage(src, (x - this.camera.x), (y - this.camera.y));
         } catch {
@@ -135,6 +145,8 @@ class Renderer {
             this.rectStroke(x, y, width, height, "#fff")
             this.text(src, x, y, width, "#fff")
         }
+
+        this.ctx.restore();
     }
 
     imgStatic(src, x, y) {
@@ -194,13 +206,148 @@ class Camera {
 
 }
 
+class LightingEngine {
+    constructor() {
+
+
+        this.sources = []
+
+    }
+
+    update() {
+        this.draw();
+    }
+
+
+    draw() {
+        var segments = [];
+        onScreen.forEach(block => {
+
+            var tile = {
+                x: block.x - camera.x,
+                y: block.y - camera.y,
+                width: block.width,
+                height: block.height
+            }
+            segments.push({
+                a: {
+                    x: tile.x,
+                    y: tile.y
+                },
+                b: {
+                    x: tile.x + tile.width,
+                    y: tile.y
+                }
+            }, {
+                a: {
+                    x: tile.x + tile.width,
+                    y: tile.y
+                },
+                b: {
+                    x: tile.x + tile.width,
+                    y: tile.y + tile.height
+                }
+            }, {
+                a: {
+                    x: tile.x + tile.width,
+                    y: tile.y + tile.height
+                },
+                b: {
+                    x: tile.x,
+                    y: tile.y + tile.height
+                }
+            }, {
+                a: {
+                    x: tile.x,
+                    y: tile.y + tile.height
+                },
+                b: {
+                    x: tile.x,
+                    y: tile.y
+                }
+            }, )
+        })
+        for (var i = 0; i < segments.length; i++) {
+            var seg = segments[i];
+            render.ctx.beginPath();
+            render.ctx.moveTo(seg.a.x, seg.a.y);
+            render.ctx.lineTo(seg.b.x, seg.b.y);
+            render.ctx.stroke();
+        }
+
+        var points = ((segments) => {
+            var a = [];
+            segments.forEach((seg) => {
+                a.push(seg.a, seg.b);
+            });
+            return a;
+        })(segments);
+        var uniquePoints = ((p) => {
+            var set = {};
+            return points.filter((p) => {
+                var key = p.x + "," + p.y;
+                if (key in set) {
+                    return false;
+                } else {
+                    set[key] = true;
+                    return true;
+                }
+            });
+        })(points);
+    }
+
+    getIntersection(ray,segment){
+
+        // RAY in parametric: Point + Delta*T1
+        var r_px = ray.a.x;
+        var r_py = ray.a.y;
+        var r_dx = ray.b.x-ray.a.x;
+        var r_dy = ray.b.y-ray.a.y;
+    
+        // SEGMENT in parametric: Point + Delta*T2
+        var s_px = segment.a.x;
+        var s_py = segment.a.y;
+        var s_dx = segment.b.x-segment.a.x;
+        var s_dy = segment.b.y-segment.a.y;
+    
+        // Are they parallel? If so, no intersect
+        var r_mag = Math.sqrt(r_dx*r_dx+r_dy*r_dy);
+        var s_mag = Math.sqrt(s_dx*s_dx+s_dy*s_dy);
+        if(r_dx/r_mag==s_dx/s_mag && r_dy/r_mag==s_dy/s_mag){
+            // Unit vectors are the same.
+            return null;
+        }
+    
+        // SOLVE FOR T1 & T2
+        // r_px+r_dx*T1 = s_px+s_dx*T2 && r_py+r_dy*T1 = s_py+s_dy*T2
+        // ==> T1 = (s_px+s_dx*T2-r_px)/r_dx = (s_py+s_dy*T2-r_py)/r_dy
+        // ==> s_px*r_dy + s_dx*T2*r_dy - r_px*r_dy = s_py*r_dx + s_dy*T2*r_dx - r_py*r_dx
+        // ==> T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx)
+        var T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx);
+        var T1 = (s_px+s_dx*T2-r_px)/r_dx;
+    
+        // Must be within parametic whatevers for RAY/SEGMENT
+        if(T1<0) return null;
+        if(T2<0 || T2>1) return null;
+    
+        // Return the POINT OF INTERSECTION
+        return {
+            x: r_px+r_dx*T1,
+            y: r_py+r_dy*T1,
+            param: T1
+        };
+    
+    }
+}
+
+
 class ParticleEngine {
     constructor() {
         this.particles = [];
     }
 
     tick() {
-        
+
         this.particles.forEach((particle, index) => {
             render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
             particle.x += particle.velX;
@@ -208,6 +355,8 @@ class ParticleEngine {
             particle.size -= .05;
             (particle.lifetime > 0) ? particle.lifetime--: this.particles.splice(index, 1);
         })
+
+
     }
 
 
