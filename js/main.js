@@ -59,7 +59,7 @@ let menu = new Menu();
 
 let world = new World();
 
-world.loadLevel(level[3])
+world.loadLevel(level[1])
 
 let player = new Player(world.spawn.x, world.spawn.y);
 let camera = new Camera();
@@ -188,7 +188,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[1])
+    world.loadLevel(level[3])
 
 
     player.posX = world.spawn.x;
@@ -199,7 +199,7 @@ window.onload = () => {
 
 
     render.attatchCamera(camera);
-    //playMusic(1);
+    playMusic(1);
     setInterval(() => loop(), 1000 / 60);
     render.update();
 
