@@ -27,7 +27,7 @@ class Input {
         document.addEventListener('keydown', (e) => {
             //console.log(e);
             var pressedKey = e.key.toLowerCase();
-            if(this.keys[pressedKey] !== true) document.dispatchEvent(new Event(pressedKey))
+            document.dispatchEvent(new Event(pressedKey))
             this.keys[pressedKey] = true
         });
         document.addEventListener('keyup', (e) => {
@@ -86,7 +86,10 @@ class Input {
                 passive: true
             })
 
-            mobileJump.addEventListener("touchstart", (e) => this.keys[this.binds.jump] = true, {
+            mobileJump.addEventListener("touchstart", (e) => {
+                document.dispatchEvent(new Event(this.binds.jump));
+                this.keys[this.binds.jump] = true
+            }, {
                 passive: true
             })
             mobileJump.addEventListener("touchend", (e) => this.keys[this.binds.jump] = false, {

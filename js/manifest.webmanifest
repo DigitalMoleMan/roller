@@ -1,5 +1,6 @@
 {
     "name": "Roller",
+    "short_name": "Roller",
     "display": "standalone",
     "background_color": "#000",
     "theme_color" : "#000",
