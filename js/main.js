@@ -5,33 +5,19 @@ const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
 //Mobile
-var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-if (onMobile) {
-    window.addEventListener("orientationchange", () => {
-        setTimeout(() => {
-            canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight;
-            render.canvas.width = canvasWidth;
-            render.canvas.height = canvasHeight;
-            render.refreshCanvas();
-            console.log(screen.orientation)
-        }, 100)
 
-    })
-}
+var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 const mobileControls = document.getElementById("mobileControls");
 
 //let menu = new Menu();
 
+lastIndex = (array) => array.length - 1;
+
+randomIndex = (array) => array[Math.round(Math.random() * lastIndex(array))];
+
 var canvasWidth = 1024;
 var canvasHeight = 576;
-
-potatoMode = () => {
-    canvasWidth = 640
-    canvasHeight = 512;
-    render.canvas.width = canvasWidth;
-    render.canvas.height = canvasHeight;
-}
 
 if (onMobile) {
     canvasWidth = window.innerWidth;
@@ -140,13 +126,16 @@ var sprites = {
     },
     npcs: {
         enemies: {
-            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 4),
+            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
             laserTurret: {
                 base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
                 arm: render.importImage('img/npcs/enemies/laser_turret/arm.png'),
                 laser: render.importImage('img/npcs/enemies/laser_turret/laser.png'),
             }
         },
+        bogus: {
+            idle: render.importSprite('img/npcs/bogus/idle', 5)
+        }
     },
     backgrounds: [
         render.importImage('img/backgrounds/main.png'),
@@ -182,10 +171,12 @@ var sfx = {
             new Audio('audio/sfx/player/hurt_2.wav'),
         ]
     },
-    hookshot: {
-        hook: new Audio('audio/sfx/hookshot_hook.wav'),//.setAttribute("preload", "auto"),
-        shoot: new Audio('audio/sfx/hookshot_shoot.wav'),
-        wall: new Audio('audio/sfx/hookshot_wall.wav'),
+    items: {
+        hookshot: {
+            hook: new Audio('audio/sfx/hookshot_hook.wav'),
+            shoot: new Audio('audio/sfx/hookshot_shoot.wav'),
+            wall: new Audio('audio/sfx/hookshot_wall.wav'),
+        }
     }
 }
 
@@ -201,8 +192,8 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[0])
-    
+    world.loadLevel(level[1])
+
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
 
@@ -249,8 +240,11 @@ playMusic = (track) => {
  * @param {Number} sound index in sfx[]
  */
 playSound = (sound) => {
-    //sfx[sound].loop = loop;
-    sound.play();
+    if (sound.length !== undefined) {
+        randomIndex(sound).play();
+    } else {
+        sound.play();
+    }
 }
 
 stopSound = (sound) => {
@@ -270,10 +264,10 @@ function loop() {
     switch (activeScene) {
         case "game": {
 
-            
+
             gameClock++;
 
-            
+
 
             onScreen = world.tiles.filter((tile) => (
                 tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
@@ -289,9 +283,9 @@ function loop() {
 
             onScreenLights = world.lightSources.filter((tile) => (
                 (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-                (camera.x + canvasWidth + (canvasWidth )) > tile.x - tile.radius &&
+                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
                 (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-                (camera.y + canvasHeight + (canvasHeight )) > tile.y - tile.radius
+                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
             ));
 
             nearPlayer = world.segments.filter((tile) => (
@@ -303,12 +297,13 @@ function loop() {
 
 
 
-            player.readInput(input);
+            
             world.update();
+            player.readInput(input);
             player.updatePos();
-            
+
             camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
-            
+
             lighting.update();
 
             //if(input.keys[input.binds.toggleDebug]) debug = !debug;
@@ -346,19 +341,19 @@ var scenes = {
 
 
         render.ctx.save();
-        try{
-        pattern[0].setTransform(render.ctx.translate(-(camera.x) % 64, -(camera.y) % 64));
-        } catch (error){
-            if(debug) console.log(error);
+        try {
+            pattern[0].setTransform(render.ctx.translate(-(camera.x) % 64, -(camera.y) % 64));
+        } catch (error) {
+            if (debug) console.log(error);
         }
 
-        if (sprites.backgrounds[0] !== undefined) render.rect(-64, -64, canvasWidth + 128, canvasHeight + 128, pattern[2], 0)
+        render.rect(-64, -64, canvasWidth + 128, canvasHeight + 128, pattern[2], 0)
 
 
         render.ctx.restore();
 
         // player
-        
+
 
         player.draw();
 
@@ -374,12 +369,12 @@ var scenes = {
                 render.ctx.save();
                 var texture = sprites.tiles[tile.type];
 
-                if(tile.drawModifier !== undefined)tile.drawModifier();
+                if (tile.drawModifier !== undefined) tile.drawModifier();
 
 
-               (texture.length > 1) ? render.img(texture[gameClock % texture.length], tile.x, tile.y, 1): render.img(texture, tile.x, tile.y, 1);
+                (texture.length > 1) ? render.img(texture[gameClock % texture.length], tile.x, tile.y, 1): render.img(texture, tile.x, tile.y, 1);
                 render.ctx.restore();
-            } catch (error){
+            } catch (error) {
                 render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
             }
 
@@ -387,14 +382,14 @@ var scenes = {
 
         onScreenSegs.filter((seg) => seg.type == "X" || seg.type == "-").forEach(tile => {
 
-                render.ctx.save();
-                var texture = tile.texture;
+            render.ctx.save();
+            var texture = tile.texture;
 
-               // if(tile.drawModifier !== undefined)tile.drawModifier();
+            // if(tile.drawModifier !== undefined)tile.drawModifier();
 
 
-                render.img(texture, tile.x, tile.y, 1);
-                render.ctx.restore();
+            render.img(texture, tile.x, tile.y, 1);
+            render.ctx.restore();
 
         })
 
@@ -408,7 +403,7 @@ var scenes = {
 
         render.pe.tick()
 
-        
+
         lighting.draw();
 
 
@@ -461,14 +456,14 @@ var scenes = {
 
             //render.rectStroke((player.posX - 32), (player.posY - 32), 64, 64, "#00f")
 
-            //world.segments.forEach(seg => render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00"))
+            world.segments.forEach(seg => render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00"))
             /*
                         onScreen.forEach(tile => {
                             render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#f00");
                         })
             */
             nearPlayer.forEach(tile => {
-            //    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
+                //    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
             })
 
 

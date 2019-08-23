@@ -222,12 +222,17 @@ class Camera {
 class LightingEngine {
     constructor() {
         this.sources = [];
+        this.tempSources = [];
         this.segments = [];
         this.polygons = [];
     }
 
     update() {
-        this.sources = onScreenLights
+        this.sources = onScreenLights.concat(this.tempSources);
+
+        this.tempSources.forEach(source => source.lifetime--);
+
+        this.tempSources = this.tempSources.filter(source => source.lifetime > 0);
 
         var playerPoints = [{
             x: player.posX - 3,
@@ -293,7 +298,7 @@ class LightingEngine {
             this.segments.push(...this.toSegments(segPoints))
         })
 
-        
+
         this.polygons = [];
         this.sources.forEach(source => this.polygons.push(this.getSightPolygon(source.x, source.y, source.radiusBorder())));
 
@@ -368,14 +373,14 @@ class LightingEngine {
         }
 
 
-        
+
         var intersects = [];
         for (var j = 0; j < uniqueAngles.length; j++) {
             var angle = uniqueAngles[j];
 
             var dx = Math.cos(angle);
             var dy = Math.sin(angle);
-           
+
             var ray = {
                 a: {
                     x: sightX,
@@ -386,7 +391,7 @@ class LightingEngine {
                     y: sightY + dy
                 }
             };
-          
+
             var closestIntersect = null;
             for (var i = 0; i < segmentsBorder.length; i++) {
                 var intersect = this.getIntersection(ray, segmentsBorder[i]);
@@ -395,10 +400,10 @@ class LightingEngine {
                     closestIntersect = intersect;
                 }
             }
-            
+
             if (!closestIntersect) continue;
             closestIntersect.angle = angle;
-            
+
             intersects.push(closestIntersect);
         }
 
@@ -410,7 +415,7 @@ class LightingEngine {
     }
 
     getIntersection(ray, segment) {
-        
+
         var r_px = ray.a.x;
         var r_py = ray.a.y;
         var r_dx = ray.b.x - ray.a.x;
@@ -426,7 +431,7 @@ class LightingEngine {
         if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag) {
             return null;
         }
-       
+
         var T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
         var T1 = (s_px + s_dx * T2 - r_px) / r_dx;
 
@@ -456,7 +461,7 @@ class LightingEngine {
 
         render.ctx.globalCompositeOperation = "source-over";
 
-        if (debug) {
+        if (debug && !debug) {
             for (var i = 0; i < this.polygons.length; i++) {
                 var polygon = this.polygons[i];
                 render.ctx.strokeStyle = "#fff";
@@ -493,13 +498,16 @@ class LightingEngine {
 }
 
 class Light {
-    constructor(x, y, offsetX, offsetY, radius, colorStops) {
+    constructor(x, y, offsetX, offsetY, radius, colorStops, options = {
+        lifetime: 0
+    }) {
         this.x = x;
         this.y = y;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
         this.radius = radius;
         this.colorStops = colorStops;
+        this.lifetime = options.lifetime;
         this.gradient = () => {
             var grd = render.ctx.createRadialGradient(this.x - camera.x, this.y - camera.y, 0, this.x - camera.x + this.offsetX, this.y - camera.y + this.offsetY, this.radius);
             this.colorStops.forEach(stop => grd.addColorStop(stop.index, stop.color));
@@ -559,6 +567,7 @@ class ParticleEngine {
             particle.y += particle.velY;
             particle.size -= .05;
             (particle.lifetime > 0) ? particle.lifetime--: this.particles.splice(index, 1);
+            
         })
 
 
@@ -573,7 +582,10 @@ class ParticleEngine {
         lifetime: 10,
         size: 10,
         color: "#fff",
+        glow: false
     }) {
+        
         this.particles.push(particle);
+        
     }
 }

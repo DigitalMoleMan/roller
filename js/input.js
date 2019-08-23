@@ -39,26 +39,10 @@ class Input {
 
         //} else
         if (onMobile) {
-            const mobileLeft = document.getElementById("mobileLeft");
-            const mobileRight = document.getElementById("mobileRight");
             const mobileFastLeft = document.getElementById("mobileFastLeft");
             const mobileFastRight = document.getElementById("mobileFastRight");
             const mobileJump = document.getElementById("mobileJump");
             const mobileUse = document.getElementById("mobileUse");
-
-            mobileLeft.addEventListener("touchstart", (e) => this.keys[this.binds.left] = true, {
-                passive: true
-            })
-            mobileLeft.addEventListener("touchend", (e) => this.keys[this.binds.left] = false, {
-                passive: true
-            })
-
-            mobileRight.addEventListener("touchstart", (e) => this.keys[this.binds.right] = true, {
-                passive: true
-            })
-            mobileRight.addEventListener("touchend", (e) => this.keys[this.binds.right] = false, {
-                passive: true
-            })
 
             mobileFastLeft.addEventListener("touchstart", (e) => {
                 this.keys[this.binds.sprint] = true;
@@ -95,14 +79,24 @@ class Input {
             mobileJump.addEventListener("touchend", (e) => this.keys[this.binds.jump] = false, {
                 passive: true
             })
-
             mobileUse.addEventListener("touchstart", (e) => {
                 document.dispatchEvent(new Event(this.binds.use));
                 this.keys[this.binds.use] = true
+                console.log(e);
             }, {
                 passive: true
             })
-            mobileUse.addEventListener("touchend", (e) => this.keys[this.binds.use] = false, {
+            mobileUse.addEventListener("touchmove", (e) => {
+                console.log(e);
+                    document.dispatchEvent(new Event(this.binds.jump));
+                    this.keys[this.binds.jump] = true
+            }, {
+                passive: true
+            })
+            mobileUse.addEventListener("touchend", (e) => {
+                this.keys[this.binds.use] = false
+                this.keys[this.binds.jump] = false
+            }, {
                 passive: true
             })
         }

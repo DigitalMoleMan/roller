@@ -191,17 +191,22 @@ class World {
                             width: block(0),
                             height: block(0),
                             type: tile,
-                        });
-
-                        this.lightSources.push(new Light(block(x + .5), block(y + .1), 0, 455, 460, [
-                            {
-                                index: 0, 
+                            light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
+                                index: 0,
                                 color: "#ffc04080"
-                            },{
+                            }, {
                                 index: 1,
                                 color: "#00000000"
-                            }
-                        ]));
+                            }])
+                        });
+
+                        this.lightSources.push(new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
+                            index: 0,
+                            color: "#ffc04080"
+                        }, {
+                            index: 1,
+                            color: "#00000000"
+                        }]));
                     }
                     break;
                 case 'R':
@@ -315,7 +320,7 @@ class World {
 
         }
 
-        this.segments = this.tiles;
+        this.segments = this.tiles.filter(tile => tile.type !== "G");
         this.createMesh();
 
 
@@ -477,6 +482,7 @@ class World {
     }
 
     update() {
+        this.lightSources = [];
         this.tiles.forEach((tile) => {
             switch (tile.type) {
                 case '^':
@@ -498,10 +504,19 @@ class World {
                     tile.velX = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
                     tile.x += tile.velX;
                     break;
+                case 'L':
+                    this.lightSources.push(tile.light);
+                    break;
             }
         })
         this.npcs.forEach(npc => {
+            switch (npc.name) {
+                case 'spikeGuard':
+                    this.lightSources.push(npc.light);
+                    break;
+            }
             npc.update();
+
         })
     }
 
@@ -541,12 +556,16 @@ class World {
 
     buildTextures() {
         this.segments.filter((seg) => seg.type == "X" || seg.type == "-").forEach(segment => {
-            var canvas = new OffscreenCanvas(segment.width, segment.height);
+            var canvas = document.createElement('canvas')
+            canvas.width = segment.width;
+            canvas.height = segment.height;
             var ctx = canvas.getContext("2d")
             ctx.imageSmoothingEnabled = false;
-            ctx.scale(2, 2)
+            ctx.scale(2, 2);
+
+            var sprite = sprites.tiles[segment.type]
             for (var x = 0; x < segment.width; x += 16)
-                for (var y = 0; y < segment.height; y += 16) ctx.drawImage(sprites.tiles[segment.type], x, y);
+                for (var y = 0; y < segment.height; y += 16) ctx.drawImage(sprite, x, y);
             Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
         })
     }
@@ -576,27 +595,42 @@ class SpikeGuard extends Enemy {
         this.deceleration = .9;
         this.detectionRadius = 256;
         this.sprite = () => sprites.npcs.enemies.spikeGuard;
+        this.sound = () => sfx.npcs.enemies.spikeGuard;
+
+        this.blink = 0;
+
+        this.light = new Light(this.posX, this.posY, (this.velX * this.detectionRadius), (this.velY * this.detectionRadius), this.detectionRadius, [{
+            index: 0,
+            color: "#00ffff40"
+        }, {
+            index: 1,
+            color: "#0080ff40"
+        }])
     }
+
+    
 
 
     update() {
+
         this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
 
 
         this.fromOrigin = Math.sqrt(Math.pow(this.originX - this.posX, 2) + Math.pow(this.originY - this.posY, 2));
 
-        if (this.fromPlayer < this.detectionRadius && this.fromOrigin < this.detectionRadius) {
+        if (this.fromPlayer < this.detectionRadius) {
+
             var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
             this.velX += Math.cos(rotation) * this.acceleration
             this.velY += Math.sin(rotation) * this.acceleration
 
         } else {
-
             var rotation = Math.atan2(this.originY - this.posY, this.originX - this.posX);
             this.velX += Math.cos(rotation) * this.acceleration
             this.velY += Math.sin(rotation) * this.acceleration
 
             if (Math.round(this.posX) == this.originX) {
+
                 this.posX = this.originX;
                 this.velX /= 2;
             }
@@ -605,9 +639,14 @@ class SpikeGuard extends Enemy {
                 this.posY = this.originY;
                 this.velY /= 2;
             }
+
         }
+
+
         this.posX += this.velX;
         this.posY += this.velY;
+
+
 
         this.velX *= this.deceleration;
         this.velY *= this.deceleration;
@@ -615,6 +654,24 @@ class SpikeGuard extends Enemy {
         if (this.checkCollision()) {
             player.damage(1);
         }
+
+        if (this.blink > 0) this.blink += .25;
+        else if ((Math.floor(Math.random() + .005) == 1)) this.blink = 1;
+
+        if (this.blink == (this.sprite().length - 1)) this.blink = 0;
+        this.light = new Light(this.posX + (this.velX * 3), this.posY + (this.velY * 3), (this.velX * this.detectionRadius), (this.velY * this.detectionRadius), this.detectionRadius, [{
+            index: 0,
+            color: "#ffffffff"
+        }, {
+            index: .005,
+            color: "#0095e9ff"
+        }, {
+            index: .01,
+            color: "#0095e980"
+        }, {
+            index: 1,
+            color: "#00000000"
+        }])
     }
 
     checkCollision() {
@@ -627,14 +684,10 @@ class SpikeGuard extends Enemy {
 
     draw() {
 
-        render.img(this.sprite()[0], this.posX - (this.width / 2), this.posY - (this.height / 2))
+        render.img(this.sprite()[Math.floor(this.blink)], this.posX - (this.width / 2), this.posY - (this.height / 2))
 
-        if (this.fromPlayer < this.detectionRadius) {
-            var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
-            render.rect((this.posX - 2) + Math.cos(rotation) * 2, (this.posY - 2) + Math.sin(rotation) * 2, 4, 4, "#29adff");
-        } else {
-            render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#29adff");
-        }
+
+        render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#0095e9");
 
         if (debug) {
             render.line(this.posX - 16, this.posY, this.posX + 16, this.posY, "#fff");
@@ -643,6 +696,20 @@ class SpikeGuard extends Enemy {
     }
 }
 
+class Bogus extends Enemy {
+    constructor(posX, posY){
+        super(posX, posY);
+        this.sprite = () => sprites.npcs.bogus;
+    }
+
+    update(){
+
+    }
+
+    draw(){
+        render.img(this.sprite().idle[Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
+    }
+}
 class LaserTurret extends Enemy {
     constructor(posX, posY) {
         super(posX + block(.5), posY + block(.5))
@@ -711,7 +778,10 @@ const level = [{
         exit: 1,
         exitX: block(6),
         exitY: block(30),
-    }]
+    }, ],
+    npcs: [
+        new SpikeGuard(block(3), block(15)),
+    ]
 }, {
     name: "Toybox",
     layout: [
@@ -730,7 +800,7 @@ const level = [{
         "X    MMMMX            X                                                X",
         "X    XXXXX                                                             X",
         "X                                                                      X",
-        "X                                                                      X",
+        "X                                    @                                 X",
         "XXXXXXXXXXXXXMMMMMMXXXX      XXXXXXXXXXX                     XXX-------X",
         "XXXXXXXXXXXXXXXXXXXXXXX        G     G                        G        X",
         "X              L    X                                                  X",
@@ -746,7 +816,7 @@ const level = [{
         "X                   X        X         X     XX                        X",
         "X  ^^               X        X   ---   X                               X",
         "                        XX                                              ",
-        "          @            XXXX                                             ",
+        "                       XXXX                                             ",
         "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     ],
@@ -769,10 +839,10 @@ const level = [{
         entry: block(1),
         exit: 3,
         exitX: block(.5),
-        exitY: block(8.5),
+        exitY: block(10.5),
     }],
     npcs: [
-        //new SpikeGuard(block(20), block(20)) //block(20), block(20)),
+        new Bogus(block(30), block(29)) //block(20), block(20)),
         // new LaserTurret(block(20), block(31)),
     ]
 }, {
@@ -833,7 +903,7 @@ const level = [{
     advancedLayer: [{
         type: "E",
         x: block(0),
-        y: block(7),
+        y: block(10),
         width: block(0),
         height: block(2),
         exit: 1,
@@ -847,59 +917,61 @@ const level = [{
         height: block(2),
         exit: 4,
         exitX: block(.5),
-        exitY: block(29.5)
+        exitY: block(31.5)
     }]
 }, {
     name: "MNKO Swinging Course - Tower",
     layout: [
-        "XXXXXXXXXXXXXXXXXXXX",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X         XXXXXXXXXX",
-        "X      -XXX        X",
-        "X                  X",
-        "X                  X",
-        "X------XXXXXXXX    X",
-        "X      XXXXWWWG    X",
-        "X      XXXX        X",
-        "X      XXXX        X",
-        "X      XXXX        X",
-        "X      XXXX    MMMMX",
-        "XXXXXXXXXXX    XXXXX",
-        "XXXXXXXXXXX    GWWWX",
-        "XXXXXXXXXXX        X",
-        "XXXXXXXXXXX        X",
-        "XXXXXXXXXXX        X",
-        "XXXXXXXXXXXMMMM    X",
-        "XXXXXXXXXXXXXXX    X",
-        "XWWWWWWWWWWWWWW    X",
-        "X          G       X",
-        "X                  X",
-        "X                  X",
-        "                   X",
-        "  @                X",
-        "X---               X",
-        "X                  X",
-        "XMMMMMMMMMMMMMMMMMMX",
+        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX         XXXXXXXXXXXXXXXX",
+        "XXXXXXX      -XXX        XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
+        "XXXXXXXXXXXXXXXXXWWWG    XXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXX    MMMMXXXXXXX",
+        "XXXXXXXXXXXXXXXXX    XXXXXXXXXXX",
+        "XXXXXXXXXXXXXXXXX    GWWWXXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXX        XXXXXXX",
+        "XXXXXXXXXXXXXXXXXMMMM    XXXXXXX",
+        "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
+        "XXXXXXXWWWWWWWWWWWWWW    XXXXXXX",
+        "XXXXXXX          G       XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "X                        XXXXXXX",
+        "                         XXXXXXX",
+        "        @                XXXXXXX",
+        "XXXXXXX---               XXXXXXX",
+        "XXXXXXX                  XXXXXXX",
+        "XXXXXXXMMMMMMMMMMMMMMMMMMXXXXXXX",
     ],
     advancedLayer: [{
             type: "E",
             x: block(0),
-            y: block(28),
+            y: block(30),
             width: block(0),
             height: block(2),
             exit: 3,
             exitX: block(98.5),
-            exitY: block(14.5)
+            exitY: block(16.5)
         }
 
     ],
     npcs: [
-        new SpikeGuard(block(3), block(15)),
+        new SpikeGuard(block(10), block(10)),
     ]
 }, {
     name: "Mryo Worl",

@@ -24,7 +24,7 @@ class Player {
                 bottom: () => (this.posY + this.hitbox.padding) + this.velY
             }
         }
-        this.acc = .2;
+        this.acc = .4;
         this.dec = .93;
 
         this.jumpHeight = 0;
@@ -58,7 +58,7 @@ class Player {
         if (input.keys[input.binds.right]) this.moveRight();
         //if (input.keys[input.binds.jump]) this.jump();
         if (input.keys[input.binds.sprint]) this.acc = .4;
-        else this.acc = .16;
+        //else this.acc = .16;
 
         /** 
         if((input.keys[input.binds.prevItem])) this.activeIndex--;
@@ -184,7 +184,7 @@ class Player {
             this.invsFrames = 60;
             this.hp -= amount;
 
-            playSound(this.sfx().hurt[Math.floor(Math.random() * this.sfx().hurt.length)]);
+            playSound(this.sfx().hurt);
             if (this.hp <= 0) this.kill();
         }
     }
@@ -219,24 +219,18 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
                     case '^':
-                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
                             this.midJump = false;
-                            this.velY = tile.velY;
-                            this.velY -= .1;
-                            return false;
-                        } else {
-                            this.posY -= .1
+                            this.velY -= (this.hitbox.x.bottom() - tile.y)
+                            //this.velY -= .5;
+                            return true;
+                            
                         }
                         break;
 
                         if (this.hitbox.x.bottom() <= tile.y + tile.height) {
                             this.velX += tile.velX
                             this.velY += tile.velY;
-                        }
-
-
-                        if (this.hitbox.x.bottom() <= tile.y) {
-                            return true;
                         }
 
                         //}
@@ -247,7 +241,6 @@ class Player {
                             this.midJump = false;
                             this.velY = tile.velY;
                             this.velY -= .1;
-                            return false;
                         } else {
                             this.posY -= .1
                         }
@@ -258,7 +251,7 @@ class Player {
                             this.midJump = false;
                             this.posX += tile.velX;
                             this.velY = 0;
-                            return false;
+                            if(axis == "x") return true;
                         }
                         break;
                     case '>':
@@ -266,7 +259,7 @@ class Player {
                             this.midJump = false;
                             this.posX += tile.velX;
                             this.velY = 0;
-                            return false;
+                            if(axis == "x") return true;
                         }
                         break;
                     case 'M':
@@ -358,7 +351,7 @@ class Hookshot extends Item {
 
         this.inputBuffer = 0;
         this.sprite = () => sprites.player.hookshot;
-        this.sound = () => sfx.hookshot;
+        this.sound = () => sfx.items.hookshot;
     }
 
 
@@ -408,7 +401,7 @@ class Hookshot extends Item {
             case "shooting":
 
 
-                if (this.checkCollision(this.posX, this.posY, onScreen)) this.state = "retracting";
+                //if (this.checkCollision(this.posX, this.posY, onScreen)) this.state = "retracting";
 
                 if (Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)) > this.maxLength) this.state = "retracting";
 
@@ -440,9 +433,12 @@ class Hookshot extends Item {
                                     velY: (Math.random() - .5) * 3,
                                     lifetime: 5 + (Math.random() * 10),
                                     size: 2 + (Math.random() - .5) * 2,
-                                    color: `rgba(255,${colVal},128,255)`
+                                    color: `rgba(255,${colVal},0,255)`,
+                                    glow: true
                                 })
+
                             }
+                           
 
                         } else {
                             var rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
@@ -519,7 +515,7 @@ class Hookshot extends Item {
     getClosest() {
 
         var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
-        hookpoints = hookpoints.filter((point) => (point.fromPlayer < this.maxLength * 1.75));
+        hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
         hookpoints.forEach(point => {
 
             point.blocked = () => {
