@@ -840,7 +840,7 @@ const level = [
             },
         ],
         npcs: [
-            new SpikeGuard(block(3), block(15)),
+            //new SpikeGuard(block(3), block(15)),
         ]
     }, {
         name: "Toybox",
