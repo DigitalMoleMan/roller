@@ -193,7 +193,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[4])
+    world.loadLevel(level[0])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
