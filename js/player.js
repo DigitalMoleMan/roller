@@ -27,6 +27,7 @@ class Player {
         this.acc = .4;
         this.dec = .93;
 
+
         this.jumpHeight = 0;
         this.midJump = false;
 
@@ -498,8 +499,8 @@ class Hookshot extends Item {
             var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
-            this.posX += Math.cos(rotation) * (this.speed * 1);
-            this.posY += Math.sin(rotation) * (this.speed * 1);
+            this.posX += Math.cos(rotation) * (this.speed * 2);
+            this.posY += Math.sin(rotation) * (this.speed * 2);
 
             if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
 

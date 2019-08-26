@@ -88,8 +88,10 @@ class Input {
             })
             mobileUse.addEventListener("touchmove", (e) => {
                 console.log(e);
-                    document.dispatchEvent(new Event(this.binds.jump));
-                    this.keys[this.binds.jump] = true
+                    //document.dispatchEvent(new Event(this.binds.jump));
+                    //this.keys[this.binds.use] = false
+                    //this.keys[this.binds.jump] = true
+                    
             }, {
                 passive: true
             })

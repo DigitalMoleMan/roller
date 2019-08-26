@@ -8,17 +8,17 @@ class World {
     constructor() {
 
         this.build = {
-                "@": 'spawnpoint',
-                "X": 'block',
-                "-": 'platform',
-                "^": 'elevator.png',
-                "v": 'elevator.png',
-                "<": 'img/tiles/elevator.png',
-                ">": 'img/tiles/elevator.png',
-                "M": 'img/tiles/spikes.png',
-                "¤": 'img/tiles/cog',
-                "#": 'img/tiles/break_block',
-            },
+            "@": 'spawnpoint',
+            "X": 'block',
+            "-": 'platform',
+            "^": 'elevator.png',
+            "v": 'elevator.png',
+            "<": 'img/tiles/elevator.png',
+            ">": 'img/tiles/elevator.png',
+            "M": 'img/tiles/spikes.png',
+            "¤": 'img/tiles/cog',
+            "#": 'img/tiles/break_block',
+        },
 
             this.tileTemplate = {
                 "X": {
@@ -208,18 +208,18 @@ class World {
                             color: "#00000000"
                         }]));
                     }
-                    break;
-                case 'R':
-                    this.npcs.push({
-                        x: block(x),
-                        y: block(y),
-                        width: block(1),
-                        height: block(1),
-                        velX: 0,
-                        frame: 0,
-                        type: tile
-                    })
-                    break;
+                        break;
+                    case 'R':
+                        this.npcs.push({
+                            x: block(x),
+                            y: block(y),
+                            width: block(1),
+                            height: block(1),
+                            velX: 0,
+                            frame: 0,
+                            type: tile
+                        })
+                        break;
                 }
             }
         }
@@ -463,18 +463,18 @@ class World {
                                 y: block(y + .1)
                             });
                         }
-                        break;
-                    case 'R':
-                        this.npcs.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(1),
-                            velX: 0,
-                            frame: 0,
-                            type: tile
-                        })
-                        break;
+                            break;
+                        case 'R':
+                            this.npcs.push({
+                                x: block(x),
+                                y: block(y),
+                                width: block(1),
+                                height: block(1),
+                                velX: 0,
+                                frame: 0,
+                                type: tile
+                            })
+                            break;
                     }
                 }
             }
@@ -574,12 +574,67 @@ class World {
 
 class Enemy {
     constructor(posX, posY) {
-        this.posX = posX;
-        this.posY = posY;
+        this.posX = block(posX);
+        this.posY = block(posY);
         this.type = "enemies";
     }
 }
 
+class Roamer extends Enemy {
+    constructor(posX, posY) {
+        super(posX + .5, posY + .5);
+        this.hp = 3;
+        this.velX = -1;
+
+        this.sprite = () => sprites.npcs.enemies.roamer;
+    }
+
+    update() {
+        if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
+        this.posX += this.velX;
+
+        this.getCollisionPlayer() 
+    }
+
+    getCollision(area, offsetX = 0, offsetY = 0) {
+        for (var i = 0; i < area.length; i++) {
+            var obj = area[i];
+            if (((this.posX - 8) + offsetX) < obj.x + obj.width &&
+                ((this.posX + 8) + offsetX) > obj.x &&
+                ((this.posY - 16) + offsetY) < obj.y + obj.height &&
+                ((this.posY + 8) + offsetY) > obj.y) return true;
+        };
+        return false;
+    }
+
+    getCollisionPlayer(offsetX = 0, offsetY = 0) {
+            if (((this.posX - 8) + offsetX) < player.hitbox.x.right() &&
+                ((this.posX + 8) + offsetX) > player.hitbox.x.left() &&
+                ((this.posY - 16) + offsetY) < player.hitbox.x.bottom() &&
+                ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
+
+                    if(player.hitbox.x.bottom() > this.posY - 14){
+                        player.velY -= 20;
+                        this.damage(1);
+                    } else {
+                        player.damage(1);
+                    }
+                }
+    }
+
+    damage(amount){
+        this.hp -= amount;
+        //if(this.hp <= 0) this.kill();
+    }
+
+    draw() {
+        render.img(this.sprite()[Math.round(this.posX / 2) % this.sprite().length], this.posX - block(.5), this.posY - block(.5), 1, 2);
+
+        if (debug) {
+            render.rectStroke(this.posX - 8, this.posY - 8, 16, 24, "#f00");
+        }
+    }
+}
 class SpikeGuard extends Enemy {
 
     constructor(posX, posY) {
@@ -608,7 +663,7 @@ class SpikeGuard extends Enemy {
         }])
     }
 
-    
+
 
 
     update() {
@@ -696,20 +751,7 @@ class SpikeGuard extends Enemy {
     }
 }
 
-class Bogus extends Enemy {
-    constructor(posX, posY){
-        super(posX, posY);
-        this.sprite = () => sprites.npcs.bogus;
-    }
 
-    update(){
-
-    }
-
-    draw(){
-        render.img(this.sprite().idle[Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
-    }
-}
 class LaserTurret extends Enemy {
     constructor(posX, posY) {
         super(posX + block(.5), posY + block(.5))
@@ -731,234 +773,259 @@ class LaserTurret extends Enemy {
     }
 }
 
+class Bogus extends Enemy {
+    constructor(posX, posY) {
+        super(posX, posY);
+        this.sprite = () => sprites.npcs.bogus;
+    }
 
-const level = [{
-    name: "The Well",
-    layout: [
-        "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X    --    XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X--        XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X       ---XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X---       XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X    --    XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X        --XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X--        XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X          XXXXXXXXXXXXXXXXXXXXX",
-        "X    --    X         XXXXXXXXXXX",
-        "X          X   XXXX  XXXXXXXXXXX",
-        "X          X   XXXX            X",
-        "X          X   XXXXXXXXX    @  X",
-        "X       ---X   XXXXXXXXX       X",
-        "X          X   XXXXXXXXXXXXXXXXX",
-        "X          X   XXXXXXXXXXXXXXXXX",
-        "X---       X   XXXXXXXXXXXXXXXXX",
-        "X              XXXXXXXXXXXXXXXXX",
-        "X              XXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    ],
-    advancedLayer: [{
-        type: "E",
-        x: block(5),
-        y: block(0),
-        width: block(2),
-        height: block(.1),
-        entry: block(1),
-        exit: 1,
-        exitX: block(6),
-        exitY: block(30),
-    }, ],
-    npcs: [
-        new SpikeGuard(block(3), block(15)),
-    ]
-}, {
-    name: "Toybox",
-    layout: [
-        "X                    G                 G                               X",
-        "X                                                                      X",
-        "X                                                        XXXXXX        X",
-        "X                                                                      X",
-        "X                                                                      X",
-        "X                                                                      X",
-        "XXXXXXXXXX                   XXX                      G                X",
-        "X        X                    L                                        X",
-        "X                                                                      X",
-        "X     vv                                                               X",
-        "X        XXXXXXXXXXXXXX                                                X",
-        "X        X            X                        G                       X",
-        "X    MMMMX            X                                                X",
-        "X    XXXXX                                                             X",
-        "X                                                                      X",
-        "X                                    @                                 X",
-        "XXXXXXXXXXXXXMMMMMMXXXX      XXXXXXXXXXX                     XXX-------X",
-        "XXXXXXXXXXXXXXXXXXXXXXX        G     G                        G        X",
-        "X              L    X                                                  X",
-        "X                   X                                                  X",
-        "X                   X  ^^vv                                            X",
-        "X     vv                                                               X",
-        "X        -X-                                                           X",
-        "X         X                                                            X",
-        "X         X  >>     XXXMMMMXXX                     XXX                 X",
-        "X         X         XXXXXXXXXX---   ---X                               X",
-        "X         X         XXXXXXXXXX         X     XX                        X",
-        "X         X         X        X         X     XX                        X",
-        "X                   X        X         X     XX                        X",
-        "X  ^^               X        X   ---   X                               X",
-        "                        XX                                              ",
-        "                       XXXX                                             ",
-        "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-    ],
-    advancedLayer: [{
-        type: "E",
-        x: block(0),
-        y: block(30),
-        width: block(0),
-        height: block(2),
-        entry: block(1),
-        exit: 2,
-        exitX: block(81.5),
-        exitY: block(9.5),
+    update() {
+
+    }
+
+    draw() {
+        render.img(this.sprite().idle[Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
+    }
+}
+
+
+const level = [
+    {
+        name: "The Well",
+        layout: [
+            "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X    --    XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X--        XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X       ---XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X---       XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X    --    XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X        --XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X--        XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X          XXXXXXXXXXXXXXXXXXXXX",
+            "X    --    X         XXXXXXXXXXX",
+            "X          X   XXXX  XXXXXXXXXXX",
+            "X          X   XXXX            X",
+            "X          X   XXXXXXXXX    @  X",
+            "X       ---X   XXXXXXXXX       X",
+            "X          X   XXXXXXXXXXXXXXXXX",
+            "X          X   XXXXXXXXXXXXXXXXX",
+            "X---       X   XXXXXXXXXXXXXXXXX",
+            "X              XXXXXXXXXXXXXXXXX",
+            "X              XXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(5),
+                y: block(0),
+                width: block(2),
+                height: block(.1),
+                entry: block(1),
+                exit: 1,
+                exitX: block(6),
+                exitY: block(30),
+            },
+        ],
+        npcs: [
+            new SpikeGuard(block(3), block(15)),
+        ]
     }, {
-        type: "E",
-        x: block(72),
-        y: block(30),
-        width: block(0),
-        height: block(2),
-        entry: block(1),
-        exit: 3,
-        exitX: block(.5),
-        exitY: block(10.5),
-    }],
-    npcs: [
-        new Bogus(block(30), block(29)) //block(20), block(20)),
-        // new LaserTurret(block(20), block(31)),
-    ]
-}, {
-    name: "GA valley",
-    layout: [
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                X",
-        "X                                                                                 ",
-        "X                                                                                 ",
-        "X                             X----XXXX  >>        <<  XXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X                             X    XXXX                XXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X                             X    XXXXMMMMMMMMMMMMMMMMXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X                             X----XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X                                  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X        @                         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-    ],
-    advancedLayer: [{
-        type: "E",
-        x: block(81.99),
-        y: block(8),
-        width: block(0),
-        height: block(2),
-        entry: block(1),
-        exit: 1,
-        exitX: block(.5),
-        exitY: block(31.5),
-    }]
-}, {
-    name: "MNKO Swinging Course - Hall",
-    layout: [
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "X                               XXX                                                             XXX",
-        "X                               XXX                                                             XXX",
-        "X            G                  XXX                                                             XXX",
-        "X                               XXX                G                                            XXX",
-        "X                               XXX                                                             XXX",
-        "X                               XXX                                                 XXXXXXXXX   XXX",
-        "X                               XXX                                                 XXXWWWWG    XXX",
-        "X                               XXX                                                 XXX         XXX",
-        "                       XXXXXX   XXX                            G            G       XXX         XXX",
-        "  @                    XXXXXX   XXX   XXXXXX                                        XXX         XXX",
-        "XXXX                   XXXXXX    G    XXXXXX                                        XXX         XXX",
-        "XXXX                   XXXXXX         XXXXXX                                        XXX   MMMMMMXXX",
-        "XXXX                   XXXXXX         XXXXXX                                        XXX   XXXXXXXXX",
-        "XXXX                   XXXXXX         XXXXXX                                        XXX           X",
-        "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
-        "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
-        "XXXX                   XXXXXX         XXXXXX                                        XXXXXXXXXXXXXXX",
-    ],
-    advancedLayer: [{
-        type: "E",
-        x: block(0),
-        y: block(10),
-        width: block(0),
-        height: block(2),
-        exit: 1,
-        exitX: block(71.5),
-        exitY: block(31.5),
+        name: "Toybox",
+        layout: [
+            "X                    G                 G                               X",
+            "X                                                                      X",
+            "X                                                        XXXXXX        X",
+            "X                                                                      X",
+            "X                                                                      X",
+            "X                                                                      X",
+            "XXXXXXXXXX                   XXX                      G                X",
+            "X        X                    L                                        X",
+            "X                                                                      X",
+            "X     vv                                                               X",
+            "X        XXXXXXXXXXXXXX                                                X",
+            "X        X            X                        G                       X",
+            "X    MMMMX            X                                                X",
+            "X    XXXXX                                                             X",
+            "X                                                                      X",
+            "X                                                                      X",
+            "XXXXXXXXXXXXXMMMMMMXXXX      XXXXXXXXXXX                     XXX-------X",
+            "XXXXXXXXXXXXXXXXXXXXXXX        G     G                        G        X",
+            "X              L    X                                                  X",
+            "X                   X                                                  X",
+            "X                   X  ^^vv                                            X",
+            "X     vv                                                               X",
+            "X        -X-                                                           X",
+            "X         X                                                            X",
+            "X         X  >>     XXXMMMMXXX                     XXX                 X",
+            "X         X         XXXXXXXXXX---   ---X                               X",
+            "X         X         XXXXXXXXXX         X     XX                        X",
+            "X         X         X        X         X     XX                        X",
+            "X                   X        X         X     XX                        X",
+            "X  ^^               X    @   X   ---   X                               X",
+            "                        XX                                              ",
+            "                       XXXX                                             ",
+            "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(0),
+                y: block(30),
+                width: block(0),
+                height: block(2),
+                entry: block(1),
+                exit: 2,
+                exitX: block(81.5),
+                exitY: block(9.5),
+            }, {
+                type: "E",
+                x: block(72),
+                y: block(30),
+                width: block(0),
+                height: block(2),
+                entry: block(1),
+                exit: 3,
+                exitX: block(.5),
+                exitY: block(10.5),
+            }
+        ],
+        npcs: [
+            //new Bogus(30, 29), //block(20), block(20)),
+            // new LaserTurret(block(20), block(31)),
+            //new Roamer(30, 31)
+        ]
     }, {
-        type: "E",
-        x: block(99),
-        y: block(15),
-        width: block(0),
-        height: block(2),
-        exit: 4,
-        exitX: block(.5),
-        exitY: block(31.5)
-    }]
-}, {
-    name: "MNKO Swinging Course - Tower",
-    layout: [
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX         XXXXXXXXXXXXXXXX",
-        "XXXXXXX      -XXX        XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
-        "XXXXXXXXXXXXXXXXXWWWG    XXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXX    MMMMXXXXXXX",
-        "XXXXXXXXXXXXXXXXX    XXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXX    GWWWXXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXX        XXXXXXX",
-        "XXXXXXXXXXXXXXXXXMMMM    XXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
-        "XXXXXXXWWWWWWWWWWWWWW    XXXXXXX",
-        "XXXXXXX          G       XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "X                        XXXXXXX",
-        "                         XXXXXXX",
-        "        @                XXXXXXX",
-        "XXXXXXX---               XXXXXXX",
-        "XXXXXXX                  XXXXXXX",
-        "XXXXXXXMMMMMMMMMMMMMMMMMMXXXXXXX",
-    ],
-    advancedLayer: [{
+        name: "GA valley",
+        layout: [
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                X",
+            "X                                                                                 ",
+            "X                                                                                 ",
+            "X                             X----XXXX  >>        <<  XXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                             X    XXXX                XXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                             X    XXXXMMMMMMMMMMMMMMMMXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                             X----XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                                  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X        @                         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(81.99),
+                y: block(8),
+                width: block(0),
+                height: block(2),
+                entry: block(1),
+                exit: 1,
+                exitX: block(.5),
+                exitY: block(31.5),
+            }
+        ]
+    }, {
+        name: "MNKO Swinging Course - Hall",
+        layout: [
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "X                               XXX                                                             XXX",
+            "X                               XXX                                                             XXX",
+            "X            G                  XXX                                                             XXX",
+            "X                               XXX                G                                            XXX",
+            "X                               XXX                                                             XXX",
+            "X                               XXX                                                 XXXXXXXXX   XXX",
+            "X                               XXX                                                 XXXWWWWG    XXX",
+            "X                               XXX                                                 XXX         XXX",
+            "                       XXXXXX   XXX                            G            G       XXX         XXX",
+            "  @                    XXXXXX   XXX   XXXXXX                                        XXX         XXX",
+            "XXXX                   XXXXXX    G    XXXXXX                                        XXX         XXX",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX   MMMMMMXXX",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX   XXXXXXXXX",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX           X",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
+            "XXXX                   XXXXXX         XXXXXX                                        XXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(0),
+                y: block(10),
+                width: block(0),
+                height: block(2),
+                exit: 1,
+                exitX: block(71.5),
+                exitY: block(31.5),
+            }, {
+                type: "E",
+                x: block(99),
+                y: block(15),
+                width: block(0),
+                height: block(2),
+                exit: 4,
+                exitX: block(.5),
+                exitY: block(31.5)
+            }
+        ]
+    }, {
+        name: "MNKO Swinging Course - Tower",
+        layout: [
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX         XXXXXXXXXXXXXXXX",
+            "XXXXXXX      -XXX        XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
+            "XXXXXXXXXXXXXXXXXWWWG    XXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXX    MMMMXXXXXXX",
+            "XXXXXXXXXXXXXXXXX    XXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXX    GWWWXXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXX        XXXXXXX",
+            "XXXXXXXXXXXXXXXXXMMMM    XXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXX    XXXXXXX",
+            "XXXXXXXWWWWWWWWWWWWWW    XXXXXXX",
+            "XXXXXXX          G       XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "X                        XXXXXXX",
+            "                         XXXXXXX",
+            "        @                XXXXXXX",
+            "XXXXXXX---               XXXXXXX",
+            "XXXXXXX                  XXXXXXX",
+            "XXXXXXXMMMMMMMMMMMMMMMMMMXXXXXXX",
+        ],
+        advancedLayer: [{
             type: "E",
             x: block(0),
             y: block(30),
@@ -969,79 +1036,79 @@ const level = [{
             exitY: block(16.5)
         }
 
-    ],
-    npcs: [
-        new SpikeGuard(block(10), block(10)),
-    ]
-}, {
-    name: "Mryo Worl",
-    layout: [
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                          ",
-        "                                       X X",
-        "                   -----------------      ",
-        "                                          ",
-        " @               -                        ",
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    ],
-    advancedLayer: []
-}, {
-    name: "Adv Layer Testing",
-    layout: [
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X                  X",
-        "X            X     X",
-        "X GX         X  G  X",
-        "X            X     X",
-        "X         @  X     X",
-        "XXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXX",
-    ],
-    advancedLayer: [],
-}, {
-    name: "Light Test",
-    layout: [
-        "                                                                                      ",
-        "                                          L                                           ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                      ---------------                                 ",
-        "                                                                                      ",
-        "                                                                                      ",
-        "                                      ---------------                                 ",
-        " @                                                                                    ",
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-        "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    ],
-    advancedLayer: []
-}];
+        ],
+        npcs: [
+            new SpikeGuard(block(10), block(10)),
+        ]
+    }, {
+        name: "Mryo Worl",
+        layout: [
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                          ",
+            "                                       X X",
+            "                   -----------------      ",
+            "                                          ",
+            " @               -                        ",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: []
+    }, {
+        name: "Adv Layer Testing",
+        layout: [
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X                  X",
+            "X            X     X",
+            "X GX         X  G  X",
+            "X            X     X",
+            "X         @  X     X",
+            "XXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [],
+    }, {
+        name: "Light Test",
+        layout: [
+            "                                                                                      ",
+            "                                          L                                           ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                      ---------------                                 ",
+            "                                                                                      ",
+            "                                                                                      ",
+            "                                      ---------------                                 ",
+            " @                                                                                    ",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: []
+    }];

@@ -82,6 +82,7 @@ class Renderer {
     update() {
         requestAnimationFrame(render.update)
         scenes[render.activeScene]();
+        if(debug) drawDebug();
     }
 
     clear() {
@@ -135,10 +136,17 @@ class Renderer {
      * @param {Number} x 
      * @param {Number} y 
      */
-    img(src, x, y, scrollFactor = 1) {
+    img(src, x, y, scrollFactor = 1, scale = 1) {
 
         try {
-            this.ctx.drawImage(src, x - (this.camera.x * scrollFactor), y - (this.camera.y * scrollFactor));
+            if(scale !== 1) {
+                render.ctx.save();
+                render.ctx.scale(scale, scale);
+            }
+            this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
+            if(scale !== 1) {
+                render.ctx.restore();
+            }
         } catch (error) {
             this.rect(x, y, 32, 32, "#f00");
             this.rectStroke(x, y, 32, 32, "#fff")

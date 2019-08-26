@@ -126,6 +126,7 @@ var sprites = {
     },
     npcs: {
         enemies: {
+            roamer: render.importSprite('img/npcs/enemies/roamer/', 6),
             spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
             laserTurret: {
                 base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
@@ -192,7 +193,7 @@ window.onload = () => {
     (onMobile) ? mobileControls.style.display = "block": mobileControls.style.display = "none";
     setScene("game");
 
-    world.loadLevel(level[1])
+    world.loadLevel(level[0])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
@@ -315,6 +316,7 @@ function loop() {
             break;
         }
         case "pauseMenu": {
+            player.readInput(input);
             menu.readInput(input);
             if (input.keys[input.binds.pause]) setScene("game");
             break;
@@ -353,16 +355,16 @@ var scenes = {
         render.ctx.restore();
 
         // player
-
+        world.npcs.forEach(npc => npc.draw());
 
         player.draw();
 
 
-
+        
         // world
         //render.ctx.save();
         //render.ctx.scale(2, 2);
-        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
+        onScreen.filter((tile) => tile.type !== "X" || tile.type == "-").forEach(tile => {
 
 
             try {
@@ -398,7 +400,7 @@ var scenes = {
 
 
 
-        world.npcs.forEach(npc => npc.draw());
+        
 
 
         render.pe.tick()
@@ -440,45 +442,49 @@ var scenes = {
         render.img(itemUi[player.activeItem.name], 48, 32, static);
 
 
-        //debug
-        if (debug) {
-            //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
-            //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');
-
-            var hb = player.hitbox;
-
-            //ctx.setTransform(1,0,0,1,0,0)
-
-            //render.rectStroke(hb.x.left(), hb.y.top(), hb.x.right() - hb.x.left(), hb.y.bottom() - hb.y.top(), "#ff0");
-
-            render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
-            render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
-
-            //render.rectStroke((player.posX - 32), (player.posY - 32), 64, 64, "#00f")
-
-            world.segments.forEach(seg => render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00"))
-            /*
-                        onScreen.forEach(tile => {
-                            render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#f00");
-                        })
-            */
-            nearPlayer.forEach(tile => {
-                //    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
-            })
-
-
-
-            var playerInfo = JSON.stringify(player).split(',');
-
-            render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
-            playerInfo.forEach((row, i) => {
-                render.text(row, 12, (i * 12) + 12, 0, "#fff");
-            });
-            //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
-        }
+        
 
     },
     pauseMenu: () => {
         menu.draw();
     }
+
+    
+}
+
+drawDebug = () => {
+    //debug
+        //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
+        //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');
+
+        var hb = player.hitbox;
+
+        //ctx.setTransform(1,0,0,1,0,0)
+
+        //render.rectStroke(hb.x.left(), hb.y.top(), hb.x.right() - hb.x.left(), hb.y.bottom() - hb.y.top(), "#ff0");
+
+        render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
+        render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
+
+        //render.rectStroke((player.posX - 32), (player.posY - 32), 64, 64, "#00f")
+
+        world.segments.forEach(seg => render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00"))
+        /*
+                    onScreen.forEach(tile => {
+                        render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#f00");
+                    })
+        */
+        nearPlayer.forEach(tile => {
+            //    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
+        })
+
+
+
+        var playerInfo = JSON.stringify(player).split(',');
+
+        render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
+        playerInfo.forEach((row, i) => {
+            render.text(row, 12, (i * 12) + 12, 0, "#fff");
+        });
+        //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
 }

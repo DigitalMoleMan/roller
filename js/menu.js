@@ -11,6 +11,6 @@ class Menu {
 
 		var centerX = canvasWidth / 2;
 		var centerY = canvasHeight / 2;
-		render.rectStatic(centerX - 128, centerY - 128, 256, 256, "#444")
+		render.rectStatic(centerX - 128, centerY - 128, 256, 256, "#44444411");
 	}
 }
