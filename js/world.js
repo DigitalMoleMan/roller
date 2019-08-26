@@ -574,8 +574,8 @@ class World {
 
 class Enemy {
     constructor(posX, posY) {
-        this.posX = block(posX);
-        this.posY = block(posY);
+        this.posX = posX;
+        this.posY = posY;
         this.type = "enemies";
     }
 }
