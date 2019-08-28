@@ -109,7 +109,7 @@ var sprites = {
     },
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
-        "X": render.importSprite('img/tiles/block/', 16),
+        "X": render.importSprite('img/tiles/block/block', 16),
         "-": render.importImage('img/tiles/platform.png'),
         "^": render.importSprite('img/tiles/elevator', 8),
         "v": render.importSprite('img/tiles/elevator', 8),
@@ -126,7 +126,7 @@ var sprites = {
     },
     npcs: {
         enemies: {
-            roamer: render.importSprite('img/npcs/enemies/roamer/', 6),
+            roamer: render.importSprite('img/npcs/enemies/roamer/roamer', 6),
             spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
             laserTurret: {
                 base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
