@@ -21,7 +21,7 @@ class Input {
         this.keys = new Object;
         this.binds = binds;
 
-
+        this.targetTouches = [];
         //
         //if(!onMobile) {
         document.addEventListener('keydown', (e) => {
@@ -39,72 +39,49 @@ class Input {
 
         //} else
         if (onMobile) {
-            const mobileFastLeft = document.getElementById("mobileFastLeft");
-            const mobileFastRight = document.getElementById("mobileFastRight");
-            const mobileJump = document.getElementById("mobileJump");
-            const mobileUse = document.getElementById("mobileUse");
-
-            mobileFastLeft.addEventListener("touchstart", (e) => {
-                this.keys[this.binds.sprint] = true;
-                this.keys[this.binds.left] = true;
-            }, {
-                passive: true
-            })
-            mobileFastLeft.addEventListener("touchend", (e) => {
-                this.keys[this.binds.sprint] = false;
-                this.keys[this.binds.left] = false;
-            }, {
-                passive: true
-            })
-
-            mobileFastRight.addEventListener("touchstart", (e) => {
-                this.keys[this.binds.sprint] = true;
-                this.keys[this.binds.right] = true;
-            }, {
-                passive: true
-            })
-            mobileFastRight.addEventListener("touchend", (e) => {
-                this.keys[this.binds.sprint] = false;
-                this.keys[this.binds.right] = false;
-            }, {
-                passive: true
-            })
-
-            mobileJump.addEventListener("touchstart", (e) => {
-                document.dispatchEvent(new Event(this.binds.jump));
-                this.keys[this.binds.jump] = true
-            }, {
-                passive: true
-            })
-            mobileJump.addEventListener("touchend", (e) => this.keys[this.binds.jump] = false, {
-                passive: true
-            })
-            mobileUse.addEventListener("touchstart", (e) => {
-                document.dispatchEvent(new Event(this.binds.use));
-                this.keys[this.binds.use] = true
-                console.log(e);
-            }, {
-                passive: true
-            })
-            mobileUse.addEventListener("touchmove", (e) => {
-                console.log(e);
-                    //document.dispatchEvent(new Event(this.binds.jump));
-                    //this.keys[this.binds.use] = false
-                    //this.keys[this.binds.jump] = true
-                    
-            }, {
-                passive: true
-            })
-            mobileUse.addEventListener("touchend", (e) => {
-                this.keys[this.binds.use] = false
-                this.keys[this.binds.jump] = false
-            }, {
-                passive: true
-            })
+            render.canvas.addEventListener("touchstart", (e) => this.targetTouches = e.targetTouches, { passive: true });
+            render.canvas.addEventListener("touchmove", (e) => this.targetTouches = e.targetTouches, { passive: true });
+            render.canvas.addEventListener("touchend", (e) => this.targetTouches = e.targetTouches, { passive: true });
         }
 
     }
 
+    readMobileInput() {
+
+        var touches = [];
+
+        for (var i = 0; i < this.targetTouches.length; i++) touches.push(this.targetTouches[i].clientX);
+
+        if (touches.filter((t) => t <= canvasWidth / 5).length > 0) {
+            this.keys[this.binds.sprint] = true;
+            this.keys[this.binds.left] = true;
+        } else {
+            this.keys[this.binds.sprint] = false;
+            this.keys[this.binds.left] = false;
+        }
+
+        if (touches.filter((t) => t >= canvasWidth / 5 && t <= canvasWidth / 2).length > 0) {
+            this.keys[this.binds.sprint] = true;
+            this.keys[this.binds.right] = true;
+        } else {
+            this.keys[this.binds.sprint] = false;
+            this.keys[this.binds.right] = false;
+        }
+
+        if (touches.filter((t) => t >= canvasWidth - (canvasWidth / 5)).length > 0) {
+            document.dispatchEvent(new Event(this.binds.jump));
+            this.keys[this.binds.jump] = true;
+        } else {
+            this.keys[this.binds.jump] = false;
+        }
+
+        if (touches.filter((t) => t >= (canvasWidth / 2) && t < canvasWidth - (canvasWidth / 5)).length > 0) {
+            document.dispatchEvent(new Event(this.binds.use));
+            this.keys[this.binds.use] = true;
+        } else {
+            this.keys[this.binds.use] = false;
+        }
+    }
     setBinds(newBinds) {
         this.binds = newBinds;
     }

@@ -220,12 +220,12 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
                     case '^':
-                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.midJump = false;
-                            this.velY -= (this.hitbox.x.bottom() - tile.y)
-                            //this.velY -= .5;
-                            return true;
-                            
+                            this.velY = tile.velY;
+                            this.velY -= .1;
+                        } else {
+                            this.posY -= .1
                         }
                         break;
 

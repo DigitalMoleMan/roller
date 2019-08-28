@@ -85,7 +85,7 @@ class World {
                             y: block(y),
                             width: block(1),
                             height: block(.25),
-                            type: tile
+                            type: tile,
                         });
                         break
                     }
@@ -193,20 +193,12 @@ class World {
                             type: tile,
                             light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
                                 index: 0,
-                                color: "#ffc04080"
+                                color: "#ffc04040"
                             }, {
                                 index: 1,
                                 color: "#00000000"
                             }])
                         });
-
-                        this.lightSources.push(new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
-                            index: 0,
-                            color: "#ffc04080"
-                        }, {
-                            index: 1,
-                            color: "#00000000"
-                        }]));
                     }
                         break;
                     case 'R':
@@ -555,7 +547,7 @@ class World {
     }
 
     buildTextures() {
-        this.segments.filter((seg) => seg.type == "X" || seg.type == "-").forEach(segment => {
+        this.segments.filter((seg) => seg.type == "X").forEach(segment => {
             var canvas = document.createElement('canvas')
             canvas.width = segment.width;
             canvas.height = segment.height;
@@ -564,8 +556,64 @@ class World {
             ctx.scale(2, 2);
 
             var sprite = sprites.tiles[segment.type]
-            for (var x = 0; x < segment.width; x += 16)
-                for (var y = 0; y < segment.height; y += 16) ctx.drawImage(sprite, x, y);
+            for (var y = 0; y < segment.height; y += 16) {
+                for (var x = 0; x < segment.width; x += 16) {
+
+                    if (segment.width > 32) {
+
+                        if (segment.height > 32) {
+                            switch (y) {
+                                case 0: {
+                                    switch (x) {
+                                        case 0: ctx.drawImage(sprite[1], x, y);
+                                            break;
+                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[3], x, y);
+                                            break;
+                                        default: ctx.drawImage(sprite[2], x, y);
+                                    }
+                                    break;
+                                }
+                                case (segment.height / 2) - 16: {
+                                    switch (x) {
+                                        case 0: ctx.drawImage(sprite[7], x, y);
+                                            break;
+                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[9], x, y);
+                                            break;
+                                        default: ctx.drawImage(sprite[8], x, y);
+                                    }
+                                    break;
+                                }
+                                default: {
+                                    switch (x) {
+                                        case 0: ctx.drawImage(sprite[4], x, y);
+                                            break;
+                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[6], x, y);
+                                            break;
+                                        default: ctx.drawImage(sprite[5], x, y);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else {
+                            switch (x) {
+                                case 0: ctx.drawImage(sprite[13], x, y);
+                                break;
+                                case (segment.width / 2) - 16: ctx.drawImage(sprite[15], x, y);
+                                break;
+                                default: ctx.drawImage(sprite[14], x, y);
+                            }
+                        }
+                    } else if(segment.height > 32) {
+                        switch (y) {
+                            case 0: ctx.drawImage(sprite[10], x, y);
+                            break;
+                            case (segment.height / 2) - 16: ctx.drawImage(sprite[12], x, y);
+                            break;
+                            default: ctx.drawImage(sprite[11], x, y);
+                        }
+                    } else ctx.drawImage(sprite[0], x, y);
+                }
+            }
             Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
         })
     }
@@ -593,7 +641,7 @@ class Roamer extends Enemy {
         if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
         this.posX += this.velX;
 
-        this.getCollisionPlayer() 
+        this.getCollisionPlayer()
     }
 
     getCollision(area, offsetX = 0, offsetY = 0) {
@@ -608,21 +656,21 @@ class Roamer extends Enemy {
     }
 
     getCollisionPlayer(offsetX = 0, offsetY = 0) {
-            if (((this.posX - 8) + offsetX) < player.hitbox.x.right() &&
-                ((this.posX + 8) + offsetX) > player.hitbox.x.left() &&
-                ((this.posY - 16) + offsetY) < player.hitbox.x.bottom() &&
-                ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
+        if (((this.posX - 8) + offsetX) < player.hitbox.x.right() &&
+            ((this.posX + 8) + offsetX) > player.hitbox.x.left() &&
+            ((this.posY - 16) + offsetY) < player.hitbox.x.bottom() &&
+            ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
 
-                    if(player.hitbox.x.bottom() > this.posY - 14){
-                        player.velY -= 20;
-                        this.damage(1);
-                    } else {
-                        player.damage(1);
-                    }
-                }
+            if (player.hitbox.x.bottom() > this.posY - 14) {
+                player.velY -= 20;
+                this.damage(1);
+            } else {
+                player.damage(1);
+            }
+        }
     }
 
-    damage(amount){
+    damage(amount) {
         this.hp -= amount;
         //if(this.hp <= 0) this.kill();
     }
@@ -814,14 +862,14 @@ const level = [
             "X--        XXXXXXXXXXXXXXXXXXXXX",
             "X          XXXXXXXXXXXXXXXXXXXXX",
             "X          XXXXXXXXXXXXXXXXXXXXX",
-            "X    --    X         XXXXXXXXXXX",
-            "X          X   XXXX  XXXXXXXXXXX",
-            "X          X   XXXX            X",
-            "X          X   XXXXXXXXX    @  X",
-            "X       ---X   XXXXXXXXX       X",
-            "X          X   XXXXXXXXXXXXXXXXX",
-            "X          X   XXXXXXXXXXXXXXXXX",
-            "X---       X   XXXXXXXXXXXXXXXXX",
+            "X    --    XX        XXXXXXXXXXX",
+            "X          XX  XXXX  XXXXXXXXXXX",
+            "X          XX  XXXX            X",
+            "X          XX  XXXXXXXXX    @  X",
+            "X       ---XX  XXXXXXXXX       X",
+            "X          XX  XXXXXXXXXXXXXXXXX",
+            "X          XX  XXXXXXXXXXXXXXXXX",
+            "X---       XX  XXXXXXXXXXXXXXXXX",
             "X              XXXXXXXXXXXXXXXXX",
             "X              XXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
