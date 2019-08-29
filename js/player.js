@@ -31,8 +31,6 @@ class Player {
         this.jumpHeight = 0;
         this.midJump = false;
 
-        this.fallDisable = false;
-
         this.colX = false;
         this.colY = false;
 
@@ -53,22 +51,11 @@ class Player {
     }
 
     readInput(input) {
-        //if (input.keys[input.binds.up]) this.moveUp()
-        //if (input.keys[input.binds.down]) this.moveDown()
-        if (input.keys[input.binds.left]) this.moveLeft();
-        if (input.keys[input.binds.right]) this.moveRight();
+        var key = input.keys;
+        var bind = input.binds;
+        if (key[bind.left]) this.moveLeft();
+        if (key[bind.right]) this.moveRight();
         //if (input.keys[input.binds.jump]) this.jump();
-        if (input.keys[input.binds.sprint]) this.acc = .4;
-        //else this.acc = .16;
-
-        /** 
-        if((input.keys[input.binds.prevItem])) this.activeIndex--;
-        if((input.keys[input.binds.nextItem])) this.activeIndex++;
-
-        this.activeIndex %= this.items.length;
-        if(this.activeIndex <= 0) this.activeIndex = this.items.length - 1;
-
-        */
 
         // if (input.keys[input.binds.use]) this.use();
     }
@@ -77,8 +64,6 @@ class Player {
         this.colX = this.collision('x');
         this.colY = this.collision('y');
 
-
-        //console.log(`this.colX = ${this.colX}`)
         this.activeItem.update();
 
 
@@ -91,24 +76,20 @@ class Player {
 
         var dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2));
 
-                    
-                          //  this.posY += Math.sin(rotation)  //(this.posY - (this.target.y + (this.target.height / 2))) / 3;
 
-        (!this.colX) ? this.posX += Math.cos(rotation) * dist: this.velX = 0;
+        (!this.colX) ? this.posX += Math.cos(rotation) * dist : this.velX = 0;
 
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
 
         if (!this.colY) {
             this.posY += Math.sin(rotation) * dist;//this.velY;
-            (this.velY < 0) ? this.velY += .3: this.velY += .4;
+            (this.velY < 0) ? this.velY += .3 : this.velY += .4;
         } else {
             if (this.velY > .1) this.velY *= .1;
             if (this.velY < 0) this.velY *= .1;
             if (this.velY < .1 && this.velY > -.1) this.velY = Math.round(this.velY * 100) / 100
             //this.posY = Math.round(this.posY)
         }
-
-
 
         if (this.colY && this.velY > 0) {
 
@@ -162,7 +143,7 @@ class Player {
 
     jump() {
         if (!this.midJump) {
-            (this.velY > 0) ? this.velY = this.jumpHeight: this.velY += this.jumpHeight;
+            (this.velY > 0) ? this.velY = this.jumpHeight : this.velY += this.jumpHeight;
             this.midJump = true;
 
             for (var i = 0; i < 50; i++) {
@@ -252,7 +233,7 @@ class Player {
                             this.midJump = false;
                             this.posX += tile.velX;
                             this.velY = 0;
-                            if(axis == "x") return true;
+                            if (axis == "x") return true;
                         }
                         break;
                     case '>':
@@ -260,7 +241,7 @@ class Player {
                             this.midJump = false;
                             this.posX += tile.velX;
                             this.velY = 0;
-                            if(axis == "x") return true;
+                            if (axis == "x") return true;
                         }
                         break;
                     case 'M':
@@ -310,7 +291,7 @@ class Player {
 
             if (debug) {
                 //render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
-               //render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
+                //render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
             }
         }
     }
@@ -326,7 +307,6 @@ class Item {
 
 class Hookshot extends Item {
     constructor(posX, posY) {
-
         super();
         this.name = "hookshot"
         this.posX = posX;
@@ -340,14 +320,8 @@ class Hookshot extends Item {
 
         this.stiffness = 2;
 
-        this.momentum = {
-            x: 0,
-            y: 0
-        };
-
         this.angle = 0;
 
-        this.closest;
         this.target;
 
         this.inputBuffer = 0;
@@ -373,22 +347,15 @@ class Hookshot extends Item {
     update() {
 
         var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
-        this.closest = undefined;
         hookpoints.forEach(point => {
-            point.fromPlayer = Math.sqrt(Math.pow((player.posX + (player.velX)) - (point.x + point.width / 2), 2) + Math.pow((player.posY + (player.velY)) - (point.y + point.height / 2), 2));
-
-
+            point.fromPlayer = Math.sqrt(Math.pow((player.posX + player.velX) - (point.x + point.width / 2), 2) + Math.pow((player.posY + player.velY) - (point.y + point.height / 2), 2));
         });
 
-
-        //this.closest = this.getClosest();
-        //console.log(this.closest)
         switch (this.state) {
             case "retracted":
                 this.posX = player.posX;
                 this.posY = player.posY;
                 this.length = 0;
-                this.nodes = [];
 
                 if (this.inputBuffer > 0) {
                     this.target = this.getClosest();
@@ -400,8 +367,6 @@ class Hookshot extends Item {
                 }
                 break;
             case "shooting":
-
-
                 //if (this.checkCollision(this.posX, this.posY, onScreen)) this.state = "retracting";
 
                 if (Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)) > this.maxLength) this.state = "retracting";
@@ -439,7 +404,7 @@ class Hookshot extends Item {
                                 })
 
                             }
-                           
+
 
                         } else {
                             var rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
@@ -471,8 +436,8 @@ class Hookshot extends Item {
 
                         this.stiffness = (this.target.fromPlayer - this.length) / 4;
 
-                        player.velX += (Math.cos(rotation) * this.stiffness) //+ this.momentum.x;
-                        player.velY += (Math.sin(rotation) * this.stiffness) //+ this.momentum.y;
+                        player.velX += (Math.cos(rotation) * this.stiffness);
+                        player.velY += (Math.sin(rotation) * this.stiffness);
 
 
 
@@ -491,24 +456,21 @@ class Hookshot extends Item {
                     this.state = "retracting";
                 }
             }
-            break;
-        case "retracting":
-            player.dec = .93;
-            this.length = 0;
+                break;
+            case "retracting":
+                player.dec = .93;
+                this.length = 0;
 
-            var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
+                var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
-            this.posX += Math.cos(rotation) * (this.speed * 2);
-            this.posY += Math.sin(rotation) * (this.speed * 2);
+                this.posX += Math.cos(rotation) * (this.speed * 2);
+                this.posY += Math.sin(rotation) * (this.speed * 2);
 
-            if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
+                if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
 
-            break;
+                break;
         }
-
-        //this.momentum.x *= .9;
-        //this.momentum.y *= .9;
 
         this.angle = (4 + (Math.round(((Math.atan2(player.posY - this.posY, player.posX - this.posX)) * 180 / Math.PI) / 45))) % 8;
     }
@@ -566,7 +528,7 @@ class Hookshot extends Item {
         if (debug) {
             try {
                 render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff")
-            } catch (error) {}
+            } catch (error) { }
         }
     }
 }
@@ -574,9 +536,11 @@ class Hookshot extends Item {
 class Booster extends Item {
     constructor() {
         super();
+        this.posX;
+        this.posY;
         this.name = "booster";
 
-        this.state = "active";
+        this.state = "inactive";
 
         this.fuel = 20;
 
@@ -586,7 +550,13 @@ class Booster extends Item {
 
     }
 
+    use() {
+        if (this.state == "inactive" && this.fuel == 20) this.state = "active";
+    }
+
     update() {
+        this.posX = player.posX;
+        this.pos
         switch (this.state) {
             case "inactive":
                 this.fuel = 20;
@@ -615,18 +585,14 @@ class Booster extends Item {
 
         render.ctx.save();
 
-
-
-        render.ctx.scale(this.dir(), 1)
+        render.ctx.translate(player.posX, 0);
+        render.ctx.scale(this.dir(), 1);
 
         switch (this.state) {
-            case "inactive":
-                render.img(this.sprite(), ((player.posX) - (32 * this.dir())), player.posY - 32)
-
-                break;
+            
             case "active":
 
-                render.img(this.sprite()[Math.round(gameClock / 4) % this.sprite().length], (player.posX) - (32 * this.dir()), player.posY - 32);
+                render.img(this.sprite()[Math.round(gameClock / 4) % this.sprite().length],  -(player.look * 2), player.posY - 4);
 
                 var colVal = () => (Math.random() * 128);
 
@@ -643,8 +609,7 @@ class Booster extends Item {
                 }
 
                 break;
-            case "cooldown":
-                render.img(this.sprite(), ((player.posX) - (32 * this.dir())), player.posY - 32)
+                default: render.img(this.sprite(),  -(player.look * 2), player.posY - 4);
                 break;
         }
         render.ctx.restore();
