@@ -81,7 +81,7 @@ class Renderer {
      */
     update() {
         requestAnimationFrame(render.update)
-        scenes[render.activeScene]();
+        scenes[activeScene]();
         if(debug) drawDebug();
     }
 
@@ -115,10 +115,10 @@ class Renderer {
         this.ctx.fillRect(x, y, width, height);
     }
 
-    rectStroke(x, y, width, height, color, lineWidth = 1) {
+    rectStroke(x, y, width, height, color, lineWidth = 1, scrollFactor = 1) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
-        this.ctx.strokeRect(x - (this.camera.x), y - (this.camera.y), width, height);
+        this.ctx.strokeRect(x - (this.camera.x * scrollFactor), y - (this.camera.y * scrollFactor), width, height);
     }
 
     line(x1, y1, x2, y2, color) {

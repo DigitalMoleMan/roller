@@ -6,6 +6,7 @@
     "display": "standalone",
     "orientation": "landscape",
     "theme_color": "#000",
+    "background_color": "#181425",
     "icons": [
         {
             "src": "img/icon/icon48.png",

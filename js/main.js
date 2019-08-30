@@ -1,6 +1,8 @@
 /**
  * Roller - main.js
  */
+var debug = false;
+
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
@@ -26,26 +28,31 @@ if (onMobile) {
 
 let render = new Renderer(canvasWidth, canvasHeight);
 let input = new Input({ //Binds
-    //movement
-    up: 'arrowup',
-    down: 'arrowdown',
-    left: 'a',
-    right: 'd',
+    game: {
+        //movement
+        up: 'arrowup',
+        down: 'arrowdown',
+        left: 'a',
+        right: 'd',
 
-    //actions
-    jump: ' ',
-    sprint: 'shift',
-    use: 'n',
+        //actions
+        jump: ' ',
+        sprint: 'shift',
+        use: 'n',
 
-    //hotkeys
-    prevItem: 'arrowleft',
-    nextItem: 'arrowright',
+        //hotkeys
+        prevItem: 'arrowleft',
+        nextItem: 'arrowright',
 
-    //misc
-    pause: 'p',
+        //misc
+        togglePause: 'p',
 
-    //dev
-    toggleDebug: 'f',
+        //dev
+        toggleDebug: 'f',
+    },
+    pauseMenu: {
+        togglePause: 'p'
+    }
 });
 
 let menu = new Menu();
@@ -61,7 +68,7 @@ let lighting = new LightingEngine();
 
 let particleEng = new ParticleEngine();
 
-var debug = false;
+
 
 var gameClock = 0;
 var activeScene
@@ -188,12 +195,18 @@ const musicPlayer = new Audio();
 
 musicPlayer.loop = true;
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+      (err) => console.log('ServiceWorker registration failed: ', err));
+    });
+  }
 
 window.onload = () => {
 
     setScene("game");
 
-    world.loadLevel(level[1])
+    world.loadLevel(level[0])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
@@ -207,7 +220,9 @@ window.onload = () => {
 
 
     render.attatchCamera(camera);
-   // playMusic(10);
+
+    document.addEventListener(input.binds[activeScene].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
+    // playMusic(10);
     setInterval(() => loop(), 1000 / 60);
     render.update();
 
@@ -240,13 +255,7 @@ playMusic = (track) => {
 /**
  * @param {Number} sound index in sfx[]
  */
-playSound = (sound) => {
-    if (sound.length !== undefined) {
-        randomIndex(sound).play();
-    } else {
-        sound.play();
-    }
-}
+playSound = (sound) => (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 
 stopSound = (sound) => {
     sfx[sound].pause();
@@ -262,13 +271,12 @@ setScene = (scene) => {
 }
 
 function loop() {
+    if (onMobile) input.readMobileInput();
     switch (activeScene) {
         case "game": {
 
 
             gameClock++;
-
-            if(onMobile) input.readMobileInput();
 
             onScreen = world.tiles.filter((tile) => (
                 tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
@@ -300,7 +308,7 @@ function loop() {
 
 
             world.update();
-            
+
 
             player.readInput(input);
             player.updatePos();
@@ -314,13 +322,14 @@ function loop() {
             //render.camera.follow(player.pos);
 
             //setScene("pauseMenu")
-            if (input.keys[input.binds.pause]) setScene("pauseMenu");
+
+
+            // if (input.keys[input.binds.pause]) setScene("pauseMenu");
             break;
         }
         case "pauseMenu": {
-            player.readInput(input);
             menu.readInput(input);
-            if (input.keys[input.binds.pause]) setScene("game");
+            //if (input.keys[input.binds.pause]) setScene("game");
             break;
         }
 
@@ -344,31 +353,12 @@ var scenes = {
 
 
         var bg = sprites.backgrounds[3];
-        for(var y = 0; y< (canvasHeight * 3); y += (bg.height * 2)){
-            for(var x = 0; x< (canvasWidth * 3); x += (bg.width * 2)){
-                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - (camera.y % (bg.height * 4)), 0, 2);
+        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
+            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
+                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
             }
         }
 
- if (false) {
-        try {
-
-            var bg = pattern[3];
-            render.ctx.save();
-
-            bg.setTransform(render.ctx.translate(-(camera.x) % 256, -(camera.y) % 144));
-
-
-            render.ctx.scale(2, 2)
-            render.rect(-64, -64, canvasWidth + 128, canvasHeight + 128, bg, 0)
-
-
-            render.ctx.restore();
-
-        } catch (error) {
-            if (debug) console.log(error);
-        }
-    }
 
         world.npcs.forEach(npc => npc.draw());
 
@@ -389,7 +379,7 @@ var scenes = {
                 if (tile.drawModifier !== undefined) tile.drawModifier();
 
 
-                (texture.length > 1) ? render.img(texture[gameClock % texture.length], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
+                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
                 render.ctx.restore();
             } catch (error) {
                 render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
@@ -461,6 +451,7 @@ var scenes = {
 
     },
     pauseMenu: () => {
+        scenes.game();
         menu.draw();
     }
 
@@ -490,16 +481,25 @@ drawDebug = () => {
                 })
     */
     nearPlayer.forEach(tile => {
-        //    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
+        render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
     })
 
 
+    if (true) {
+        var playerInfo = JSON.stringify(player).split(',');
 
-    var playerInfo = JSON.stringify(player).split(',');
+        render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
+        playerInfo.forEach((row, i) => {
+            render.text(row, 12, (i * 12) + 12, 0, "#fff");
+        });
+    }
 
-    render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
-    playerInfo.forEach((row, i) => {
-        render.text(row, 12, (i * 12) + 12, 0, "#fff");
-    });
+    if (onMobile) {
+        var ta = input.touchAreas[activeScene];
+        for (var i = 0; i < ta.length; i++) {
+            render.rectStroke(ta[i].x, ta[i].y, ta[i].width, ta[i].height, "#ffffff80", 2, 0);
+            render.text(ta[i].bind, ta[i].x + (ta[i].width / 2), ta[i].y + (ta[i].height / 2), 0, "#ffffff80");
+        }
+    }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
 }
