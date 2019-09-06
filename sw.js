@@ -74,10 +74,6 @@ self.addEventListener('install', function (e) {
         caches.open('roller').then(function (cache) {
             return cache.addAll([
                 './',
-                './audio/',
-                './fonts/',
-                './img/',
-                './js/',
                 './js/menu.js',
                 './js/render.js',
                 './js/input.js',
