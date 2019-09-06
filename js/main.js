@@ -79,9 +79,7 @@ var onScreenLights = [];
 
 //Loading sprites
 var sprites = {
-    path: 'img/',
     ui: {
-        path: 'ui/',
         hp: {
             label: render.importImage('img/ui/hp/label.png'),
             statbar: {
