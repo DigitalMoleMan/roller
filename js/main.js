@@ -56,19 +56,11 @@ let input = new Input({ //Binds
 });
 
 let menu = new Menu();
-
 let world = new World();
-
-
-
 let player = new Player();
 let camera = new Camera();
-
 let lighting = new LightingEngine();
-
 let particleEng = new ParticleEngine();
-
-
 
 var gameClock = 0;
 var activeScene
@@ -197,7 +189,7 @@ musicPlayer.loop = true;
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+      navigator.serviceWorker.register('./sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
       (err) => console.log('ServiceWorker registration failed: ', err));
     });
   }
@@ -304,11 +296,7 @@ function loop() {
                 player.posY + 32 > tile.y
             ));
 
-
-
-
             world.update();
-
 
             player.readInput(input);
             player.updatePos();
@@ -317,14 +305,8 @@ function loop() {
 
             lighting.update();
 
-            //if(input.keys[input.binds.toggleDebug]) debug = !debug;
-
+           
             //render.camera.follow(player.pos);
-
-            //setScene("pauseMenu")
-
-
-            // if (input.keys[input.binds.pause]) setScene("pauseMenu");
             break;
         }
         case "pauseMenu": {

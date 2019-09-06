@@ -1,4 +1,9 @@
+
 class Input {
+    /**
+     * 
+     * @param {Object} binds Each object in binds represents a scene and is used as reference when checking if a certain keybind is being pressed.
+     */
     constructor(binds = {
         game: {
             //directions
@@ -25,63 +30,57 @@ class Input {
         pauseMenu: {
             togglePause: 'p'
         }
+    }, touchAreas = {
+        game: [
+            {
+                bind: "left",
+                x: block(0),
+                y: block(2),
+                width: block(5),
+                height: canvasHeight - block(2)
+            },
+            {
+                bind: "right",
+                x: block(5),
+                y: block(2),
+                width: block(5),
+                height: canvasHeight - block(2)
+            },
+            {
+                bind: "jump",
+                x: canvasWidth - block(5),
+                y: block(0),
+                width: block(5),
+                height: canvasHeight
+            },
+            {
+                bind: "use",
+                x: canvasWidth - block(10),
+                y: block(0),
+                width: block(5),
+                height: canvasHeight
+            },
+            {
+                bind: "pause",
+                x: block(1),
+                y: block(0),
+                width: block(2),
+                height: block(2)
+            }
+        ],
+        pauseMenu: [
+            {
+                bind: "unpause",
+                x: block(1),
+                y: block(0),
+                width: block(2),
+                height: block(2)
+            }
+        ]
     }) {
         this.keys = new Object;
         this.binds = binds;
-
-
-        if (onMobile) {
-            this.touchAreas = {
-                game: [
-                    {
-                        bind: "left",
-                        x: block(0),
-                        y: block(2),
-                        width: block(5),
-                        height: canvasHeight - block(2)
-                    },
-                    {
-                        bind: "right",
-                        x: block(5),
-                        y: block(2),
-                        width: block(5),
-                        height: canvasHeight - block(2)
-                    },
-                    {
-                        bind: "jump",
-                        x: canvasWidth - block(5),
-                        y: block(0),
-                        width: block(5),
-                        height: canvasHeight
-                    },
-                    {
-                        bind: "use",
-                        x: canvasWidth - block(10),
-                        y: block(0),
-                        width: block(5),
-                        height: canvasHeight
-                    },
-                    {
-                        bind: "pause",
-                        x: block(1),
-                        y: block(0),
-                        width: block(2),
-                        height: block(2)
-                    }
-                ],
-                pauseMenu: [
-                    {
-                        bind: "unpause",
-                        x: block(1),
-                        y: block(0),
-                        width: block(2),
-                        height: block(2)
-                    }
-                ]
-            }
-            this.targetTouches = [];
-        }
-
+        
         document.addEventListener('keydown', (e) => {
             var pressedKey = e.key.toLowerCase();
             document.dispatchEvent(new Event(pressedKey))
@@ -93,8 +92,10 @@ class Input {
             if (releasedKey == this.binds[activeScene].toggleDebug) debug = !debug;
         });
 
-        //} else
+
         if (onMobile) {
+            this.touchAreas = touchAreas;
+            this.targetTouches = [];
             render.canvas.addEventListener("touchstart", (e) => this.targetTouches = e.targetTouches, { passive: true });
             render.canvas.addEventListener("touchmove", (e) => this.targetTouches = e.targetTouches, { passive: true });
             render.canvas.addEventListener("touchend", (e) => this.targetTouches = e.targetTouches, { passive: true });
@@ -103,9 +104,7 @@ class Input {
     }
 
     readMobileInput() {
-
         var touches = [];
-
         for (var i = 0; i < this.targetTouches.length; i++) touches.push(this.targetTouches[i]);
 
         this.touchAreas[activeScene].forEach(area => {
@@ -118,5 +117,9 @@ class Input {
 
     setBinds(newBinds) {
         this.binds = newBinds;
+    }
+
+    setTouchAreas(newTouchAreas) {
+        this.touchAreas = newTouchAreas;
     }
 }
