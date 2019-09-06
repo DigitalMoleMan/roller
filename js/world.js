@@ -7,19 +7,6 @@ block = (n) => n * 32;
 class World {
     constructor() {
 
-        this.build = {
-            "@": 'spawnpoint',
-            "X": 'block',
-            "-": 'platform',
-            "^": 'elevator.png',
-            "v": 'elevator.png',
-            "<": 'img/tiles/elevator.png',
-            ">": 'img/tiles/elevator.png',
-            "M": 'img/tiles/spikes.png',
-            "¤": 'img/tiles/cog',
-            "#": 'img/tiles/break_block',
-        },
-
             this.tileTemplate = {
                 "X": {
                     width: block(1),

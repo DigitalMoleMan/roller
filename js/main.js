@@ -6,6 +6,14 @@ var debug = false;
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+            (err) => console.log('ServiceWorker registration failed: ', err));
+    });
+}
+
 //Mobile
 
 var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -187,12 +195,6 @@ const musicPlayer = new Audio();
 
 musicPlayer.loop = true;
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
-      (err) => console.log('ServiceWorker registration failed: ', err));
-    });
-  }
 
 window.onload = () => {
 
@@ -305,7 +307,7 @@ function loop() {
 
             lighting.update();
 
-           
+
             //render.camera.follow(player.pos);
             break;
         }

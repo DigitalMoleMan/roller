@@ -2,21 +2,23 @@ self.addEventListener('install', function (e) {
     e.waitUntil(
         caches.open('roller').then(function (cache) {
             return cache.addAll([
-                '/',
-                '/index.html',
-                '/js/',
-                '/img/',
-                '/audio/',
-                '/fonts/',
-                '/style.css'
+                './',
+               './audio/',
+               './fonts/',
+               './img/',
+                './js/',
+                './js/menu.js',
+                './js/render.js',
+                './js/input.js',
+                './js/player.js',
+                './js/world.js',
+                './js/main.js',
+                './style.css',
             ]);
         })
     );
 });
-
 self.addEventListener('fetch', function (event) {
-
-    console.log(event.request.url);
 
     event.respondWith(
 
@@ -27,5 +29,7 @@ self.addEventListener('fetch', function (event) {
         })
 
     );
-
+    
+    
 });
+
