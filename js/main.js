@@ -193,8 +193,6 @@ musicPlayer.loop = true;
 window.onload = () => {
 
     if ('serviceWorker' in navigator) {
-        cacheScripts();
-        //cacheAudio();
         var swURL = './sw.js';
         navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
             (err) => console.log('ServiceWorker registration failed: ', err));
@@ -205,7 +203,7 @@ window.onload = () => {
         musicPlayer.play();  
     })
     musicPlayer.pause();
-    
+
     setScene("game");
 
     world.loadLevel(level[0])
