@@ -45,6 +45,7 @@ class Renderer {
     importImage(path) {
         var img = new Image;
         img.src = path;
+        toCache.push('/' + path);
         return (img);
     }
 

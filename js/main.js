@@ -1,18 +1,12 @@
 /**
  * Roller - main.js
- */
+*/
+
 var debug = false;
 
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
-            (err) => console.log('ServiceWorker registration failed: ', err));
-    });
-}
 
 //Mobile
 
@@ -188,14 +182,30 @@ var sfx = {
 }
 
 
-
 const musicPlayer = new Audio();
+
+
+
 
 musicPlayer.loop = true;
 
 
 window.onload = () => {
 
+    if ('serviceWorker' in navigator) {
+        cacheScripts();
+        //cacheAudio();
+        var swURL = './sw.js';
+        navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+            (err) => console.log('ServiceWorker registration failed: ', err));
+    }
+
+    music.forEach(track => {
+        musicPlayer.src = track;
+        musicPlayer.play();  
+    })
+    musicPlayer.pause();
+    
     setScene("game");
 
     world.loadLevel(level[0])
