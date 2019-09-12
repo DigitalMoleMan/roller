@@ -35,6 +35,8 @@ class Player {
         this.colX = false;
         this.colY = false;
 
+
+        this.bandVel = 0;
         this.look = 6;
         this.band = 0;
 
@@ -114,10 +116,9 @@ class Player {
 
 
         this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
-
+        
 
         this.band += this.velX;
-
         if(this.velX > 32) this.velX = 32;
         if(this.velY > 32) this.velY = 32;
         if(this.velX < -32) this.velX = -32;

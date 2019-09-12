@@ -56,6 +56,7 @@ let input = new Input({ //Binds
         next: ' ',
          //misc
          togglePause: 'p',
+         toggleDebug: 'f',
     },
     pauseMenu: {
         togglePause: 'p'
@@ -223,7 +224,7 @@ window.onload = () => {
 
     dialogue.playDialogue(dialogue.debugMsgs[0]);
 
-    //document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
+    document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
     // playMusic(10);
     setInterval(() => loop(), 1000 / 60);
     render.update();
@@ -631,7 +632,7 @@ drawDebug = () => {
 
         render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
         playerInfo.forEach((row, i) => {
-            render.text(row, 12, (i * 12) + 12, 0, "#fff");
+            render.text(row, 12, (i * 12) + 12, 8, "#fff");
         });
     }
 
@@ -639,7 +640,7 @@ drawDebug = () => {
         var ta = input.touchAreas[activeScene];
         for (var i = 0; i < ta.length; i++) {
             render.rectStroke(ta[i].x, ta[i].y, ta[i].width, ta[i].height, "#ffffff80", 2, 0);
-            render.text(ta[i].bind, ta[i].x + (ta[i].width / 2), ta[i].y + (ta[i].height / 2), 0, "#ffffff80");
+            render.text(ta[i].bind, ta[i].x + (ta[i].width / 2), ta[i].y + (ta[i].height / 2), 8, "#ffffff80");
         }
     }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
