@@ -27,6 +27,11 @@ class Input {
             //dev
             toggleDebug: 'f',
         },
+        gameDialogue: {
+            next: ' ',
+             //misc
+             togglePause: 'p',
+        },
         pauseMenu: {
             togglePause: 'p'
         }
@@ -68,6 +73,15 @@ class Input {
                 height: block(2)
             }
         ],
+        gameDialogue: [
+            {
+                bind: "next",
+                x: block(0),
+                y: block(0),
+                width: canvasWidth,
+                height: canvasHeight
+            }
+        ],
         pauseMenu: [
             {
                 bind: "unpause",
@@ -80,7 +94,7 @@ class Input {
     }) {
         this.keys = new Object;
         this.binds = binds;
-        
+
         document.addEventListener('keydown', (e) => {
             var pressedKey = e.key.toLowerCase();
             document.dispatchEvent(new Event(pressedKey))

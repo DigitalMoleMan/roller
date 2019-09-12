@@ -1,5 +1,4 @@
 @font-face {
-    /* Import Fortnite font */
     font-family: pixelMono;
     src: url("fonts/RobotoMono.ttf");
 }
@@ -13,6 +12,7 @@ body{
 main{
     position: relative;
     display: block;
+    margin: 0 auto;
     width: fit-content;
     height: fit-content;
     object-fit: contain;
@@ -31,14 +31,6 @@ canvas{
     -ms-interpolation-mode: nearest-neighbor;   /* IE8+                           */
 }
 
-.disable-selection {
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer */
-    -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
-    -webkit-user-select: none; /* Chrome, Safari, and Opera */
-    -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
-}
-
 .canvasContainer {
     position: relative;
     margin: 0 auto;
@@ -46,61 +38,3 @@ canvas{
     height: fit-content;
   
 }
-
-.mobileControls{
-    position: fixed;
-    display: none;
-    bottom: 0rem;
-    margin: 0 auto;
-    width: 100vw;
-    height: fit-content;
-}
-
-.mobileDirections{
-    position: relative;
-    display: block;
-    float: left;
-    left: 0rem;
-    padding: .5rem;
-}
-
-.mobileActions{
-    position: relative;
-    display: block;
-    float: right;
-    right: 0rem;
-    padding: .5rem;
-}
-
-
-.mobileButton {
-    position: relative;
-    display: inline-block;
-    padding: .5rem;
-    width: 4rem;
-    height: 4rem;
-    background-color: #224;
-    color: #fff;
-    text-align: center;
-    line-height: 4rem;
-    opacity: .75;
-    border-radius: .25rem;
-    
-}
-
-
-.mobileButton:active {
-    background-color: #112;
-    color: #fff;
-    opacity: .5;
-}
-
-
-.slow{
-    bottom: -.25rem;
-    padding: 0rem;
-    width: 4rem;
-    height: 2rem;
-    line-height: 2rem;
-    }
-    

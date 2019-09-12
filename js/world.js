@@ -867,7 +867,7 @@ const level = [
                 x: block(5),
                 y: block(0),
                 width: block(2),
-                height: block(.1),
+                height: block(0),
                 entry: block(1),
                 exit: 1,
                 exitX: block(6),

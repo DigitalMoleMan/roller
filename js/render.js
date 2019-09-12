@@ -82,7 +82,7 @@ class Renderer {
     update() {
         requestAnimationFrame(render.update)
         scenes[activeScene]();
-        if(debug) drawDebug();
+        if (debug) drawDebug();
     }
 
     clear() {
@@ -139,12 +139,12 @@ class Renderer {
     img(src, x, y, scrollFactor = 1, scale = 1) {
 
         try {
-            if(scale !== 1) {
+            if (scale !== 1) {
                 render.ctx.save();
                 render.ctx.scale(scale, scale);
             }
             this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
-            if(scale !== 1) {
+            if (scale !== 1) {
                 render.ctx.restore();
             }
         } catch (error) {
@@ -164,9 +164,9 @@ class Renderer {
 
 
 
-    text(text, x, y, scrollFactor, color) {
+    text(text, x, y, size = 8, color, scrollFactor = 0) {
         this.ctx.fillStyle = color;
-
+        this.ctx.font = size + "px pixelMono";
         this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)), (y - (this.camera.y * scrollFactor)));
     }
 
@@ -574,8 +574,8 @@ class ParticleEngine {
             particle.x += particle.velX;
             particle.y += particle.velY;
             particle.size -= .05;
-            (particle.lifetime > 0) ? particle.lifetime--: this.particles.splice(index, 1);
-            
+            (particle.lifetime > 0) ? particle.lifetime-- : this.particles.splice(index, 1);
+
         })
 
 
@@ -592,8 +592,74 @@ class ParticleEngine {
         color: "#fff",
         glow: false
     }) {
-        
+
         this.particles.push(particle);
-        
+
+    }
+}
+
+class DialogueHandler {
+    constructor() {
+
+        this.debugMsgs = [
+            {
+                speakerName: "Roll-3R",
+                text: "This is a test message.",
+                camPosX: () => player.posX,
+                camPosY: () => player.posY,
+                next: () => dialogue.playDialogue(dialogue.debugMsgs[1])
+            }, {
+                speakerName: "Roll-3R",
+                text: "This is another test message.",
+                camPosX: () => player.posX - block(5),
+                camPosY: () => player.posY,
+                next: () => dialogue.playDialogue(dialogue.debugMsgs[2])
+            }, {
+                speakerName: "Roll-3R",
+                text: "Another one.",
+                camPosX: () => player.posX,
+                camPosY: () => player.posY - block(10),
+                next: () => dialogue.playDialogue(dialogue.debugMsgs[3])
+            }, {
+                speakerName: "Roll-3R",
+                text: "Another one.",
+                camPosX: () => player.posX + block(25),
+                camPosY: () => player.posY - block(25),
+                next: () => dialogue.playDialogue(dialogue.debugMsgs[4])
+            }, {
+                speakerName: "Roll-3R",
+                text: "Another one.",
+                camPosX: () => player.posX,
+                camPosY: () => player.posY - block(10),
+                next: () => setScene("game")
+            }
+        ]
+
+        this.currentTextBox = new Object;
+        this.textBuffer = new String;
+        this.displayedText = new String;
+        this.textProg = 0;
+    };
+
+    playDialogue(dlgObj) {
+        this.textProg = 0;
+        this.currentTextBox = dlgObj;
+
+        this.displayedText = "";
+    }
+
+    update() {
+        var tl = this.currentTextBox.text.length;
+        if (tl > this.textProg) {
+            this.displayedText += this.currentTextBox.text[this.textProg];
+            this.textProg++;
+        }
+    }
+
+    draw() {
+        render.rect(block(3), canvasHeight - block(4.5), canvasWidth - block(6), block(4), "#00408080", 0); // background
+        render.text(this.currentTextBox.speakerName, block(3), block(13.5), 12, "#fff", 0);
+        render.text(this.displayedText, block(4), block(14.5), 16, "#fff");
+        if (this.currentTextBox.text.length == this.textProg) render.text(">", block(28 + (Math.sin(gameClock / 5) / 4)), block(16.5), 32)
     }
 }

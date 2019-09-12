@@ -52,6 +52,11 @@ let input = new Input({ //Binds
         //dev
         toggleDebug: 'f',
     },
+    gameDialogue: {
+        next: ' ',
+         //misc
+         togglePause: 'p',
+    },
     pauseMenu: {
         togglePause: 'p'
     }
@@ -61,6 +66,7 @@ let menu = new Menu();
 let world = new World();
 let player = new Player();
 let camera = new Camera();
+let dialogue = new DialogueHandler();
 let lighting = new LightingEngine();
 let particleEng = new ParticleEngine();
 
@@ -198,15 +204,9 @@ window.onload = () => {
             (err) => console.log('ServiceWorker registration failed: ', err));
     }
 
-    music.forEach(track => {
-        musicPlayer.src = track;
-        musicPlayer.play();  
-    })
-    musicPlayer.pause();
+    setScene("gameDialogue");
 
-    setScene("game");
-
-    world.loadLevel(level[0])
+    world.loadLevel(level[1])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
@@ -221,7 +221,9 @@ window.onload = () => {
 
     render.attatchCamera(camera);
 
-    document.addEventListener(input.binds[activeScene].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
+    dialogue.playDialogue(dialogue.debugMsgs[0]);
+
+    //document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
     // playMusic(10);
     setInterval(() => loop(), 1000 / 60);
     render.update();
@@ -271,11 +273,10 @@ setScene = (scene) => {
 }
 
 function loop() {
-    if (onMobile) input.readMobileInput();
+
     switch (activeScene) {
         case "game": {
-
-
+            if (onMobile) input.readMobileInput();
             gameClock++;
 
             onScreen = world.tiles.filter((tile) => (
@@ -317,7 +318,49 @@ function loop() {
             //render.camera.follow(player.pos);
             break;
         }
+        case "gameDialogue": {
+            gameClock++;
+
+            onScreen = world.tiles.filter((tile) => (
+                tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
+                tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
+            ));
+
+            onScreenSegs = world.segments.filter((tile) => (
+                (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
+                (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
+                (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
+                (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
+            ));
+
+            onScreenLights = world.lightSources.filter((tile) => (
+                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+            ));
+
+            nearPlayer = world.segments.filter((tile) => (
+                player.posX - 32 < tile.x + tile.width &&
+                player.posX + 32 > tile.x &&
+                player.posY - 32 < tile.y + tile.height &&
+                player.posY + 32 > tile.y
+            ));
+
+            world.update();
+
+            camera.follow(dialogue.currentTextBox.camPosX(), dialogue.currentTextBox.camPosY());
+
+            lighting.update();
+
+            if (input.keys[input.binds.gameDialogue.next] && dialogue.currentTextBox.text.length == dialogue.textProg) dialogue.currentTextBox.next();
+
+            dialogue.update();
+
+            break;
+        }
         case "pauseMenu": {
+            if (onMobile) input.readMobileInput();
             menu.readInput(input);
             //if (input.keys[input.binds.pause]) setScene("game");
             break;
@@ -439,6 +482,113 @@ var scenes = {
 
 
 
+
+    },
+    gameDialogue: () => {
+
+        const static = 0;
+
+        render.clear();
+        // background
+
+
+        var bg = sprites.backgrounds[3];
+        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
+            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
+                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+            }
+        }
+
+
+        world.npcs.forEach(npc => npc.draw());
+
+        player.draw();
+
+
+
+        // world
+        //render.ctx.save();
+        //render.ctx.scale(2, 2);
+        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
+
+
+            try {
+                render.ctx.save();
+                var texture = sprites.tiles[tile.type];
+
+                if (tile.drawModifier !== undefined) tile.drawModifier();
+
+
+                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
+                render.ctx.restore();
+            } catch (error) {
+                render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
+            }
+
+        })
+
+        onScreenSegs.filter((seg) => seg.type == "X").forEach(tile => {
+
+            render.ctx.save();
+            var texture = tile.texture;
+
+            // if(tile.drawModifier !== undefined)tile.drawModifier();
+
+
+            render.img(texture, tile.x, tile.y, 1);
+            render.ctx.restore();
+
+        })
+
+
+        //render.ctx.restore();
+
+
+
+
+
+
+        render.pe.tick()
+
+
+        lighting.draw();
+
+        dialogue.draw();
+        //ui
+        var hpUi = sprites.ui.hp;
+
+        render.ctx.save();
+        render.ctx.translate(-hpUi.label.width, static);
+
+        render.img(hpUi.label, 48, 16, 0);
+        render.ctx.restore();
+
+        for (var i = 0; i < player.maxHp; i++) {
+            if (i == 0) render.img(hpUi.statbar.left, 48, 16, static);
+            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, static)
+            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, static);
+        }
+
+        for (var i = 0; i < player.hp; i++) {
+            render.img(hpUi.statbar.point, 52 + (12 * i), 16, static)
+        }
+
+
+
+        var itemUi = sprites.ui.activeItem;
+        render.ctx.save();
+        render.ctx.translate(-itemUi.label.width, 0);
+
+        render.img(itemUi.label, 48, 32, static);
+
+        render.ctx.restore();
+        render.img(itemUi.border, 48, 32, static);
+
+        render.img(itemUi[player.activeItem.name], 48, 32, static);
+
+
+
+
     },
     pauseMenu: () => {
         scenes.game();
@@ -493,3 +643,4 @@ drawDebug = () => {
     }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
 }
+
