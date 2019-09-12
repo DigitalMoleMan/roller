@@ -319,6 +319,7 @@ function loop() {
             break;
         }
         case "gameDialogue": {
+            if (onMobile) input.readMobileInput();
             gameClock++;
 
             onScreen = world.tiles.filter((tile) => (
