@@ -658,8 +658,8 @@ class DialogueHandler {
 
     draw() {
         render.rect(block(3), canvasHeight - block(4.5), canvasWidth - block(6), block(4), "#00408080", 0); // background
-        render.text(this.currentTextBox.speakerName, block(3), block(13.5), 12, "#fff", 0);
+        render.text(this.currentTextBox.speakerName, block(3), canvasHeight - block(4.5), 12, "#fff", 0);
         render.text(this.displayedText, block(4), canvasHeight - block(3.5), 16, "#fff");
-        if (this.currentTextBox.text.length == this.textProg) render.text(">", block(28 + (Math.sin(gameClock / 5) / 4)), block(16.5), 32)
+        if (this.currentTextBox.text.length == this.textProg) render.text(">", canvasWidth - block(4 - (Math.sin(gameClock / 5) / 4)), canvasHeight - block(1.5), 32);
     }
 }
