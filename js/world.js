@@ -45,12 +45,12 @@ class World {
     }
 
     interaction(){
-        console.log(this.npcs);
+        this.npcs.forEach(npc => console.log(npc));
         var inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
-            player.posX > (npc.posX - npc.interactionRadius) &&
+            player.posX > (npc.posX) &&
             player.posX < (npc.posX + npc.interactionRadius) &&
-            player.posY > (npc.posY - npc.interactionRadius) &&
+            player.posY > (npc.posY) &&
             player.posY < (npc.posY + npc.interactionRadius)));
             console.log(inRangeActors);
             if(inRangeActors.length > 0) inRangeActors[0].onInteract();
@@ -840,8 +840,8 @@ class LaserTurret extends Enemy {
 }
 
 class Bogus extends Actor {
-    constructor(posX, posY) {
-        super(posX, posY, block(1000));
+    constructor(posX, posY, onInteract) {
+        super(posX, posY, onInteract, block(3));
         this.sprite = () => sprites.npcs.bogus;
     }
 
@@ -1047,9 +1047,15 @@ const level = [
             new Bogus(block(30), block(79), () => dialogue.playDialogue({
                 speakerName: "B.O.G.U.S.",
                 text: "Ooh, heeey.",
-                camPosX: player.posX,
-                camPosY: player.posY,
-                next: () => setScene("game"),
+                camPosX: () => player.posX,
+                camPosY: () => player.posY,
+                next: () => dialogue.playDialogue({
+                    speakerName: "B.O.G.U.S.",
+                    text: "You may be wondering what a cool robot like me is doing in a test build.",
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => setScene("game")
+                }),
             })) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
