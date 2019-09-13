@@ -1061,12 +1061,12 @@ const level = [
                         camPosY: () => player.posY,
                         next: () => dialogue.playDialogue({
                             speakerName: "B.O.G.U.S.",
-                            text: "O b v i o u s l y, I'm here to add value to the product.",
+                            text: "O b v i o u s l y, I'm here to add value to this otherwise worthless product.",
                             camPosX: () => player.posX,
                             camPosY: () => player.posY,
                             next: () => dialogue.playDialogue({
                                 speakerName: "B.O.G.U.S.",
-                                text: "I don't know what you would do without me.",
+                                text: "What would the developer do without me?",
                                 camPosX: () => player.posX,
                                 camPosY: () => player.posY,
                                 next: () => setScene("game")
