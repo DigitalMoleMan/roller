@@ -1,10 +1,11 @@
 class Menu {
 	constructor() {
 		this.selector = 0;
+
+		addEventListener(input.binds.pauseMenu.up, () => {});
 	}
 
 	readInput(input) {
-		
 	}
 
 	draw() {

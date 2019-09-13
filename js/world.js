@@ -7,28 +7,28 @@ block = (n) => n * 32;
 class World {
     constructor() {
 
-            this.tileTemplate = {
-                "X": {
-                    width: block(1),
-                    height: block(1),
-                },
-                "-": {
-                    width: block(1),
-                    height: block(.125),
-                },
-                "^": {
-                    width: block(1),
-                    height: block(0.1875),
-                    range: 64,
-                    speed: 1,
-                },
-                "M": {
-                    x: block(1),
-                    y: block(2 + .5),
-                    width: block(1),
-                    height: block(.5),
-                },
-            }
+        this.tileTemplate = {
+            "X": {
+                width: block(1),
+                height: block(1),
+            },
+            "-": {
+                width: block(1),
+                height: block(.125),
+            },
+            "^": {
+                width: block(1),
+                height: block(0.1875),
+                range: 64,
+                speed: 1,
+            },
+            "M": {
+                x: block(1),
+                y: block(2 + .5),
+                width: block(1),
+                height: block(.5),
+            },
+        }
 
         this.spawn = {};
 
@@ -36,6 +36,24 @@ class World {
         this.npcs = [];
 
         this.segments = [];
+
+        document.addEventListener(input.binds.game.interact, () => {
+
+            this.interaction();
+        });
+
+    }
+
+    interaction(){
+        console.log(this.npcs);
+        var inRangeActors = this.npcs.filter((npc) => (
+            //npc.type == "actor" &&
+            player.posX > (npc.posX - npc.interactionRadius) &&
+            player.posX < (npc.posX + npc.interactionRadius) &&
+            player.posY > (npc.posY - npc.interactionRadius) &&
+            player.posY < (npc.posY + npc.interactionRadius)));
+            console.log(inRangeActors);
+            if(inRangeActors.length > 0) inRangeActors[0].onInteract();
     }
 
     loadLevel(lvl) {
@@ -488,6 +506,8 @@ class World {
                     break;
             }
         })
+
+
         this.npcs.forEach(npc => {
             switch (npc.name) {
                 case 'spikeGuard':
@@ -495,8 +515,9 @@ class World {
                     break;
             }
             npc.update();
-
         })
+
+        
     }
 
     createMesh() {
@@ -584,18 +605,18 @@ class World {
                         } else {
                             switch (x) {
                                 case 0: ctx.drawImage(sprite[13], x, y);
-                                break;
+                                    break;
                                 case (segment.width / 2) - 16: ctx.drawImage(sprite[15], x, y);
-                                break;
+                                    break;
                                 default: ctx.drawImage(sprite[14], x, y);
                             }
                         }
-                    } else if(segment.height > 32) {
+                    } else if (segment.height > 32) {
                         switch (y) {
                             case 0: ctx.drawImage(sprite[10], x, y);
-                            break;
+                                break;
                             case (segment.height / 2) - 16: ctx.drawImage(sprite[12], x, y);
-                            break;
+                                break;
                             default: ctx.drawImage(sprite[11], x, y);
                         }
                     } else ctx.drawImage(sprite[0], x, y);
@@ -605,6 +626,16 @@ class World {
         })
     }
 
+}
+
+class Actor {
+    constructor(posX, posY, onInteract, interactionRadius) {
+        this.type = "actor";
+        this.posX = posX;
+        this.posY = posY;
+        this.interactionRadius = interactionRadius;
+        this.onInteract = () => onInteract();
+    }
 }
 
 class Enemy {
@@ -808,13 +839,13 @@ class LaserTurret extends Enemy {
     }
 }
 
-class Bogus extends Enemy {
+class Bogus extends Actor {
     constructor(posX, posY) {
-        super(posX, posY);
+        super(posX, posY, block(1000));
         this.sprite = () => sprites.npcs.bogus;
     }
 
-    update() {
+    update(){
 
     }
 
@@ -880,7 +911,7 @@ const level = [
     }, {
         name: "Toybox",
         layout: [
-           
+
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "X      G                G                                   G          X",
             "X                                                                      X",
@@ -1012,7 +1043,14 @@ const level = [
             }
         ],
         npcs: [
-            //new Bogus(30, 29), //block(20), block(20)),
+            //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
+            new Bogus(block(30), block(79), () => dialogue.playDialogue({
+                speakerName: "B.O.G.U.S.",
+                text: "Ooh, heeey.",
+                camPosX: player.posX,
+                camPosY: player.posY,
+                next: () => setScene("game"),
+            })) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
         ]
@@ -1196,7 +1234,7 @@ const level = [
             exit: 4,
             exitX: block(0),
             exitY: block(1.5)
-        },{
+        }, {
             type: "E",
             x: block(-.5),
             y: block(1),

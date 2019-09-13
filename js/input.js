@@ -5,6 +5,9 @@ class Input {
      * @param {Object} binds Each object in binds represents a scene and is used as reference when checking if a certain keybind is being pressed.
      */
     constructor(binds = {
+        global: {
+            toggleDebug: 'f',
+        },
         game: {
             //directions
             up: 'w',
@@ -19,7 +22,8 @@ class Input {
             //actions
             jump: ' ',
             sprint: 'shift',
-            use: 'e',
+            use: 'n',
+            interact: 'e',
 
             //misc
             togglePause: 'p',
@@ -97,13 +101,13 @@ class Input {
 
         document.addEventListener('keydown', (e) => {
             var pressedKey = e.key.toLowerCase();
-            document.dispatchEvent(new Event(pressedKey))
+            if(!this.keys[pressedKey])document.dispatchEvent(new Event(pressedKey))
             this.keys[pressedKey] = true
         });
         document.addEventListener('keyup', (e) => {
             var releasedKey = e.key.toLowerCase();
             this.keys[releasedKey] = false
-            if (releasedKey == this.binds[activeScene].toggleDebug) debug = !debug;
+            if (releasedKey == this.binds.global.toggleDebug) debug = !debug;
         });
 
 

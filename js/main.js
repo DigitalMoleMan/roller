@@ -29,39 +29,44 @@ if (onMobile) {
 }
 
 let render = new Renderer(canvasWidth, canvasHeight);
-let input = new Input({ //Binds
-    game: {
-        //movement
-        up: 'arrowup',
-        down: 'arrowdown',
-        left: 'a',
-        right: 'd',
+let input = new Input(
+    { //Binds
+        global: {
+            toggleDebug: 'f',
+        },
+        game: {
+            //movement
+            up: 'arrowup',
+            down: 'arrowdown',
+            left: 'a',
+            right: 'd',
 
-        //actions
-        jump: ' ',
-        sprint: 'shift',
-        use: 'n',
+            //actions
+            jump: ' ',
+            sprint: 'shift',
+            use: 'n',
+            interact: 'e',
 
-        //hotkeys
-        prevItem: 'arrowleft',
-        nextItem: 'arrowright',
+            //hotkeys
+            prevItem: 'arrowleft',
+            nextItem: 'arrowright',
 
-        //misc
-        togglePause: 'p',
+            //misc
+            togglePause: 'p',
 
-        //dev
-        toggleDebug: 'f',
-    },
-    gameDialogue: {
-        next: ' ',
-         //misc
-         togglePause: 'p',
-         toggleDebug: 'f',
-    },
-    pauseMenu: {
-        togglePause: 'p'
-    }
-});
+            //dev
+            toggleDebug: 'f',
+        },
+        gameDialogue: {
+            next: ' ',
+            //misc
+            togglePause: 'p',
+            toggleDebug: 'f',
+        },
+        pauseMenu: {
+            togglePause: 'p'
+        }
+    });
 
 let menu = new Menu();
 let world = new World();
@@ -355,7 +360,7 @@ function loop() {
 
             lighting.update();
 
-            if (input.keys[input.binds.gameDialogue.next] && dialogue.currentTextBox.text.length == dialogue.textProg) dialogue.currentTextBox.next();
+            //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentTextBox.text.length == dialogue.textProg) dialogue.currentTextBox.next();
 
             dialogue.update();
 
