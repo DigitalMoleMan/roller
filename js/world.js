@@ -44,7 +44,7 @@ class World {
 
     }
 
-    interaction(){
+    interaction() {
         this.npcs.forEach(npc => console.log(npc));
         var inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
@@ -52,8 +52,8 @@ class World {
             player.posX < (npc.posX + npc.interactionRadius) &&
             player.posY > (npc.posY) &&
             player.posY < (npc.posY + npc.interactionRadius)));
-            console.log(inRangeActors);
-            if(inRangeActors.length > 0) inRangeActors[0].onInteract();
+        console.log(inRangeActors);
+        if (inRangeActors.length > 0) inRangeActors[0].onInteract();
     }
 
     loadLevel(lvl) {
@@ -517,7 +517,7 @@ class World {
             npc.update();
         })
 
-        
+
     }
 
     createMesh() {
@@ -845,7 +845,7 @@ class Bogus extends Actor {
         this.sprite = () => sprites.npcs.bogus;
     }
 
-    update(){
+    update() {
 
     }
 
@@ -1051,11 +1051,29 @@ const level = [
                 camPosY: () => player.posY,
                 next: () => dialogue.playDialogue({
                     speakerName: "B.O.G.U.S.",
-                    text: "You may be wondering what a cool robot like me is doing in a test build.",
+                    text: "You may be wondering what a cool robot like me is doing in a lame test build.",
                     camPosX: () => player.posX,
                     camPosY: () => player.posY,
-                    next: () => setScene("game")
-                }),
+                    next: () => dialogue.playDialogue({
+                        speakerName: "B.O.G.U.S.",
+                        text: "HAHAHA! How utterly stupid of you.",
+                        camPosX: () => player.posX,
+                        camPosY: () => player.posY,
+                        next: () => dialogue.playDialogue({
+                            speakerName: "B.O.G.U.S.",
+                            text: "O b v i o u s l y, I'm here to add value to the product.",
+                            camPosX: () => player.posX,
+                            camPosY: () => player.posY,
+                            next: () => dialogue.playDialogue({
+                                speakerName: "B.O.G.U.S.",
+                                text: "I don't know what you would do without me.",
+                                camPosX: () => player.posX,
+                                camPosY: () => player.posY,
+                                next: () => setScene("game")
+                            })
+                        })
+                    })
+                })
             })) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
