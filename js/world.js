@@ -38,8 +38,8 @@ class World {
         this.segments = [];
 
         document.addEventListener(input.binds.game.interact, () => {
-            this.interaction();
-        });
+            if (activeScene == "game") this.interaction();
+        })
 
     }
 
