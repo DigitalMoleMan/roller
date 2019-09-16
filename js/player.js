@@ -120,9 +120,10 @@ class Player {
 
         this.band += this.velX;
         if(this.velX > 32) this.velX = 32;
-        if(this.velY > 32) this.velY = 32;
         if(this.velX < -32) this.velX = -32;
+        if(this.velY > 32) this.velY = 32;
         if(this.velY < -32) this.velY = -32;
+        
 
         if (this.band < 0) this.band = sprites.player.bands.length * 100;
         if (this.posY >= world.height + 128) this.kill();

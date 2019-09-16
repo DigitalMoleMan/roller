@@ -17,7 +17,7 @@ class Renderer {
 
         //text
 
-        this.ctx.font = "8px pixelMono";
+        this.ctx.font = "8px Roboto Mono;";
         this.ctx.textBaseline = "top";
 
 
@@ -166,7 +166,7 @@ class Renderer {
 
     text(text, x, y, size = 8, color, scrollFactor = 0) {
         this.ctx.fillStyle = color;
-        this.ctx.font = size + "px pixelMono";
+        this.ctx.font = size + "px Roboto Mono";
         this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)), (y - (this.camera.y * scrollFactor)));
     }
 
