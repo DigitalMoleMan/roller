@@ -554,8 +554,7 @@ class Booster extends Item {
         this.state = "inactive";
 
         this.fuel = 20;
-
-
+        
         this.sprite = () => sprites.player.equipment.booster[this.state];
         this.dir = () => ((player.look - 6) / 6);
 

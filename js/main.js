@@ -278,7 +278,7 @@ setScene = (scene) => {
     render.activeScene = scene;
 }
 
-function loop() {
+function loop() {    
     switch (activeScene) {
         case "game": {
             if (onMobile) input.readMobileInput();
@@ -375,6 +375,7 @@ function loop() {
         }
 
     }
+    
 
 }
 
@@ -387,7 +388,7 @@ var scenes = {
     },
     game: () => {
 
-        const static = 0;
+        const zero = 0;
 
         render.clear();
         // background
@@ -459,19 +460,19 @@ var scenes = {
         var hpUi = sprites.ui.hp;
 
         render.ctx.save();
-        render.ctx.translate(-hpUi.label.width, static);
+        render.ctx.translate(-hpUi.label.width, zero);
 
         render.img(hpUi.label, 48, 16, 0);
         render.ctx.restore();
 
         for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.statbar.left, 48, 16, static);
-            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, static)
-            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, static);
+            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
+            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
+            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
         }
 
         for (var i = 0; i < player.hp; i++) {
-            render.img(hpUi.statbar.point, 52 + (12 * i), 16, static)
+            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
         }
 
 
@@ -480,12 +481,12 @@ var scenes = {
         render.ctx.save();
         render.ctx.translate(-itemUi.label.width, 0);
 
-        render.img(itemUi.label, 48, 32, static);
+        render.img(itemUi.label, 48, 32, zero);
 
         render.ctx.restore();
-        render.img(itemUi.border, 48, 32, static);
+        render.img(itemUi.border, 48, 32, zero);
 
-        render.img(itemUi[player.activeItem.name], 48, 32, static);
+        render.img(itemUi[player.activeItem.name], 48, 32, zero);
 
 
 
@@ -494,7 +495,7 @@ var scenes = {
     },
     gameDialogue: () => {
 
-        const static = 0;
+        const zero = 0;
 
         render.clear();
         // background
@@ -561,19 +562,19 @@ var scenes = {
         var hpUi = sprites.ui.hp;
 
         render.ctx.save();
-        render.ctx.translate(-hpUi.label.width, static);
+        render.ctx.translate(-hpUi.label.width, zero);
 
         render.img(hpUi.label, 48, 16, 0);
         render.ctx.restore();
 
         for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.statbar.left, 48, 16, static);
-            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, static)
-            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, static);
+            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
+            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
+            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
         }
 
         for (var i = 0; i < player.hp; i++) {
-            render.img(hpUi.statbar.point, 52 + (12 * i), 16, static)
+            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
         }
 
 
@@ -582,12 +583,12 @@ var scenes = {
         render.ctx.save();
         render.ctx.translate(-itemUi.label.width, 0);
 
-        render.img(itemUi.label, 48, 32, static);
+        render.img(itemUi.label, 48, 32, zero);
 
         render.ctx.restore();
-        render.img(itemUi.border, 48, 32, static);
+        render.img(itemUi.border, 48, 32, zero);
 
-        render.img(itemUi[player.activeItem.name], 48, 32, static);
+        render.img(itemUi[player.activeItem.name], 48, 32, zero);
 
 
 
