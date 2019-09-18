@@ -227,7 +227,7 @@ window.onload = () => {
 
     render.attatchCamera(camera);
 
-    dialogue.playDialogue(dialogue.debugMsgs[0]);
+    dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
     // playMusic(10);

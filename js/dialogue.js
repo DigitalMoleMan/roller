@@ -2,48 +2,7 @@
 class DialogueHandler {
     constructor() {
 
-        this.debugMsgs = [
-            new DialogueBox({
-                speakerName: "Roll-3R",
-                text: "This is a test message.",
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => this.playDialogue(this.debugMsgs[1])
-            }),
-            new DialogueBox({
-                speakerName: "Roll-3R",
-                text: "This is another test message.",
-                textSpeed: 1,
-                camPosX: () => player.posX - block(5),
-                camPosY: () => player.posY,
-                next: () => this.playDialogue(this.debugMsgs[2])
-            }),
-            new DialogueBox({
-                speakerName: "Roll-3R",
-                text: "Another one.",
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY - block(10),
-                next: () => this.playDialogue(this.debugMsgs[3])
-            }),
-            new DialogueBox({
-                speakerName: "Roll-3R",
-                text: "Another one.",
-                textSpeed: 1,
-                camPosX: () => player.posX + block(25),
-                camPosY: () => player.posY - block(25),
-                next: () => this.playDialogue(this.debugMsgs[4])
-            }),
-            new DialogueBox({
-                speakerName: "Roll-3R",
-                text: "Another one.",
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY - block(10),
-                next: () => setScene("game")
-            })
-        ]
+
 
         this.currentDialogue;
         this.textBuffer = new String;
@@ -90,3 +49,90 @@ class DialogueBox {
         this.next = options.next;
     }
 }
+
+
+const rollerDialogues = [
+    new DialogueBox({
+        speakerName: "Roll-3R",
+        text: "This is a test message.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(rollerDialogues[1])
+    }),
+    new DialogueBox({
+        speakerName: "Roll-3R",
+        text: "This is another test message.",
+        textSpeed: 1,
+        camPosX: () => player.posX - block(5),
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(rollerDialogues[2])
+    }),
+    new DialogueBox({
+        speakerName: "Roll-3R",
+        text: "Another one.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY - block(10),
+        next: () => dialogue.playDialogue(rollerDialogues[3])
+    }),
+    new DialogueBox({
+        speakerName: "Roll-3R",
+        text: "Another one.",
+        textSpeed: 1,
+        camPosX: () => player.posX + block(25),
+        camPosY: () => player.posY - block(25),
+        next: () => dialogue.playDialogue(rollerDialogues[4])
+    }),
+    new DialogueBox({
+        speakerName: "Roll-3R",
+        text: "Another one.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY - block(10),
+        next: () => setScene("game")
+    })
+]
+
+const bogusDialogues = [
+    new DialogueBox({
+        speakerName: "B.O.G.U.S.",
+        text: "Ooh, heeey.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(bogusDialogues[1])
+    }),
+    new DialogueBox({
+        speakerName: "B.O.G.U.S.",
+        text: "You may be wondering what a cool robot like me is doing in a lame test build.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(bogusDialogues[2])
+    }),
+    new DialogueBox({
+        speakerName: "B.O.G.U.S.",
+        text: "HAHAHA! How utterly stupid of you.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(bogusDialogues[3])
+    }),
+    new DialogueBox({
+        speakerName: "B.O.G.U.S.",
+        text: "O b v i o u s l y, I'm here to add value to this otherwise worthless product.",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(bogusDialogues[4])
+    }),
+    new DialogueBox({
+        speakerName: "B.O.G.U.S.",
+        text: "What would the developer do without me?",
+        textSpeed: 1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => setScene("game")
+    })
+]
