@@ -357,11 +357,11 @@ function loop() {
 
             player.updatePos();
 
-            camera.follow(dialogue.currentTextBox.camPosX(), dialogue.currentTextBox.camPosY());
+            camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
 
             lighting.update();
 
-            //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentTextBox.text.length == dialogue.textProg) dialogue.currentTextBox.next();
+            //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentDialogue.text.length == dialogue.textProg) dialogue.currentDialogue.next();
 
             dialogue.update();
 
