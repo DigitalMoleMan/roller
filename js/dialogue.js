@@ -4,36 +4,41 @@ class DialogueHandler {
 
         this.debugMsgs = [
             new DialogueBox({
-                speakerName: "yee",
-                text: "haw",
+                speakerName: "Roll-3R",
+                text: "This is a test message.",
+                textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(dialogue.debugMsgs[1])
-            }), 
+                next: () => this.playDialogue(this.debugMsgs[1])
+            }),
             new DialogueBox({
                 speakerName: "Roll-3R",
                 text: "This is another test message.",
+                textSpeed: 1,
                 camPosX: () => player.posX - block(5),
                 camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(dialogue.debugMsgs[2])
-            }), 
+                next: () => this.playDialogue(this.debugMsgs[2])
+            }),
             new DialogueBox({
                 speakerName: "Roll-3R",
                 text: "Another one.",
+                textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY - block(10),
-                next: () => dialogue.playDialogue(dialogue.debugMsgs[3])
-            }), 
+                next: () => this.playDialogue(this.debugMsgs[3])
+            }),
             new DialogueBox({
                 speakerName: "Roll-3R",
                 text: "Another one.",
+                textSpeed: 1,
                 camPosX: () => player.posX + block(25),
                 camPosY: () => player.posY - block(25),
-                next: () => dialogue.playDialogue(dialogue.debugMsgs[4])
-            }), 
+                next: () => this.playDialogue(this.debugMsgs[4])
+            }),
             new DialogueBox({
                 speakerName: "Roll-3R",
                 text: "Another one.",
+                textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY - block(10),
                 next: () => setScene("game")
@@ -45,7 +50,7 @@ class DialogueHandler {
         this.displayedText = new String;
         this.textProg = 0;
         document.addEventListener(input.binds.gameDialogue.next, () => {
-            if(activeScene == "gameDialogue") dialogue.currentDialogue.next();
+            if (activeScene == "gameDialogue") dialogue.currentDialogue.next();
         })
     };
 
@@ -53,16 +58,10 @@ class DialogueHandler {
         setScene("gameDialogue");
         this.textProg = 0;
         this.currentDialogue = dlgObj;
-
-        this.displayedText = "";
     }
 
     update() {
-        var tl = this.currentDialogue.text.length;
-        if (tl > this.textProg) {
-            this.displayedText += this.currentDialogue.text[this.textProg];
-            this.textProg++;
-        }
+        if (this.currentDialogue.text.length > this.textProg) this.textProg += this.currentDialogue.textSpeed;
     }
 
     draw() {
@@ -76,19 +75,18 @@ class DialogueHandler {
 
 class DialogueBox {
     constructor(options = {
-        speakerName: undefined,
-        text: undefined,
-        camPosX: () => player.posX,
-        camPosY: () => player.posY,
-        next: () => setScene("game"),
-        textSpeed: 1,
-    }){
-        this.options = options;
-            this.speakerName = options.speakerName;
-            this.text = options.text;
-            this.textSpeed = options.textSpeed;
-            this.camPosX = () => options.camPosX();
-            this.camPosY = () => options.camPosY();
-            this.next = () => options.next();
+        speakerName: String(),
+        text: String(),
+        textSpeed: Number(),
+        camPosX: Function(),
+        camPosY: Function(),
+        next: Function()
+    }) {
+        this.speakerName = options.speakerName;
+        this.text = options.text;
+        this.textSpeed = options.textSpeed;
+        this.camPosX = options.camPosX;
+        this.camPosY = options.camPosY;
+        this.next = options.next;
     }
 }
