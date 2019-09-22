@@ -565,60 +565,39 @@ class World {
             var sprite = sprites.tiles[segment.type]
             for (var y = 0; y < segment.height; y += 16) {
                 for (var x = 0; x < segment.width; x += 16) {
-
+                    var dIndex = 0;
                     if (segment.width > 32) {
+                        if (segment.height > 32) switch (y) {
+                            case 0: switch (x) {
+                                case 0: dIndex = 1; break;
+                                case (segment.width / 2) - 16: dIndex = 3; break;
+                                default: dIndex = 2;
+                            } break;
+                            case (segment.height / 2) - 16: switch (x) {
+                                case 0: dIndex = 7; break;
+                                case (segment.width / 2) - 16: dIndex = 9; break;
+                                default: dIndex = 8;
+                            } break;
+                            default: switch (x) {
+                                case 0: dIndex = 4; break;
+                                case (segment.width / 2) - 16: dIndex = 6; break;
+                                default: dIndex = 5
+                            } break;
+                        } else switch (x) {
+                            case 0: dIndex = 13; break;
+                            case (segment.width / 2) - 16: dIndex = 15; break;
+                            default: dIndex = 14;
+                        }
+                    } else if (segment.height > 32) switch (y) {
+                        case 0: dIndex = 10; break;
+                        case (segment.height / 2) - 16: dIndex = 12; break;
+                        default: dIndex = 11;
+                    } else dIndex = 0;
 
-                        if (segment.height > 32) {
-                            switch (y) {
-                                case 0: {
-                                    switch (x) {
-                                        case 0: ctx.drawImage(sprite[1], x, y);
-                                            break;
-                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[3], x, y);
-                                            break;
-                                        default: ctx.drawImage(sprite[2], x, y);
-                                    }
-                                    break;
-                                }
-                                case (segment.height / 2) - 16: {
-                                    switch (x) {
-                                        case 0: ctx.drawImage(sprite[7], x, y);
-                                            break;
-                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[9], x, y);
-                                            break;
-                                        default: ctx.drawImage(sprite[8], x, y);
-                                    }
-                                    break;
-                                }
-                                default: {
-                                    switch (x) {
-                                        case 0: ctx.drawImage(sprite[4], x, y);
-                                            break;
-                                        case (segment.width / 2) - 16: ctx.drawImage(sprite[6], x, y);
-                                            break;
-                                        default: ctx.drawImage(sprite[5], x, y);
-                                    }
-                                    break;
-                                }
-                            }
-                        } else {
-                            switch (x) {
-                                case 0: ctx.drawImage(sprite[13], x, y);
-                                    break;
-                                case (segment.width / 2) - 16: ctx.drawImage(sprite[15], x, y);
-                                    break;
-                                default: ctx.drawImage(sprite[14], x, y);
-                            }
-                        }
-                    } else if (segment.height > 32) {
-                        switch (y) {
-                            case 0: ctx.drawImage(sprite[10], x, y);
-                                break;
-                            case (segment.height / 2) - 16: ctx.drawImage(sprite[12], x, y);
-                                break;
-                            default: ctx.drawImage(sprite[11], x, y);
-                        }
-                    } else ctx.drawImage(sprite[0], x, y);
+                    if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++ 
+                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex++ 
+                    if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+                    ctx.drawImage(sprite[dIndex], x, y);
                 }
             }
             Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
@@ -1043,37 +1022,7 @@ const level = [
         ],
         npcs: [
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
-            new Bogus(block(30), block(79), () => dialogue.playDialogue({
-                speakerName: "B.O.G.U.S.",
-                text: "Ooh, heeey.",
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue({
-                    speakerName: "B.O.G.U.S.",
-                    text: "You may be wondering what a cool robot like me is doing in a lame test build.",
-                    camPosX: () => player.posX,
-                    camPosY: () => player.posY,
-                    next: () => dialogue.playDialogue({
-                        speakerName: "B.O.G.U.S.",
-                        text: "HAHAHA! How utterly stupid of you.",
-                        camPosX: () => player.posX,
-                        camPosY: () => player.posY,
-                        next: () => dialogue.playDialogue({
-                            speakerName: "B.O.G.U.S.",
-                            text: "O b v i o u s l y, I'm here to add value to this otherwise worthless product.",
-                            camPosX: () => player.posX,
-                            camPosY: () => player.posY,
-                            next: () => dialogue.playDialogue({
-                                speakerName: "B.O.G.U.S.",
-                                text: "What would the developer do without me?",
-                                camPosX: () => player.posX,
-                                camPosY: () => player.posY,
-                                next: () => setScene("game")
-                            })
-                        })
-                    })
-                })
-            })) //block(20), block(20)),
+            new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
         ]
