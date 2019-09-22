@@ -243,7 +243,7 @@ window.onload = () => {
 
     setScene("gameDialogue");
 
-    world.loadLevel(level[4])
+    world.loadLevel(level[0])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
