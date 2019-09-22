@@ -33,11 +33,15 @@ class Input {
         },
         gameDialogue: {
             next: ' ',
-             //misc
-             togglePause: 'p',
+            //misc
+            togglePause: 'p',
+            //dev
+            toggleDebug: 'f',
         },
         pauseMenu: {
-            togglePause: 'p'
+            togglePause: 'p',
+            //dev
+            toggleDebug: 'f',
         }
     }, touchAreas = {
         game: [
@@ -70,7 +74,7 @@ class Input {
                 height: canvasHeight
             },
             {
-                bind: "pause",
+                bind: "togglePause",
                 x: block(1),
                 y: block(0),
                 width: block(2),
@@ -88,26 +92,26 @@ class Input {
         ],
         pauseMenu: [
             {
-                bind: "unpause",
+                bind: "togglePause",
                 x: block(1),
                 y: block(0),
                 width: block(2),
                 height: block(2)
             }
         ]
-    }) {
+    }
+    ) {
         this.keys = new Object;
         this.binds = binds;
 
         document.addEventListener('keydown', (e) => {
             var pressedKey = e.key.toLowerCase();
-            if(!this.keys[pressedKey])document.dispatchEvent(new Event(pressedKey))
-            this.keys[pressedKey] = true
+            if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
+            this.keys[pressedKey] = true;
         });
         document.addEventListener('keyup', (e) => {
             var releasedKey = e.key.toLowerCase();
-            this.keys[releasedKey] = false
-            if (releasedKey == this.binds.global.toggleDebug) debug = !debug;
+            this.keys[releasedKey] = false;
         });
 
 
@@ -126,8 +130,11 @@ class Input {
         for (var i = 0; i < this.targetTouches.length; i++) touches.push(this.targetTouches[i]);
 
         this.touchAreas[activeScene].forEach(area => {
-            if (touches.filter((t) => (t.clientX >= area.x && t.clientX <= area.x + area.width && t.clientY >= area.y && t.clientY <= area.y + area.height)).length) {
-                document.dispatchEvent(new Event(this.binds[activeScene][area.bind]));
+            if (touches.filter((t) => (t.clientX >= area.x
+                && t.clientX <= area.x + area.width
+                && t.clientY >= area.y
+                && t.clientY <= area.y + area.height)).length > 0) {
+                if (!this.keys[this.binds[activeScene][area.bind]]) document.dispatchEvent(new Event(this.binds[activeScene][area.bind]));
                 this.keys[this.binds[activeScene][area.bind]] = true;
             } else this.keys[this.binds[activeScene][area.bind]] = false;
         })

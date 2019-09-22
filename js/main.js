@@ -29,6 +29,7 @@ if (onMobile) {
 }
 
 let render = new Renderer(canvasWidth, canvasHeight);
+
 let input = new Input(
     { //Binds
         global: {
@@ -64,7 +65,10 @@ let input = new Input(
             toggleDebug: 'f',
         },
         pauseMenu: {
-            togglePause: 'p'
+            togglePause: 'p',
+            toggleDebug: 'f',
+            up: 'w',
+            down: 's'
         }
     });
 
@@ -82,6 +86,29 @@ var nearPlayer = [];
 var onScreen = [];
 var onScreenSegs = [];
 var onScreenLights = [];
+
+const fontFile = new Image();
+
+
+var font = [];
+
+fontFile.onload = () => {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext("2d");
+    canvas.width = 16;
+    canvas.height = 16;
+    ctx.imageSmoothingEnabled = false;
+    ctx.scale(2, 2);
+    for (var i = 0; i < fontFile.width; i += 8) {
+        ctx.clearRect(0, 0, 16, 16);
+        ctx.drawImage(fontFile, -i, 0);
+        var char = new Image();
+        char.src = canvas.toDataURL();
+        font.push(char);
+    }
+}
+
+fontFile.src = 'fonts/roller_font.png';
 
 //Loading sprites
 var sprites = {
@@ -174,6 +201,7 @@ var music = [
     'audio/music/Chain Reactor.wav',
     'audio/music/Hollow.wav',
     'audio/music/Spaced Sax.wav',
+    'audio/music/the beatdown.wav'
 ];
 
 var sfx = {
@@ -201,6 +229,7 @@ const musicPlayer = new Audio();
 
 musicPlayer.loop = true;
 
+document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
 
 window.onload = () => {
 
@@ -210,9 +239,11 @@ window.onload = () => {
             (err) => console.log('ServiceWorker registration failed: ', err));
     }
 
+    loadDialogues();
+
     setScene("gameDialogue");
 
-    world.loadLevel(level[1])
+    world.loadLevel(level[4])
 
 
     sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
@@ -230,7 +261,7 @@ window.onload = () => {
     dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    // playMusic(10);
+    //playMusic(12);
     setInterval(() => loop(), 1000 / 60);
     render.update();
 
@@ -278,7 +309,8 @@ setScene = (scene) => {
     render.activeScene = scene;
 }
 
-function loop() {    
+function loop() {
+
     switch (activeScene) {
         case "game": {
             if (onMobile) input.readMobileInput();
@@ -321,8 +353,8 @@ function loop() {
 
 
             //render.camera.follow(player.pos);
-            break;
-        }
+
+        } break;
         case "gameDialogue": {
             if (onMobile) input.readMobileInput();
             gameClock++;
@@ -365,17 +397,19 @@ function loop() {
 
             dialogue.update();
 
-            break;
-        }
-        case "pauseMenu": {
-            if (onMobile) input.readMobileInput();
-            menu.readInput(input);
-            //if (input.keys[input.binds.pause]) setScene("game");
-            break;
-        }
 
+        } break;
+        case "pauseMenu": {
+
+            
+            if (onMobile) input.readMobileInput();
+
+            menu.update();
+            //if (input.keys[input.binds.pause]) setScene("game");
+
+        } break;
     }
-    
+
 
 }
 
@@ -629,12 +663,12 @@ drawDebug = () => {
     })
 
 
-    if (true) {
+    if (!true) {
         var playerInfo = JSON.stringify(player).split(',');
 
         render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
         playerInfo.forEach((row, i) => {
-            render.text(row, 12, (i * 12) + 12, 8, "#fff");
+            render.text(row, 12, (i * 16) + 12, .75, "#fff");
         });
     }
 
@@ -642,7 +676,7 @@ drawDebug = () => {
         var ta = input.touchAreas[activeScene];
         for (var i = 0; i < ta.length; i++) {
             render.rectStroke(ta[i].x, ta[i].y, ta[i].width, ta[i].height, "#ffffff80", 2, 0);
-            render.text(ta[i].bind, ta[i].x + (ta[i].width / 2), ta[i].y + (ta[i].height / 2), 8, "#ffffff80");
+            render.text(ta[i].bind, ta[i].x, ta[i].y, 1, "#ffffff80");
         }
     }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")

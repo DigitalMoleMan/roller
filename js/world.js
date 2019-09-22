@@ -595,8 +595,10 @@ class World {
                     } else dIndex = 0;
 
                     if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++ 
-                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex++ 
+                    if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--; 
+                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3; 
                     if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+                    
                     ctx.drawImage(sprite[dIndex], x, y);
                 }
             }
@@ -860,14 +862,15 @@ const level = [
             "X          XXXXXXXXXXXXXXXXXXXXX",
             "X    --    XX        XXXXXXXXXXX",
             "X          XX  XXXX  XXXXXXXXXXX",
-            "X          XX  XXXX            X",
-            "X          XX  XXXXXXXXX       X",
-            "X       ---XX  XXXXXXXXX    @  X",
+            "X          XX  XXXX           XX",
+            "X          XX  XXXXXXXXX      XX",
+            "X       ---XX  XXXXXXXXX    @ XX",
             "X          XX  XXXXXXXXXXXXXXXXX",
             "X          XX  XXXXXXXXXXXXXXXXX",
             "X---       XX  XXXXXXXXXXXXXXXXX",
             "X              XXXXXXXXXXXXXXXXX",
             "X              XXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [
@@ -958,18 +961,18 @@ const level = [
             "X                                                                      X",
             "XXXXXXXXXXXXXMMMMMMXXXX      XXXXXXXXXXX                     XXX-------X",
             "XXXXXXXXXXXXXXXXXXXXXXX        G     G                        G        X",
-            "X              L    X                                                  X",
-            "X                   X                                                  X",
-            "X                   X  ^^vv                                            X",
-            "X     vv                                                               X",
-            "X        -X-                                                           X",
-            "X         X                                                            X",
-            "X         X  >>     XXXMMMMXXX                     XXX                 X",
-            "X         X         XXXXXXXXXX---   ---X                               X",
-            "X         X         XXXXXXXXXX         X     XX                        X",
-            "X         X         X        X         X     XX                        X",
-            "X                   X        X         X     XX                        X",
-            "X  ^^               X    @   X   ---   X                               X",
+            "XX             L    X                                                  X",
+            "XX                  X                                                  X",
+            "XX                  X  ^^vv                                            X",
+            "XX    vv                                                               X",
+            "XX       XXX                                                           X",
+            "XX       XXX                                                           X",
+            "XX       XXX >>     XXXMMMMXXX                     XXX                 X",
+            "XX       XXX        XXXXXXXXXX---   ---X                               X",
+            "XX       XXX        XXXXXXXXXX         X     XX                        X",
+            "XX       XXX        X        X         X     XX                        X",
+            "XX                  X        X         X     XX                        X",
+            "XX ^^               X    @   X   ---   X                               X",
             "                        XX                                              ",
             "                       XXXX                                             ",
             "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -1078,7 +1081,7 @@ const level = [
             "XXXX                   XXXXXX    G    XXXXXX                                        XXX         XXX",
             "XXXX                   XXXXXX         XXXXXX                                        XXX   MMMMMMXXX",
             "XXXX                   XXXXXX         XXXXXX                                        XXX   XXXXXXXXX",
-            "XXXX                   XXXXXX         XXXXXX                                        XXX           X",
+            "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXXXXXXXXXXXXXX",
@@ -1096,9 +1099,9 @@ const level = [
             }, {
                 type: "E",
                 x: block(99.5),
-                y: block(15),
+                y: block(14),
                 width: block(0),
-                height: block(2),
+                height: block(3),
                 exit: 4,
                 exitX: block(0),
                 exitY: block(53.5)
@@ -1158,7 +1161,7 @@ const level = [
             "XXXXXXX                  XXXXXXX",
             "XXXXXXX                  XXXXXXX",
             "XXXXXXX                  XXXXXXX",
-            "X                        XXXXXXX",
+            "                         XXXXXXX",
             "                         XXXXXXX",
             "        @                XXXXXXX",
             "XXXXXXX---               XXXXXXX",
@@ -1168,9 +1171,9 @@ const level = [
         advancedLayer: [{
             type: "E",
             x: block(-.5),
-            y: block(52),
+            y: block(51),
             width: block(0),
-            height: block(2),
+            height: block(3),
             exit: 3,
             exitX: block(98.5),
             exitY: block(16.5)
