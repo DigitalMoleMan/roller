@@ -25,12 +25,15 @@ class DialogueHandler {
     }
 
     update() {
-
         if (this.msglength(this.currentDialogue.text.length) > this.textProg) this.textProg += this.currentDialogue.textSpeed;
     }
 
     draw() {
-        render.rect(block(3), canvasHeight - block(4.5), canvasWidth - block(6), block(4), "#00408080", 0); // background
+        var tbX = block(3);
+        var tbY = canvasHeight - block(4.5);
+        var tbW = canvasWidth - (tbX * 2);
+        var tbH = block(4);
+        render.rect(tbX, tbY, tbW, tbH, "#00408080", 0); // background
         render.text(this.currentDialogue.speakerName, block(3), canvasHeight - block(4.5), 1, "#fff", 0);
         for (var i = 0; i < this.currentDialogue.text.length; i++) {
             render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), block(4), canvasHeight - block(3.5) + block(i), 1, "#fff");

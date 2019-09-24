@@ -240,13 +240,10 @@ window.onload = () => {
     }
 
     loadDialogues();
+    world.loadLevel(level[0]);
 
-    setScene("gameDialogue");
-
-    world.loadLevel(level[0])
-
-
-    sprites.backgrounds.forEach(bg => pattern.push(render.toPattern(bg)));
+    
+    setScene("game");
 
 
     player.posX = world.spawn.x;
