@@ -129,6 +129,16 @@ var sprites = {
             //items
             hookshot: render.importImage('img/ui/activeItem/hookshot.png'),
             booster: render.importImage('img/ui/activeItem/booster.png'),
+        },
+        dialogueBox: {
+            tl: render.importImage('img/ui/dialogue_box/db_tl.png'),
+            tm: render.importImage('img/ui/dialogue_box/db_tm.png'),
+            tr: render.importImage('img/ui/dialogue_box/db_tr.png'),
+            ml: render.importImage('img/ui/dialogue_box/db_ml.png'),
+            mr: render.importImage('img/ui/dialogue_box/db_mr.png'),
+            bl: render.importImage('img/ui/dialogue_box/db_bl.png'),
+            bm: render.importImage('img/ui/dialogue_box/db_bm.png'),
+            br: render.importImage('img/ui/dialogue_box/db_br.png'),
         }
     },
     player: {
@@ -224,15 +234,9 @@ var sfx = {
 
 const musicPlayer = new Audio();
 
-
-
-
 musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
-
-
-var scenesC = {};
 
 window.onload = () => {
 
@@ -241,151 +245,6 @@ window.onload = () => {
         navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
             (err) => console.log('ServiceWorker registration failed: ', err));
     }
-
-    scenesC.game = new Scene(() => {
-        if (onMobile) input.readMobileInput();
-        gameClock++;
-    
-        onScreen = world.tiles.filter((tile) => (
-            tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
-            tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
-        ));
-    
-        onScreenSegs = world.segments.filter((tile) => (
-            (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
-            (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
-            (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
-            (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
-        ));
-    
-        onScreenLights = world.lightSources.filter((tile) => (
-            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
-        ));
-    
-        nearPlayer = world.segments.filter((tile) => (
-            player.posX - 32 < tile.x + tile.width &&
-            player.posX + 32 > tile.x &&
-            player.posY - 32 < tile.y + tile.height &&
-            player.posY + 32 > tile.y
-        ));
-    
-        world.update();
-    
-        player.readInput(input);
-        player.updatePos();
-    
-        camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
-    
-        lighting.update();
-    
-    
-        //render.camera.follow(player.pos);
-    
-    }, () => {
-    
-        const zero = 0;
-    
-        render.clear();
-        // background
-    
-    
-        var bg = sprites.backgrounds[3];
-        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
-            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
-            }
-        }
-    
-    
-        world.npcs.forEach(npc => npc.draw());
-    
-        player.draw();
-    
-    
-    
-        // world
-        //render.ctx.save();
-        //render.ctx.scale(2, 2);
-        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
-    
-    
-            try {
-                render.ctx.save();
-                var texture = sprites.tiles[tile.type];
-    
-                if (tile.drawModifier !== undefined) tile.drawModifier();
-    
-    
-                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
-                render.ctx.restore();
-            } catch (error) {
-                render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
-            }
-    
-        })
-    
-        onScreenSegs.filter((seg) => seg.type == "X").forEach(tile => {
-    
-            render.ctx.save();
-            var texture = tile.texture;
-    
-            // if(tile.drawModifier !== undefined)tile.drawModifier();
-    
-    
-            render.img(texture, tile.x, tile.y, 1);
-            render.ctx.restore();
-    
-        })
-    
-    
-        //render.ctx.restore();
-    
-    
-    
-    
-    
-    
-        render.pe.tick()
-    
-    
-        lighting.draw();
-    
-    
-        //ui
-        var hpUi = sprites.ui.hp;
-    
-        render.ctx.save();
-        render.ctx.translate(-hpUi.label.width, zero);
-    
-        render.img(hpUi.label, 48, 16, 0);
-        render.ctx.restore();
-    
-        for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
-            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
-            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
-        }
-    
-        for (var i = 0; i < player.hp; i++) {
-            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
-        }
-    
-    
-    
-        var itemUi = sprites.ui.activeItem;
-        render.ctx.save();
-        render.ctx.translate(-itemUi.label.width, 0);
-    
-        render.img(itemUi.label, 48, 32, zero);
-    
-        render.ctx.restore();
-        render.img(itemUi.border, 48, 32, zero);
-    
-        render.img(itemUi[player.activeItem.name], 48, 32, zero);
-    })
 
     loadDialogues();
     world.loadLevel(level[0]);
@@ -408,7 +267,7 @@ window.onload = () => {
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
     //playMusic(12);
     setInterval(() => loop(), 1000 / 60);
-    render.update();
+    // render.update();
 
 
 }
@@ -455,120 +314,71 @@ setScene = (scene) => {
 }
 
 function loop() {
-    scenesC.game.update();
-    scenesC.game.draw();
+    scenes[activeScene].update();
+    scenes[activeScene].draw();
 
-/*
-    switch (activeScene) {
-        case "game": {
-            if (onMobile) input.readMobileInput();
-            gameClock++;
+    if(debug) drawDebug();
+}
 
-            onScreen = world.tiles.filter((tile) => (
-                tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
-                tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
-            ));
-
-            onScreenSegs = world.segments.filter((tile) => (
-                (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
-                (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
-                (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
-                (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
-            ));
-
-            onScreenLights = world.lightSources.filter((tile) => (
-                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
-            ));
-
-            nearPlayer = world.segments.filter((tile) => (
-                player.posX - 32 < tile.x + tile.width &&
-                player.posX + 32 > tile.x &&
-                player.posY - 32 < tile.y + tile.height &&
-                player.posY + 32 > tile.y
-            ));
-
-            world.update();
-
-            player.readInput(input);
-            player.updatePos();
-
-            camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
-
-            lighting.update();
-
-
-            //render.camera.follow(player.pos);
-
-        } break;
-        case "gameDialogue": {
-            if (onMobile) input.readMobileInput();
-            gameClock++;
-
-            onScreen = world.tiles.filter((tile) => (
-                tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
-                tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
-            ));
-
-            onScreenSegs = world.segments.filter((tile) => (
-                (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
-                (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
-                (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
-                (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
-            ));
-
-            onScreenLights = world.lightSources.filter((tile) => (
-                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
-            ));
-
-            nearPlayer = world.segments.filter((tile) => (
-                player.posX - 32 < tile.x + tile.width &&
-                player.posX + 32 > tile.x &&
-                player.posY - 32 < tile.y + tile.height &&
-                player.posY + 32 > tile.y
-            ));
-
-            world.update();
-
-            player.updatePos();
-
-            camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
-
-            lighting.update();
-
-            //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentDialogue.text.length == dialogue.textProg) dialogue.currentDialogue.next();
-
-            dialogue.update();
-
-
-        } break;
-        case "pauseMenu": {
-
-
-            if (onMobile) input.readMobileInput();
-
-            menu.update();
-            //if (input.keys[input.binds.pause]) setScene("game");
-
-        } break;
+class Scene {
+    constructor(update, draw) {
+        this.update = () => update();
+        this.draw = () => draw();
     }
-
-*/
 }
 
 
 
 var scenes = {
-    menu: () => {
+    menu: new Scene(() => { // update
+
+    }, () => { // draw
         // background
         //render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
-    },
-    game: () => {
+    }),
+    game: new Scene(() => { // update
+        if (onMobile) input.readMobileInput();
+        gameClock++;
+
+        onScreen = world.tiles.filter((tile) => (
+            tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
+            tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
+        ));
+
+        onScreenSegs = world.segments.filter((tile) => (
+            (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
+            (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
+            (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
+            (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
+        ));
+
+        onScreenLights = world.lightSources.filter((tile) => (
+            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+        ));
+
+        nearPlayer = world.segments.filter((tile) => (
+            player.posX - 32 < tile.x + tile.width &&
+            player.posX + 32 > tile.x &&
+            player.posY - 32 < tile.y + tile.height &&
+            player.posY + 32 > tile.y
+        ));
+
+        world.update();
+
+        player.readInput(input);
+        player.updatePos();
+
+        camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
+
+        lighting.update();
+
+
+        //render.camera.follow(player.pos);
+
+    }, () => { // draw
 
         const zero = 0;
 
@@ -669,13 +479,51 @@ var scenes = {
         render.img(itemUi.border, 48, 32, zero);
 
         render.img(itemUi[player.activeItem.name], 48, 32, zero);
+    }),
+    gameDialogue: new Scene(() => { // update
+        if (onMobile) input.readMobileInput();
+        gameClock++;
+
+        onScreen = world.tiles.filter((tile) => (
+            tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
+            tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
+        ));
+
+        onScreenSegs = world.segments.filter((tile) => (
+            (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
+            (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
+            (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
+            (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
+        ));
+
+        onScreenLights = world.lightSources.filter((tile) => (
+            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+        ));
+
+        nearPlayer = world.segments.filter((tile) => (
+            player.posX - 32 < tile.x + tile.width &&
+            player.posX + 32 > tile.x &&
+            player.posY - 32 < tile.y + tile.height &&
+            player.posY + 32 > tile.y
+        ));
+
+        world.update();
+
+        player.updatePos();
+
+        camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
+
+        lighting.update();
+
+        //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentDialogue.text.length == dialogue.textProg) dialogue.currentDialogue.next();
+
+        dialogue.update();
 
 
-
-
-
-    },
-    gameDialogue: () => {
+    }, () => { // draw
 
         const zero = 0;
 
@@ -775,13 +623,16 @@ var scenes = {
 
 
 
-    },
-    pauseMenu: () => {
-        scenes.game();
+    }),
+    pauseMenu: new Scene(() => { // update
+        if (onMobile) input.readMobileInput();
+
+        menu.update();
+        //if (input.keys[input.binds.pause]) setScene("game");
+    }, () => { // draw
+        scenes.game.draw();
         menu.draw();
-    }
-
-
+    })
 }
 
 drawDebug = () => {
@@ -830,11 +681,4 @@ drawDebug = () => {
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
 }
 
-
-class Scene {
-    constructor(update, draw) {
-        this.update = () => update();
-        this.draw = () => draw();
-    }
-}
 
