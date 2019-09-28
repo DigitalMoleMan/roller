@@ -231,6 +231,9 @@ musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
 
+
+var scenesC = {};
+
 window.onload = () => {
 
     if ('serviceWorker' in navigator) {
@@ -239,10 +242,155 @@ window.onload = () => {
             (err) => console.log('ServiceWorker registration failed: ', err));
     }
 
+    scenesC.game = new Scene(() => {
+        if (onMobile) input.readMobileInput();
+        gameClock++;
+    
+        onScreen = world.tiles.filter((tile) => (
+            tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
+            tile.y > (camera.y - 32) && tile.y < (render.canvas.height + camera.y)
+        ));
+    
+        onScreenSegs = world.segments.filter((tile) => (
+            (camera.x - (canvasWidth / 2)) < tile.x + tile.width &&
+            (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
+            (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
+            (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
+        ));
+    
+        onScreenLights = world.lightSources.filter((tile) => (
+            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+        ));
+    
+        nearPlayer = world.segments.filter((tile) => (
+            player.posX - 32 < tile.x + tile.width &&
+            player.posX + 32 > tile.x &&
+            player.posY - 32 < tile.y + tile.height &&
+            player.posY + 32 > tile.y
+        ));
+    
+        world.update();
+    
+        player.readInput(input);
+        player.updatePos();
+    
+        camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
+    
+        lighting.update();
+    
+    
+        //render.camera.follow(player.pos);
+    
+    }, () => {
+    
+        const zero = 0;
+    
+        render.clear();
+        // background
+    
+    
+        var bg = sprites.backgrounds[3];
+        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
+            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
+                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+            }
+        }
+    
+    
+        world.npcs.forEach(npc => npc.draw());
+    
+        player.draw();
+    
+    
+    
+        // world
+        //render.ctx.save();
+        //render.ctx.scale(2, 2);
+        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
+    
+    
+            try {
+                render.ctx.save();
+                var texture = sprites.tiles[tile.type];
+    
+                if (tile.drawModifier !== undefined) tile.drawModifier();
+    
+    
+                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
+                render.ctx.restore();
+            } catch (error) {
+                render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
+            }
+    
+        })
+    
+        onScreenSegs.filter((seg) => seg.type == "X").forEach(tile => {
+    
+            render.ctx.save();
+            var texture = tile.texture;
+    
+            // if(tile.drawModifier !== undefined)tile.drawModifier();
+    
+    
+            render.img(texture, tile.x, tile.y, 1);
+            render.ctx.restore();
+    
+        })
+    
+    
+        //render.ctx.restore();
+    
+    
+    
+    
+    
+    
+        render.pe.tick()
+    
+    
+        lighting.draw();
+    
+    
+        //ui
+        var hpUi = sprites.ui.hp;
+    
+        render.ctx.save();
+        render.ctx.translate(-hpUi.label.width, zero);
+    
+        render.img(hpUi.label, 48, 16, 0);
+        render.ctx.restore();
+    
+        for (var i = 0; i < player.maxHp; i++) {
+            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
+            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
+            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
+        }
+    
+        for (var i = 0; i < player.hp; i++) {
+            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
+        }
+    
+    
+    
+        var itemUi = sprites.ui.activeItem;
+        render.ctx.save();
+        render.ctx.translate(-itemUi.label.width, 0);
+    
+        render.img(itemUi.label, 48, 32, zero);
+    
+        render.ctx.restore();
+        render.img(itemUi.border, 48, 32, zero);
+    
+        render.img(itemUi[player.activeItem.name], 48, 32, zero);
+    })
+
     loadDialogues();
     world.loadLevel(level[0]);
 
-    
+
     setScene("game");
 
 
@@ -307,7 +455,10 @@ setScene = (scene) => {
 }
 
 function loop() {
+    scenesC.game.update();
+    scenesC.game.draw();
 
+/*
     switch (activeScene) {
         case "game": {
             if (onMobile) input.readMobileInput();
@@ -398,7 +549,7 @@ function loop() {
         } break;
         case "pauseMenu": {
 
-            
+
             if (onMobile) input.readMobileInput();
 
             menu.update();
@@ -407,7 +558,7 @@ function loop() {
         } break;
     }
 
-
+*/
 }
 
 
@@ -678,3 +829,12 @@ drawDebug = () => {
     }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
 }
+
+
+class Scene {
+    constructor(update, draw) {
+        this.update = () => update();
+        this.draw = () => draw();
+    }
+}
+

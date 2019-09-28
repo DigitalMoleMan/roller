@@ -1,9 +1,5 @@
 block = (n) => n * 32;
 
-
-
-
-
 class World {
     constructor() {
 
