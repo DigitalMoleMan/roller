@@ -164,7 +164,7 @@ class Renderer {
 
 
 
-    text(text, x, y, size = 8, color, scrollFactor = 0) {
+    text(text, x, y, size = 1, color, scrollFactor = 0) {
         this.ctx.fillStyle = color;
         this.ctx.font = size + "px Roboto Mono";
 

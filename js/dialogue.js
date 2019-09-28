@@ -9,7 +9,7 @@ class DialogueHandler {
         this.displayedText = [];
         this.textProg = 0;
         document.addEventListener(input.binds.gameDialogue.next, () => {
-            if (activeScene == "gameDialogue") dialogue.currentDialogue.next();
+            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) dialogue.currentDialogue.next();
         })
     };
 
@@ -20,24 +20,25 @@ class DialogueHandler {
     }
     msglength(n) {
         var l = 0;
-        for (var i = 0; i < n; i++) {
-            l += this.currentDialogue.text[i].length;
-        }
+        for (var i = 0; i < n; i++) l += this.currentDialogue.text[i].length;
         return l;
     }
 
     update() {
-
         if (this.msglength(this.currentDialogue.text.length) > this.textProg) this.textProg += this.currentDialogue.textSpeed;
     }
 
     draw() {
-        render.rect(block(3), canvasHeight - block(4.5), canvasWidth - block(6), block(4), "#00408080", 0); // background
+        var tbX = block(3);
+        var tbY = canvasHeight - block(4.5);
+        var tbW = canvasWidth - (tbX * 2);
+        var tbH = block(4);
+        render.rect(tbX, tbY, tbW, tbH, "#00408080", 0); // background
         render.text(this.currentDialogue.speakerName, block(3), canvasHeight - block(4.5), 1, "#fff", 0);
         for (var i = 0; i < this.currentDialogue.text.length; i++) {
             render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), block(4), canvasHeight - block(3.5) + block(i), 1, "#fff");
         }
-        if (this.textProg >= this.currentDialogue.text.length) render.text(">", canvasWidth - block(4 - (Math.sin(gameClock / 5) / 4)), canvasHeight - block(1.5), 1);
+        if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", canvasWidth - block(4 - (Math.sin(gameClock / 5) / 4)), canvasHeight - block(1.5), 1);
     }
 }
 
@@ -68,7 +69,7 @@ loadDialogues = () => {
         rollerDialogues = [
             new DialogueBox({
                 speakerName: "",
-                text: ["Welcome to the alpha build of [ROLLER]!"],
+                text: ["Welcome to the [ROLLER] alpha!"],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
@@ -119,7 +120,7 @@ loadDialogues = () => {
         rollerDialogues = [
             new DialogueBox({
                 speakerName: "",
-                text: "Welcome to this build of ROLLER!",
+                text: ["Welcome to the [ROLLER] alpha!"],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
@@ -127,7 +128,7 @@ loadDialogues = () => {
             }),
             new DialogueBox({
                 speakerName: "",
-                text: "CONTROLS:",
+                text: ["CONTROLS:"],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
@@ -135,7 +136,7 @@ loadDialogues = () => {
             }),
             new DialogueBox({
                 speakerName: "",
-                text: `use the left half of the screen to move.`,
+                text: ["Use the left half of the screen", "to move."],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
@@ -143,15 +144,7 @@ loadDialogues = () => {
             }),
             new DialogueBox({
                 speakerName: "",
-                text: `use the right half of the screen to jump and use your active item.`,
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[4])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: `Press N to use the hookshot.`,
+                text: ["Use the right half of the screen", "to jump and use your active item."],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,

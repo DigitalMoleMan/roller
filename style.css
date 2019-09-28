@@ -1,8 +1,3 @@
-@font-face {
-    font-family: 'Roboto Mono', monospace;
-    src: url("fonts/RobotoMono.ttf");
-}
-
 body{
     margin: 0;
     background-color: #000;
