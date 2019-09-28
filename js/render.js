@@ -81,7 +81,8 @@ class Renderer {
      */
     update() {
         requestAnimationFrame(render.update)
-        scenes[activeScene]();
+        scenes[activeScene].draw();
+
         if (debug) drawDebug();
     }
 

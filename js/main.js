@@ -233,7 +233,7 @@ var sfx = {
 
 
 const musicPlayer = new Audio();
-
+musicPlayer.volume = .1;
 musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
@@ -265,9 +265,9 @@ window.onload = () => {
     dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    //playMusic(12);
+    //playMusic(5);
     setInterval(() => loop(), 1000 / 60);
-    // render.update();
+    //render.update();
 
 
 }
@@ -312,8 +312,9 @@ setScene = (scene) => {
     activeScene = scene;
     render.activeScene = scene;
 }
-
 function loop() {
+    console.log(musicPlayer.duration);
+    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
     scenes[activeScene].update();
     scenes[activeScene].draw();
 
