@@ -216,6 +216,9 @@ var music = [
 
 var sfx = {
     player: {
+        jump: new Audio('audio/sfx/player/jump.wav'),
+        landing: new Audio('audio/sfx/player/landing.wav'),
+        rolling: new Audio('audio/sfx/player/rolling.wav'),
         hurt: [
             new Audio('audio/sfx/player/hurt_0.wav'),
             new Audio('audio/sfx/player/hurt_1.wav'),
@@ -227,6 +230,11 @@ var sfx = {
             hook: new Audio('audio/sfx/hookshot_hook.wav'),
             shoot: new Audio('audio/sfx/hookshot_shoot.wav'),
             wall: new Audio('audio/sfx/hookshot_wall.wav'),
+        }
+    },
+    ui: {
+        dialogue: {
+            next: new Audio('audio/sfx/tick.wav')
         }
     }
 }
@@ -265,7 +273,7 @@ window.onload = () => {
     dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    //playMusic(5);
+    playMusic(10);
     setInterval(() => loop(), 1000 / 60);
     //render.update();
 
@@ -298,11 +306,11 @@ playMusic = (track) => {
 /**
  * @param {Number} sound index in sfx[]
  */
-playSound = (sound) => (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
+playSound = (sound) => sound.play();// (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 
 stopSound = (sound) => {
-    sfx[sound].pause();
-    sfx[sound].currentTime = 0;
+    sound.pause();
+    sound.currentTime = 0;
 }
 
 /**
@@ -313,7 +321,6 @@ setScene = (scene) => {
     render.activeScene = scene;
 }
 function loop() {
-    console.log(musicPlayer.duration);
     if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
     scenes[activeScene].update();
     scenes[activeScene].draw();

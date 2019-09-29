@@ -8,17 +8,35 @@ class DialogueHandler {
         this.textBuffer = new String;
         this.displayedText = [];
         this.textProg = 0;
+        this.sfx = () => sfx.ui.dialogue;
         document.addEventListener(input.binds.gameDialogue.next, () => {
-            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) dialogue.currentDialogue.next();
+            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)){
+                playSound(this.sfx().next);
+                 dialogue.currentDialogue.next();
+            }
         })
 
         this.sprite = () => sprites.ui.dialogueBox;
+
+
+        //TextBox draw variables
+        this.tbX = canvasWidth / 16;
+        this.tbY = canvasHeight - block(4.5);
+        this.tbW = canvasWidth - (this.tbX * 2);
+        this.tbH = block(4);
+
+
     };
 
     playDialogue(dlgObj) {
         setScene("gameDialogue");
         this.textProg = 0;
         this.currentDialogue = dlgObj;
+    }
+
+    end() {
+        this.currentDialogue = new Object;
+        setScene("game");
     }
     msglength(n) {
         var l = 0;
@@ -31,41 +49,52 @@ class DialogueHandler {
     }
 
     draw() {
-        var tbX = canvasWidth / 16;
-        var tbY = canvasHeight - block(4.5);
-        var tbW = canvasWidth - (tbX * 2);
-        var tbH = block(4);
+        var tbR = this.tbX + this.tbW;
+        var tbB = this.tbY + this.tbH;
 
-        var tbR = tbX + tbW;
-        var tbB = tbY + tbH;
-        render.rect(tbX, tbY, tbW, tbH, "#002040c0", 0); // background
-        render.text(this.currentDialogue.speakerName, tbX, tbY, 1, "#fff", 0);
-        for(var x = 0; x < tbW; x+= 32){
-            switch (x){
-                case 0 : {
-                    render.img(this.sprite().tl, tbX - block(1), tbY - block(1), 0, 2);
-                    
-                    for(var y = 0; y < tbH; y+= 32){
-                        render.img(this.sprite().ml, tbX - block(1), tbY + y, 0, 2);
+        this.color1 = "#2ce8f5";
+        this.color2 = "#0095e9";
+        this.color3 = "#124e89";
+
+
+        // background
+        render.rect(this.tbX, this.tbY, this.tbW, this.tbH, "#002040c0", 0);
+
+        //Speaker name.
+        render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
+
+        //Border
+        for (var x = 0; x < this.tbW; x += 32) {
+            switch (x) {
+                case 0: {
+                    render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
+
+                    for (var y = 0; y < this.tbH; y += 32) {
+                        render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
                     }
-                    render.img(this.sprite().bl, tbX - block(1), tbY + tbH, 0, 2);
+                    render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
                 }
-                case tbW : {
-                    render.img(this.sprite().tr, tbX + tbW, tbY - block(1), 0, 2);
-                    for(var y = 0; y < tbH; y+= 32){
-                        render.img(this.sprite().mr, tbX + tbW, tbY + y, 0, 2);
+                case this.tbW: {
+                    render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
+                    for (var y = 0; y < this.tbH; y += 32) {
+                        render.img(this.sprite().mr, this.tbX + this.tbW, this.tbY + y, 0, 2);
                     }
-                    render.img(this.sprite().br, tbX + tbW, tbY + tbH, 0, 2);
+                    render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
                 }
-                default : {
-                    render.img(this.sprite().tm, tbX + x, tbY - block(1), 0, 2);
-                    render.img(this.sprite().bm, tbX + x, tbY + tbH, 0, 2);
+                default: {
+                    render.img(this.sprite().tm, this.tbX + x, this.tbY - block(1), 0, 2);
+                    render.img(this.sprite().bm, this.tbX + x, this.tbY + this.tbH, 0, 2);
                 }
             }
         }
+
+        //dialogue message
         for (var i = 0; i < this.currentDialogue.text.length; i++) {
-            render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), tbX + block(.75), tbY + block(.75) + block(i), 1, "#fff");
+            render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
         }
+
+
+        //next message symbol
         if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", tbR - block(1 - (Math.sin(gameClock / 5) / 4)), tbB - block(1), 1);
     }
 }

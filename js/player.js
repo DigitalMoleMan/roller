@@ -54,8 +54,11 @@ class Player {
     readInput(input) {
         var key = input.keys;
         var bind = input.binds.game;
+
         if (key[bind.left]) this.moveLeft();
         if (key[bind.right]) this.moveRight();
+
+
         //if (input.keys[input.binds.jump]) this.jump();
 
         // if (input.keys[input.binds.use]) this.use();
@@ -67,10 +70,10 @@ class Player {
 
         this.activeItem.update();
 
-            if (this.collision('x') && this.collision('y')) {
-               this.posX -= this.velX;
-               this.posY -= this.velY;
-            }
+        if (this.collision('x') && this.collision('y')) {
+            this.posX -= this.velX;
+            this.posY -= this.velY;
+        }
 
         var rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
 
@@ -91,8 +94,14 @@ class Player {
             //this.posY = Math.round(this.posY)
         }
 
-        if (this.colY && this.velY > 0) {
+        if (Math.abs(this.velX) > 3 && this.colY) {
+            playSound(this.sfx().rolling);
+            if (this.sfx().rolling.currentTime > this.sfx().rolling.duration - .1) this.sfx().rolling.currentTime = .1;
+        } else {
+            stopSound(this.sfx().rolling);
+        }
 
+        if (this.colY && this.velY > 0) {
             if (this.midJump) {
                 for (var i = 0; i < 25; i++) {
                     var colVal = 192 + Math.random() * 64;
@@ -106,6 +115,7 @@ class Player {
                         color: `rgba(${colVal},${colVal},${colVal},128)`
                     })
                 }
+
             }
             this.midJump = false;
             //this.velY -= .1;
@@ -114,16 +124,15 @@ class Player {
 
         if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
 
-
         this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
-        
+
 
         this.band += this.velX;
-        if(this.velX > 32) this.velX = 32;
-        if(this.velX < -32) this.velX = -32;
-        if(this.velY > 32) this.velY = 32;
-        if(this.velY < -32) this.velY = -32;
-        
+        if (this.velX > 32) this.velX = 32;
+        if (this.velX < -32) this.velX = -32;
+        if (this.velY > 32) this.velY = 32;
+        if (this.velY < -32) this.velY = -32;
+
 
         if (this.band < 0) this.band = sprites.player.bands.length * 100;
         if (this.posY >= world.height + 128) this.kill();
@@ -137,6 +146,7 @@ class Player {
     }
 
     moveLeft() {
+
         this.velX -= this.acc;
         if (this.look > 0) this.look--;
     }
@@ -163,6 +173,7 @@ class Player {
                     color: `rgba(${colVal},${colVal},${colVal},128)`
                 })
             }
+            playSound(this.sfx().jump);
         }
     }
 
@@ -554,7 +565,7 @@ class Booster extends Item {
         this.state = "inactive";
 
         this.fuel = 20;
-        
+
         this.sprite = () => sprites.player.equipment.booster[this.state];
         this.dir = () => ((player.look - 6) / 6);
 
