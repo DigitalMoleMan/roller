@@ -8,8 +8,12 @@ class DialogueHandler {
         this.textBuffer = new String;
         this.displayedText = [];
         this.textProg = 0;
+        this.sfx = () => sfx.ui.dialogue;
         document.addEventListener(input.binds.gameDialogue.next, () => {
-            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) dialogue.currentDialogue.next();
+            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)){
+                playSound(this.sfx().next);
+                 dialogue.currentDialogue.next();
+            }
         })
 
         this.sprite = () => sprites.ui.dialogueBox;
