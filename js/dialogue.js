@@ -11,6 +11,8 @@ class DialogueHandler {
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) dialogue.currentDialogue.next();
         })
+
+        this.sprite = () => sprites.ui.dialogueBox;
     };
 
     playDialogue(dlgObj) {
@@ -29,16 +31,42 @@ class DialogueHandler {
     }
 
     draw() {
-        var tbX = block(3);
+        var tbX = canvasWidth / 16;
         var tbY = canvasHeight - block(4.5);
         var tbW = canvasWidth - (tbX * 2);
         var tbH = block(4);
-        render.rect(tbX, tbY, tbW, tbH, "#00408080", 0); // background
-        render.text(this.currentDialogue.speakerName, block(3), canvasHeight - block(4.5), 1, "#fff", 0);
-        for (var i = 0; i < this.currentDialogue.text.length; i++) {
-            render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), block(4), canvasHeight - block(3.5) + block(i), 1, "#fff");
+
+        var tbR = tbX + tbW;
+        var tbB = tbY + tbH;
+        render.rect(tbX, tbY, tbW, tbH, "#002040c0", 0); // background
+        render.text(this.currentDialogue.speakerName, tbX, tbY, 1, "#fff", 0);
+        for(var x = 0; x < tbW; x+= 32){
+            switch (x){
+                case 0 : {
+                    render.img(this.sprite().tl, tbX - block(1), tbY - block(1), 0, 2);
+                    
+                    for(var y = 0; y < tbH; y+= 32){
+                        render.img(this.sprite().ml, tbX - block(1), tbY + y, 0, 2);
+                    }
+                    render.img(this.sprite().bl, tbX - block(1), tbY + tbH, 0, 2);
+                }
+                case tbW : {
+                    render.img(this.sprite().tr, tbX + tbW, tbY - block(1), 0, 2);
+                    for(var y = 0; y < tbH; y+= 32){
+                        render.img(this.sprite().mr, tbX + tbW, tbY + y, 0, 2);
+                    }
+                    render.img(this.sprite().br, tbX + tbW, tbY + tbH, 0, 2);
+                }
+                default : {
+                    render.img(this.sprite().tm, tbX + x, tbY - block(1), 0, 2);
+                    render.img(this.sprite().bm, tbX + x, tbY + tbH, 0, 2);
+                }
+            }
         }
-        if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", canvasWidth - block(4 - (Math.sin(gameClock / 5) / 4)), canvasHeight - block(1.5), 1);
+        for (var i = 0; i < this.currentDialogue.text.length; i++) {
+            render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), tbX + block(.75), tbY + block(.75) + block(i), 1, "#fff");
+        }
+        if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", tbR - block(1 - (Math.sin(gameClock / 5) / 4)), tbB - block(1), 1);
     }
 }
 
@@ -101,7 +129,7 @@ loadDialogues = () => {
             }),
             new DialogueBox({
                 speakerName: "",
-                text: [`Press N to use the hookshot.`],
+                text: [`Press N to use your active item.`],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,

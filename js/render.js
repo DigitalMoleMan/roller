@@ -81,7 +81,8 @@ class Renderer {
      */
     update() {
         requestAnimationFrame(render.update)
-        scenes[activeScene]();
+        scenes[activeScene].draw();
+
         if (debug) drawDebug();
     }
 
@@ -148,9 +149,9 @@ class Renderer {
                 render.ctx.restore();
             }
         } catch (error) {
-            this.rect(x, y, 32, 32, "#f00");
-            this.rectStroke(x, y, 32, 32, "#fff")
-            this.text(src, x, y, 32, "#fff")
+            this.rect(x, y, 32, 32, "#f00", 0);
+            this.rectStroke(x, y, 32, 32, "#fff", 0)
+            this.text(src, x, y, 32, "#fff", 0)
         }
     }
 
@@ -165,17 +166,16 @@ class Renderer {
 
 
     text(text, x, y, size = 1, color, scrollFactor = 0) {
-        this.ctx.fillStyle = color;
-        this.ctx.font = size + "px Roboto Mono";
-
-        
-        //this.ctx.fillText(text, (x - (this.camera.x * scrollFactor)), (y - (this.camera.y * scrollFactor)));
-
-        for(var i = 0; i < text.length; i++) {
-
-         this.img(font[text.charCodeAt(i)], x + (i * 16), y, scrollFactor, size);
+        for (var i = 0; i < text.length; i++) {
+            try {
+                this.img(font[text.charCodeAt(i)], x + (i * 16), y, scrollFactor, size);
+            } catch {
+                this.ctx.font = size + "8px monospace";
+                this.ctx.fillStyle = "#fff";
+                this.ctx.fillText(text.charCodeAt(i), x + (i * 16), y)
+            }
         }
-    
+
     }
 
 
