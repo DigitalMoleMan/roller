@@ -10,9 +10,9 @@ class DialogueHandler {
         this.textProg = 0;
         this.sfx = () => sfx.ui.dialogue;
         document.addEventListener(input.binds.gameDialogue.next, () => {
-            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)){
+            if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
                 playSound(this.sfx().next);
-                 dialogue.currentDialogue.next();
+                dialogue.currentDialogue.next();
             }
         })
 
@@ -45,7 +45,11 @@ class DialogueHandler {
     }
 
     update() {
-        if (this.msglength(this.currentDialogue.text.length) > this.textProg) this.textProg += this.currentDialogue.textSpeed;
+        if (this.msglength(this.currentDialogue.text.length) > this.textProg) {
+            this.textProg += this.currentDialogue.textSpeed;
+            if(Math.ceil(this.textProg) % 2 == 0)playSound(this.sfx().text)
+            
+        } else if (this.msglength(this.currentDialogue.text.length) == this.textProg) stopSound(this.sfx().text)
     }
 
     draw() {
@@ -70,6 +74,7 @@ class DialogueHandler {
                     render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
 
                     for (var y = 0; y < this.tbH; y += 32) {
+                        //render.rect(this.tbX - block(1), this.tbY + y, 2, 32, "#2ce8f5");
                         render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
                     }
                     render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
@@ -91,6 +96,7 @@ class DialogueHandler {
         //dialogue message
         for (var i = 0; i < this.currentDialogue.text.length; i++) {
             render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
+           if(this.currentDialogue.text[i][this.textProg - this.msglength(i) - 1] == ' ') stopSound(this.sfx().text);
         }
 
 
@@ -214,14 +220,14 @@ loadDialogues = () => {
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
             text: ["Ooh, heeey."],
-            textSpeed: 1,
+            textSpeed: .25,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => dialogue.playDialogue(bogusDialogues[1])
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
-            text: ["You might be asking what a cool ro-bro go-getta", "funky-as-few mean-bean-bustin-machine such as", "myself is doing in a filthy test build."],
+            text: ["You might be wondering what a cool, ro-bro go-getta", "funky-as-few mean-bean-bustin-machine such as", "myself is doing in a filthy test build."],
             textSpeed: 1,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
@@ -230,7 +236,7 @@ loadDialogues = () => {
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
             text: ["HAHAHA! How utterly STUPID of you."],
-            textSpeed: 1,
+            textSpeed: 2,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => dialogue.playDialogue(bogusDialogues[3])
@@ -238,7 +244,7 @@ loadDialogues = () => {
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
             text: ["OBVIOUSLY, I'm here to add value to this", "otherwise worthless game."],
-            textSpeed: 1,
+            textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => dialogue.playDialogue(bogusDialogues[4])
@@ -246,7 +252,7 @@ loadDialogues = () => {
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
             text: ["What would the developer do without me?"],
-            textSpeed: 1,
+            textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => setScene("game")

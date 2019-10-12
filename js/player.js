@@ -95,10 +95,10 @@ class Player {
         }
 
         if (Math.abs(this.velX) > 3 && this.colY) {
-            playSound(this.sfx().rolling);
-            if (this.sfx().rolling.currentTime > this.sfx().rolling.duration - .1) this.sfx().rolling.currentTime = .1;
+            //loopSound(this.sfx().rolling);
+
         } else {
-            stopSound(this.sfx().rolling);
+            //stopSound(this.sfx().rolling);
         }
 
         if (this.colY && this.velY > 0) {
@@ -173,7 +173,7 @@ class Player {
                     color: `rgba(${colVal},${colVal},${colVal},128)`
                 })
             }
-            playSound(this.sfx().jump);
+            //playSound(this.sfx().jump);
         }
     }
 

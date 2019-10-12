@@ -4,46 +4,7 @@ class Input {
      * 
      * @param {Object} binds Each object in binds represents a scene and is used as reference when checking if a certain keybind is being pressed.
      */
-    constructor(binds = {
-        global: {
-            toggleDebug: 'f',
-        },
-        game: {
-            //directions
-            up: 'w',
-            down: 's',
-            left: 'a',
-            right: 'd',
-
-            //hotkeys
-            prevItem: 'arrowleft',
-            nextItem: 'arrowright',
-
-            //actions
-            jump: ' ',
-            sprint: 'shift',
-            use: 'n',
-            interact: 'e',
-
-            //misc
-            togglePause: 'p',
-
-            //dev
-            toggleDebug: 'f',
-        },
-        gameDialogue: {
-            next: ' ',
-            //misc
-            togglePause: 'p',
-            //dev
-            toggleDebug: 'f',
-        },
-        pauseMenu: {
-            togglePause: 'p',
-            //dev
-            toggleDebug: 'f',
-        }
-    }, touchAreas = {
+    constructor(binds = {}, touchAreas = {
         game: [
             {
                 bind: "left",
@@ -104,25 +65,29 @@ class Input {
         this.keys = new Object;
         this.binds = binds;
 
-        document.addEventListener('keydown', (e) => {
-            var pressedKey = e.key.toLowerCase();
-            if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
-            this.keys[pressedKey] = true;
-        });
-        document.addEventListener('keyup', (e) => {
-            var releasedKey = e.key.toLowerCase();
-            this.keys[releasedKey] = false;
-        });
 
-
-        if (onMobile) {
+        if (!onMobile) {
+            document.addEventListener('keydown', (e) => {
+                var pressedKey = e.code;
+                if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
+                this.keys[pressedKey] = true;
+            });
+            document.addEventListener('keyup', (e) => {
+                var releasedKey = e.code;
+                this.keys[releasedKey] = false;
+            });
+        } else {
             this.touchAreas = touchAreas;
             this.targetTouches = [];
-            render.canvas.addEventListener("touchstart", (e) => this.targetTouches = e.targetTouches, { passive: true });
-            render.canvas.addEventListener("touchmove", (e) => this.targetTouches = e.targetTouches, { passive: true });
-            render.canvas.addEventListener("touchend", (e) => this.targetTouches = e.targetTouches, { passive: true });
+            this.initTouchListenersOnElement(render.canvas);
         }
 
+    }
+
+    initTouchListenersOnElement(element) {
+        element.addEventListener("touchstart", (e) => this.targetTouches = e.targetTouches, { passive: true });
+        element.addEventListener("touchmove", (e) => this.targetTouches = e.targetTouches, { passive: true });
+        element.addEventListener("touchend", (e) => this.targetTouches = e.targetTouches, { passive: true });
     }
 
     readMobileInput() {

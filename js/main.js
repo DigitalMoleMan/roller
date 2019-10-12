@@ -33,42 +33,42 @@ let render = new Renderer(canvasWidth, canvasHeight);
 let input = new Input(
     { //Binds
         global: {
-            toggleDebug: 'f',
+            toggleDebug: 'KeyF',
         },
         game: {
             //movement
-            up: 'arrowup',
-            down: 'arrowdown',
-            left: 'a',
-            right: 'd',
+            up: 'ArrowUp',
+            down: 'ArrowDown',
+            left: 'KeyA',
+            right: 'KeyD',
 
             //actions
-            jump: ' ',
-            sprint: 'shift',
-            use: 'n',
-            interact: 'e',
+            jump: 'Space',
+            sprint: 'ShiftLeft',
+            use: 'KeyN',
+            interact: 'KeyE',
 
             //hotkeys
-            prevItem: 'arrowleft',
-            nextItem: 'arrowright',
+            prevItem: 'ArrowLeft',
+            nextItem: 'ArrowRight',
 
             //misc
-            togglePause: 'p',
+            togglePause: 'KeyP',
 
             //dev
-            toggleDebug: 'f',
+            toggleDebug: 'KeyF',
         },
         gameDialogue: {
-            next: ' ',
+            next: 'Space',
             //misc
-            togglePause: 'p',
-            toggleDebug: 'f',
+            togglePause: 'KeyP',
+            toggleDebug: 'KeyF',
         },
         pauseMenu: {
-            togglePause: 'p',
-            toggleDebug: 'f',
-            up: 'w',
-            down: 's'
+            togglePause: 'KeyP',
+            toggleDebug: 'KeyF',
+            up: 'KeyW',
+            down: 'KeyS'
         }
     });
 
@@ -183,7 +183,7 @@ var sprites = {
             }
         },
         bogus: {
-            idle: render.importSprite('img/npcs/bogus/idle', 5)
+            idle: render.importSprite('img/npcs/bogus/idle', 10)
         }
     },
     backgrounds: [
@@ -234,7 +234,8 @@ var sfx = {
     },
     ui: {
         dialogue: {
-            next: new Audio('audio/sfx/tick.wav')
+            next: new Audio('audio/sfx/tick.wav'),
+            text: new Audio('audio/sfx/text.wav')
         }
     }
 }
@@ -273,7 +274,7 @@ window.onload = () => {
     dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    playMusic(10);
+    //playMusic(10);
     setInterval(() => loop(), 1000 / 60);
     //render.update();
 
@@ -306,15 +307,23 @@ playMusic = (track) => {
 /**
  * @param {Number} sound index in sfx[]
  */
-playSound = (sound) => sound.play();// (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
+playSound = (sound) => {
+    sound.currentTime = 0;
+    (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
+}
 
+loopSound = (sound) => {
+    if (sound.currentTime >= sound.duration - .1) sound.currentTime = 0;
+    sound.play();
+}
+ 
 stopSound = (sound) => {
     sound.pause();
     sound.currentTime = 0;
 }
 
 /**
- * @param {String} scene
+ * @param {Scene} scene
  */
 setScene = (scene) => {
     activeScene = scene;
@@ -325,7 +334,7 @@ function loop() {
     scenes[activeScene].update();
     scenes[activeScene].draw();
 
-    if(debug) drawDebug();
+    if (debug) drawDebug();
 }
 
 class Scene {

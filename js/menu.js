@@ -12,7 +12,7 @@ class Menu {
 			},
 			{
 				display: "Settings",
-				bind: "toggleDebug",
+				//bind: "toggleDebug",
 				x: block(3.5),
 				y: block(4),
 				width: canvasWidth - block(7),
