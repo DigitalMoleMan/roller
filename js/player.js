@@ -37,6 +37,7 @@ class Player {
 
 
         this.bandVel = 0;
+        this.lookDir = 0;
         this.look = 6;
         this.band = 0;
 
@@ -48,15 +49,15 @@ class Player {
         this.sprite = () => sprites.player;
         this.sfx = () => sfx.player;
 
-
+        
     }
 
     readInput(input) {
         var key = input.keys;
         var bind = input.binds.game;
-
-        if (key[bind.left]) this.moveLeft();
-        if (key[bind.right]) this.moveRight();
+       this.move(horizontalInput.readValue());
+        //if (key[bind.left]) this.moveLeft();
+       // if (key[bind.right]) this.moveRight();
 
 
         //if (input.keys[input.binds.jump]) this.jump();
@@ -65,6 +66,9 @@ class Player {
     }
 
     updatePos() {
+        if (this.lookDir == -1 && this.look > 0) this.look--;
+        if (this.lookDir == 1 && this.look < 12) this.look++;
+
         this.colX = this.collision('x');
         this.colY = this.collision('y');
 
@@ -143,6 +147,11 @@ class Player {
         //case handling
         if (this.velX < .01 && this.velX > -.01) this.velX = 0;
 
+    }
+
+    move(dir){
+        this.velX += dir * this.acc;
+        this.lookDir = dir;
     }
 
     moveLeft() {

@@ -21,7 +21,7 @@ class Renderer {
         this.ctx.textBaseline = "top";
 
 
-        canvasContainer.appendChild(this.canvas);
+        mainDOM.appendChild(this.canvas);
 
 
         this.activeScene //= 'game';
@@ -35,7 +35,7 @@ class Renderer {
 
     refreshCanvas() {
         this.canvas.remove();
-        canvasContainer.appendChild(this.canvas);
+        mainDOM.appendChild(this.canvas);
     }
 
     /**
@@ -606,3 +606,7 @@ class ParticleEngine {
     }
 }
 
+class Particle{
+    constructor(){
+    }
+}

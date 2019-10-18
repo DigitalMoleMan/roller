@@ -47,9 +47,8 @@ class DialogueHandler {
     update() {
         if (this.msglength(this.currentDialogue.text.length) > this.textProg) {
             this.textProg += this.currentDialogue.textSpeed;
-            if(Math.ceil(this.textProg) % 2 == 0)playSound(this.sfx().text)
-            
-        } else if (this.msglength(this.currentDialogue.text.length) == this.textProg) stopSound(this.sfx().text)
+
+        }
     }
 
     draw() {
@@ -68,35 +67,32 @@ class DialogueHandler {
         render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
 
         //Border
-        for (var x = 0; x < this.tbW; x += 32) {
-            switch (x) {
-                case 0: {
-                    render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
+        render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
+        render.rect(this.tbX - 6, this.tbY, 2, block(4), this.color1, 0);
+        render.rect(this.tbX - 4, this.tbY, 2, block(4), this.color2, 0);
+        render.rect(this.tbX - 2, this.tbY, 2, block(4), this.color3, 0);
+        render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
 
-                    for (var y = 0; y < this.tbH; y += 32) {
-                        //render.rect(this.tbX - block(1), this.tbY + y, 2, 32, "#2ce8f5");
-                        render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
-                    }
-                    render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
-                }
-                case this.tbW: {
-                    render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
-                    for (var y = 0; y < this.tbH; y += 32) {
-                        render.img(this.sprite().mr, this.tbX + this.tbW, this.tbY + y, 0, 2);
-                    }
-                    render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
-                }
-                default: {
-                    render.img(this.sprite().tm, this.tbX + x, this.tbY - block(1), 0, 2);
-                    render.img(this.sprite().bm, this.tbX + x, this.tbY + this.tbH, 0, 2);
-                }
-            }
-        }
+        render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
+        render.rect(this.tbX + this.tbW, this.tbY, 2, block(4), this.color1, 0);
+        render.rect(this.tbX + this.tbW + 2, this.tbY, 2, block(4), this.color2, 0);
+        render.rect(this.tbX + this.tbW + 4, this.tbY, 2, block(4), this.color3, 0);
+        render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
+
+        render.rect(this.tbX, this.tbY - 6, this.tbW, 2, this.color1, 0);
+        render.rect(this.tbX, this.tbY - 4, this.tbW, 2, this.color2, 0);
+        render.rect(this.tbX, this.tbY - 2, this.tbW, 2, this.color3, 0);
+
+        render.rect(this.tbX, this.tbY + this.tbH, this.tbW, 2, this.color1, 0);
+        render.rect(this.tbX, this.tbY + this.tbH + 2, this.tbW, 2, this.color2, 0);
+        render.rect(this.tbX, this.tbY + this.tbH + 4, this.tbW, 2, this.color3, 0);
+
+
+
 
         //dialogue message
         for (var i = 0; i < this.currentDialogue.text.length; i++) {
             render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
-           if(this.currentDialogue.text[i][this.textProg - this.msglength(i) - 1] == ' ') stopSound(this.sfx().text);
         }
 
 

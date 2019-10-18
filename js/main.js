@@ -5,7 +5,6 @@
 var debug = false;
 
 const mainDOM = document.getElementById("main");
-const canvasContainer = document.getElementById("canvasContainer");
 
 
 //Mobile
@@ -70,6 +69,62 @@ let input = new Input(
             up: 'KeyW',
             down: 'KeyS'
         }
+    }, {
+        game: [
+            {
+                bind: "left",
+                x: block(0),
+                y: block(2),
+                width: block(5),
+                height: canvasHeight - block(2)
+            },
+            {
+                bind: "right",
+                x: block(5),
+                y: block(2),
+                width: block(5),
+                height: canvasHeight - block(2)
+            },
+            {
+                bind: "jump",
+                x: canvasWidth - block(5),
+                y: block(0),
+                width: block(5),
+                height: canvasHeight
+            },
+            {
+                bind: "use",
+                x: canvasWidth - block(10),
+                y: block(0),
+                width: block(5),
+                height: canvasHeight
+            },
+            {
+                bind: "togglePause",
+                x: block(1),
+                y: block(0),
+                width: block(2),
+                height: block(2)
+            }
+        ],
+        gameDialogue: [
+            {
+                bind: "next",
+                x: block(0),
+                y: block(0),
+                width: canvasWidth,
+                height: canvasHeight
+            }
+        ],
+        pauseMenu: [
+            {
+                bind: "togglePause",
+                x: block(1),
+                y: block(0),
+                width: block(2),
+                height: block(2)
+            }
+        ]
     });
 
 let menu = new Menu();
