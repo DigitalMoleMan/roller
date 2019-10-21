@@ -7,6 +7,10 @@ var debug = false;
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
+//special
+var halloweenMode = true;
+
+
 
 //Mobile
 
@@ -240,6 +244,12 @@ var sfx = {
     }
 }
 
+if (halloweenMode) {
+    sprites.player.body = render.importSprite('img/player/hw_body', 13)
+    sprites.npcs.bogus.idle = render.importSprite('img/npcs/bogus/hw_idle', 10)
+    sprites.backgrounds[3] = render.importImage('img/backgrounds/halloween.png')
+}
+
 
 const musicPlayer = new Audio();
 musicPlayer.volume = .1;
@@ -256,7 +266,8 @@ window.onload = () => {
     }
 
     loadDialogues();
-    world.loadLevel(level[0]);
+    if(halloweenMode) world.loadLevel(level[9]);
+    else world.loadLevel(level[1]);
 
 
     setScene("game");
@@ -316,7 +327,7 @@ loopSound = (sound) => {
     if (sound.currentTime >= sound.duration - .1) sound.currentTime = 0;
     sound.play();
 }
- 
+
 stopSound = (sound) => {
     sound.pause();
     sound.currentTime = 0;
@@ -404,12 +415,18 @@ var scenes = {
 
 
         var bg = sprites.backgrounds[3];
-        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
-            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+        if (halloweenMode) {
+            render.rect(0, 0, render.canvas.height * 2, render.canvas.width * 2, "#262b44", 0);
+            for (var x = 0; x < (canvasWidth * 2); x += bg.width * 2) {
+                render.img(bg, (x - ((camera.x / 5) % (bg.width * 2))) , (canvasHeight - (bg.height * 2)) + (((world.height - canvasHeight) - camera.y) / 10), 0, 2);
+            }
+        } else {
+            for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
+                for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
+                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+                }
             }
         }
-
 
         world.npcs.forEach(npc => npc.draw());
 
@@ -460,9 +477,8 @@ var scenes = {
 
 
         render.pe.tick()
-
-
-        lighting.draw();
+        
+        if(!halloweenMode)lighting.draw();
 
 
         //ui
@@ -542,103 +558,13 @@ var scenes = {
 
     }, () => { // draw
 
-        const zero = 0;
-
         render.clear();
         // background
 
+        scenes.game.draw();
 
-        var bg = sprites.backgrounds[3];
-        for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
-            for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
-            }
-        }
-
-
-        world.npcs.forEach(npc => npc.draw());
-
-        player.draw();
-
-
-
-        // world
-        //render.ctx.save();
-        //render.ctx.scale(2, 2);
-        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
-
-
-            try {
-                render.ctx.save();
-                var texture = sprites.tiles[tile.type];
-
-                if (tile.drawModifier !== undefined) tile.drawModifier();
-
-
-                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
-                render.ctx.restore();
-            } catch (error) {
-                render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
-            }
-
-        })
-
-        onScreenSegs.filter((seg) => seg.type == "X").forEach(tile => {
-
-            render.ctx.save();
-            var texture = tile.texture;
-
-            // if(tile.drawModifier !== undefined)tile.drawModifier();
-
-
-            render.img(texture, tile.x, tile.y, 1);
-            render.ctx.restore();
-
-        })
-
-
-        //render.ctx.restore();
-
-        render.pe.tick()
-
-
-        lighting.draw();
 
         dialogue.draw();
-        //ui
-        var hpUi = sprites.ui.hp;
-
-        render.ctx.save();
-        render.ctx.translate(-hpUi.label.width, zero);
-
-        render.img(hpUi.label, 48, 16, 0);
-        render.ctx.restore();
-
-        for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
-            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
-            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
-        }
-
-        for (var i = 0; i < player.hp; i++) {
-            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
-        }
-
-
-
-        var itemUi = sprites.ui.activeItem;
-        render.ctx.save();
-        render.ctx.translate(-itemUi.label.width, 0);
-
-        render.img(itemUi.label, 48, 32, zero);
-
-        render.ctx.restore();
-        render.img(itemUi.border, 48, 32, zero);
-
-        render.img(itemUi[player.activeItem.name], 48, 32, zero);
-
-
-
 
     }),
     pauseMenu: new Scene(() => { // update

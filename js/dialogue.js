@@ -128,7 +128,60 @@ var rollerDialogues = [];
 var bogusDialogues = [];
 
 loadDialogues = () => {
+    
     if (!onMobile) {
+        if(halloweenMode){
+            rollerDialogues = [
+                new DialogueBox({
+                    speakerName: "",
+                    text: ["Welcome to the ROLLER alpha!", "- Now with 60% more spook!"],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[1])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: ["Controls:"],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[2])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Move left and right using A and D.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[3])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press Spacebar to jump.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[4])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press N to use your active item.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[5])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press E to interact/talk.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => setScene("game")
+                })
+            ]
+        } else 
         rollerDialogues = [
             new DialogueBox({
                 speakerName: "",

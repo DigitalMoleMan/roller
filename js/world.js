@@ -1342,4 +1342,38 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: []
+    },{
+        name: "Hall of Ween",
+        layout: [
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                             XXXXXXXXX",
+            "X                               XXXXXXX",
+            "X                               XXXXXXX",
+            "X                                      ",
+            "X                                      ",
+            "X                          XXXXXXXXXXXX",
+            "X                          XXXXXXXXXXXX",
+            "X                        XXXXXXXXXXXXXX",
+            "X                        XXXXXXXXXXXXXX",
+            "X                      XXXXXXXXXXXXXXXX",
+            "X                @     XXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(39),
+                y: block(9),
+                width: block(0),
+                height: block(2),
+                exit: 4,
+                exitX: block(0),
+                exitY: block(53.5)
+            }
+        ]
     }];
