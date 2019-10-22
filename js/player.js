@@ -204,8 +204,7 @@ class Player {
 
     collision(axis) {
 
-        for (var i = 0; i < nearPlayer.length; i++) {
-            var tile = (nearPlayer[i]);
+        for (var tile of nearPlayer) {
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
@@ -213,52 +212,18 @@ class Player {
                 switch (tile.type) {
                     case 'X':
                         return true;
-                    case '-':
+                    case 'platform':
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
-                    case '^':
-                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.midJump = false;
-                            this.velY = tile.velY;
-                            this.velY -= .1;
-                        } else {
-                            this.posY -= .1
-                        }
-                        break;
+                    case 'elevator':
+                
+                           if (this.hitbox.x.bottom() <= tile.y - tile.velY) { 
+                               this.posY += tile.velY;
+                               this.posX += tile.velX;
+                               if (this.hitbox.x.bottom() <= tile.y) return true;
+                           }
 
-                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
-                            this.velX += tile.velX
-                            this.velY += tile.velY;
-                        }
 
-                        //}
-
-                        break;
-                    case 'v':
-                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.midJump = false;
-                            this.velY = tile.velY;
-                            this.velY -= .1;
-                        } else {
-                            this.posY -= .1
-                        }
-                        break;
-                    case '<':
-
-                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
-                            this.midJump = false;
-                            this.posX += tile.velX;
-                            this.velY = 0;
-                            if (axis == "x") return true;
-                        }
-                        break;
-                    case '>':
-                        if (this.hitbox.x.bottom() <= tile.y + tile.height) {
-                            this.midJump = false;
-                            this.posX += tile.velX;
-                            this.velY = 0;
-                            if (axis == "x") return true;
-                        }
                         break;
                     case 'M':
 

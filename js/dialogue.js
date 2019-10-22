@@ -309,6 +309,14 @@ loadDialogues = () => {
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => setScene("game")
-        })
+        }),
+        new DialogueBox({
+            speakerName: "B.O.G.U.S.",
+            text: [""],
+            textSpeed: .25,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => setScene("game")
+        }),
     ]
 };

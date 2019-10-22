@@ -4,6 +4,8 @@
 
 var debug = false;
 
+var enableCache = false;
+
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
@@ -96,6 +98,8 @@ const fontFile = new Image();
 
 var font = [];
 
+fontFile.src = 'fonts/roller_font.png';
+
 fontFile.onload = () => {
     var canvas = document.createElement('canvas');
     var ctx = canvas.getContext("2d");
@@ -112,7 +116,7 @@ fontFile.onload = () => {
     }
 }
 
-fontFile.src = 'fonts/roller_font.png';
+
 
 //Loading sprites
 var sprites = {
@@ -162,16 +166,13 @@ var sprites = {
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
         "X": render.importSprite('img/tiles/block/block', 16),
-        "-": render.importImage('img/tiles/platform.png'),
-        "^": render.importSprite('img/tiles/elevator', 8),
-        "v": render.importSprite('img/tiles/elevator', 8),
-        "<": render.importSprite('img/tiles/elevator', 8),
-        ">": render.importSprite('img/tiles/elevator', 8),
+        platform: render.importImage('img/tiles/platform.png'),
+        elevator: render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes_floor.png'),
         "W": render.importImage('img/tiles/spikes_roof.png'),
         "G": render.importImage('img/tiles/hookpoint.png'),
         "L": render.importImage('img/tiles/lamp.png'),
-        "¤": render.importSprite('img/tiles/cog', 4),
+        //"¤": render.importSprite('img/tiles/cog', 4),
 
 
         //"#": render.importImage('img/tiles/break_block', 2),
@@ -220,14 +221,15 @@ var music = [
 
 var sfx = {
     player: {
-        jump: new Audio('audio/sfx/player/jump.wav'),
-        landing: new Audio('audio/sfx/player/landing.wav'),
-        rolling: new Audio('audio/sfx/player/rolling.wav'),
-        hurt: [
-            new Audio('audio/sfx/player/hurt_0.wav'),
-            new Audio('audio/sfx/player/hurt_1.wav'),
-            new Audio('audio/sfx/player/hurt_2.wav'),
-        ]
+        movement: {
+            jump: new Audio('audio/sfx/player/jump.wav'),
+            landing: new Audio('audio/sfx/player/landing.wav'),
+            rolling: new Audio('audio/sfx/player/rolling.wav'),
+        },
+
+        feedback: {
+            hurt: new Audio('audio/sfx/player/hurt_0.wav')
+        }
     },
     items: {
         hookshot: {
@@ -248,6 +250,12 @@ if (halloweenMode) {
     sprites.player.body = render.importSprite('img/player/hw_body', 13)
     sprites.npcs.bogus.idle = render.importSprite('img/npcs/bogus/hw_idle', 10)
     sprites.backgrounds[3] = render.importImage('img/backgrounds/halloween.png')
+
+    var dirt = render.importSprite('img/tiles/dirt/dirt', 10);
+
+    for(var i = 0; i<dirt.length; i++){
+        sprites.tiles["X"][i] = dirt[i]; 
+    }
 }
 
 
@@ -259,14 +267,17 @@ document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debu
 
 window.onload = () => {
 
-    if ('serviceWorker' in navigator) {
-        var swURL = './sw.js';
-        navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
-            (err) => console.log('ServiceWorker registration failed: ', err));
+
+    if (enableCache) {
+        if ('serviceWorker' in navigator) {
+            var swURL = './sw.js';
+            navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+                (err) => console.log('ServiceWorker registration failed: ', err));
+        }
     }
 
     loadDialogues();
-    if(halloweenMode) world.loadLevel(level[9]);
+    if (halloweenMode) world.loadLevel(level[9]);
     else world.loadLevel(level[1]);
 
 
@@ -290,21 +301,6 @@ window.onload = () => {
     //render.update();
 
 
-}
-
-initSounds = () => {
-    sfx.forEach(sound => {
-        var promise = sound.play();
-        if (promise !== undefined) {
-            promise.then(_ => {
-
-            }).catch(error => {
-                console.log(error);
-            })
-        }
-        sound.pause();
-        sound.currentTime = 0;
-    })
 }
 
 /**
@@ -401,7 +397,7 @@ var scenes = {
 
         camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
-        lighting.update();
+        if(!halloweenMode)lighting.update();
 
 
         //render.camera.follow(player.pos);
@@ -418,7 +414,7 @@ var scenes = {
         if (halloweenMode) {
             render.rect(0, 0, render.canvas.height * 2, render.canvas.width * 2, "#262b44", 0);
             for (var x = 0; x < (canvasWidth * 2); x += bg.width * 2) {
-                render.img(bg, (x - ((camera.x / 5) % (bg.width * 2))) , (canvasHeight - (bg.height * 2)) + (((world.height - canvasHeight) - camera.y) / 10), 0, 2);
+                render.img(bg, (x - ((camera.x / 5) % (bg.width * 2))), (canvasHeight - (bg.height * 2)) + (((world.height - canvasHeight) - camera.y) / 10), 0, 2);
             }
         } else {
             for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
@@ -437,7 +433,7 @@ var scenes = {
         // world
         //render.ctx.save();
         //render.ctx.scale(2, 2);
-        onScreen.filter((tile) => tile.type !== "X").forEach(tile => {
+        onScreen.forEach(tile => {
 
 
             try {
@@ -477,8 +473,8 @@ var scenes = {
 
 
         render.pe.tick()
-        
-        if(!halloweenMode)lighting.draw();
+
+        if (!halloweenMode) lighting.draw();
 
 
         //ui
@@ -536,34 +532,18 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
         ));
 
-        nearPlayer = world.segments.filter((tile) => (
-            player.posX - 32 < tile.x + tile.width &&
-            player.posX + 32 > tile.x &&
-            player.posY - 32 < tile.y + tile.height &&
-            player.posY + 32 > tile.y
-        ));
-
         world.update();
 
-        player.updatePos();
 
         camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
 
         lighting.update();
 
-        //if (input.keys[input.binds.gameDialogue.next] && dialogue.currentDialogue.text.length == dialogue.textProg) dialogue.currentDialogue.next();
-
         dialogue.update();
 
 
     }, () => { // draw
-
-        render.clear();
-        // background
-
         scenes.game.draw();
-
-
         dialogue.draw();
 
     }),

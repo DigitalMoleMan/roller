@@ -80,62 +80,22 @@ class World {
                         break
                     }
                     case '-': {
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(.25),
-                            type: tile,
-                        });
+                        this.tiles.push(new Platform(block(x), block(y)));
                         break
                     }
                     case '^': {
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(0.1875),
-                            velY: 0,
-                            velX: 0,
-                            range: 64,
-                            speed: 1,
-                            type: tile
-                        });
+                        this.tiles.push(new Elevator(block(x), block(y), 0, 1, 64));
                         break;
                     }
                     case 'v': {
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(0.1875),
-                            range: 64,
-                            speed: 1,
-                            type: tile
-                        });
+                        this.tiles.push(new Elevator(block(x), block(y), 0, 1, -64));
                         break;
                     }
                     case '<':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(0.1875),
-                            range: 64,
-                            speed: 1,
-                            type: tile
-                        });
+                        this.tiles.push(new Elevator(block(x), block(y), 1, 0, 64));
                         break;
                     case '>':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(0.1875),
-                            range: 64,
-                            speed: 1,
-                            type: tile
-                        });
+                        this.tiles.push(new Elevator(block(x), block(y), 1, 0, -64));
                         break;
                     case 'M':
                         this.tiles.push({
@@ -315,187 +275,19 @@ class World {
         this.segments = this.tiles.filter(tile => tile.type !== "G");
         this.createMesh();
 
+        this.tiles = this.tiles.filter((tile) => tile.type !== "X");
+
 
         //this.loadNearby();
-    }
-
-    loadNearby() {
-        world.tiles.filter((tile) => tile.type == "E").forEach(exit => {
-            for (var y = 0; y < lvl.layout.length; y++) {
-                for (var x = 0; x < lvl.layout[y].length; x++) {
-                    var tile = lvl.layout[y][x];
-                    switch (tile) {
-                        case '@':
-                            break;
-                        case 'X': {
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(1),
-                                type: tile,
-                            });
-                            break
-                        }
-                        case '-': {
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(.125),
-                                type: tile
-                            });
-                            break
-                        }
-                        case '^': {
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(0.1875),
-                                velY: 0,
-                                velX: 0,
-                                range: 64,
-                                speed: 1,
-                                type: tile
-                            });
-                            break;
-                        }
-                        case 'v': {
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(0.1875),
-                                range: 64,
-                                speed: 1,
-                                type: tile
-                            });
-                            break;
-                        }
-                        case '<':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(0.1875),
-                                range: 64,
-                                speed: 1,
-                                type: tile
-                            });
-                            break;
-                        case '>':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(0.1875),
-                                range: 64,
-                                speed: 1,
-                                type: tile
-                            });
-                            break;
-                        case 'M':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y + .5),
-                                width: block(1),
-                                height: block(.25),
-                                type: tile,
-                                drawModifiers: [
-                                    render.ctx.translate(0, -.5)
-                                ]
-                            });
-                            break;
-                        case 'W':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(.25),
-                                type: tile
-                            });
-                            break;
-                        case '¤':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(1),
-                                type: tile
-                            });
-                            break;
-                        case '#':
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(1),
-                                type: tile
-                            });
-                        case 'G':
-                            this.tiles.push({
-                                x: block(x + .25),
-                                y: block(y + .25),
-                                width: block(.5),
-                                height: block(.5),
-                                type: tile
-                            })
-                            break;
-                        case 'L': {
-                            this.tiles.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(0),
-                                type: tile,
-                            });
-                            this.lightSources.push({
-                                x: block(x + .5),
-                                y: block(y + .1)
-                            });
-                        }
-                            break;
-                        case 'R':
-                            this.npcs.push({
-                                x: block(x),
-                                y: block(y),
-                                width: block(1),
-                                height: block(1),
-                                velX: 0,
-                                frame: 0,
-                                type: tile
-                            })
-                            break;
-                    }
-                }
-            }
-        })
     }
 
     update() {
         this.lightSources = [];
         this.tiles.forEach((tile) => {
+            try {
+                tile.update()
+            } catch{ }
             switch (tile.type) {
-                case '^':
-
-                    tile.velY = -Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
-                    //tile.velX = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
-                    tile.y += tile.velY;
-                    tile.x += tile.velX;
-                    break;
-                case 'v':
-                    tile.velY = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
-                    tile.y += tile.velY;
-                    break;
-                case '<':
-                    tile.velX = -Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
-                    tile.x += tile.velX;
-                    break;
-                case '>':
-                    tile.velX = Math.sin((gameClock) / (tile.range / tile.speed)) * tile.speed;
-                    tile.x += tile.velX;
-                    break;
                 case 'L':
                     this.lightSources.push(tile.light);
                     break;
@@ -520,11 +312,15 @@ class World {
         var nSeg = [];
 
         var last = () => nSeg[nSeg.length - 1];
-        this.segments.forEach(tile => {
-            if (nSeg.length > 0 && tile.type == last().type && tile.x == (last().x + last().width) && tile.y == last().y) {
+        for (let tile of this.segments) {
+            if (nSeg.length > 0
+                && tile.type == last().type
+                && tile.x == (last().x + last().width)
+                && tile.y == last().y
+                && tile.type !== "elevator") {
                 last().width += tile.width;
             } else nSeg.push(tile)
-        })
+        }
 
         this.segments = nSeg.sort((a, b) => {
             if (a.x < b.x) return -1;
@@ -532,11 +328,15 @@ class World {
 
         nSeg = [];
 
-        this.segments.forEach(seg => {
-            if (nSeg.length > 0 && seg.type == last().type && seg.y == (last().y + last().height) && seg.x == last().x && seg.width == last().width) {
+        for (let seg of this.segments) {
+            if (nSeg.length > 0
+                && seg.type == last().type
+                && seg.y == (last().y + last().height)
+                && seg.x == last().x
+                && seg.width == last().width) {
                 last().height += seg.height;
             } else nSeg.push(seg)
-        })
+        }
 
         this.segments = nSeg.sort((a, b) => {
             var returnVal = 0;
@@ -550,110 +350,110 @@ class World {
     }
 
     buildTextures() {
-        try{
-        this.segments.filter((seg) => seg.type == "X").forEach(segment => {
-            var canvas = document.createElement('canvas')
-            canvas.width = segment.width;
-            canvas.height = segment.height;
-            var ctx = canvas.getContext("2d")
-            ctx.imageSmoothingEnabled = false;
-            ctx.scale(2, 2);
+        try {
+            this.segments.filter((seg) => seg.type == "X").forEach(segment => {
+                var canvas = document.createElement('canvas')
+                canvas.width = segment.width;
+                canvas.height = segment.height;
+                var ctx = canvas.getContext("2d")
+                ctx.imageSmoothingEnabled = false;
+                ctx.scale(2, 2);
 
-            var sprite = sprites.tiles[segment.type]
-            for (var y = 0; y < segment.height; y += 16) {
-                for (var x = 0; x < segment.width; x += 16) {
-                    var dIndex = 0;
-                    if (segment.width > 32) {
-                        if (segment.height > 32) switch (y) {
-                            case 0: switch (x) {
-                                case 0: dIndex = 1; break;
-                                case (segment.width / 2) - 16: dIndex = 3; break;
-                                default: dIndex = 2;
-                            } break;
-                            case (segment.height / 2) - 16: switch (x) {
-                                case 0: dIndex = 7; break;
-                                case (segment.width / 2) - 16: dIndex = 9; break;
-                                default: dIndex = 8;
-                            } break;
-                            default: switch (x) {
-                                case 0: dIndex = 4; break;
-                                case (segment.width / 2) - 16: dIndex = 6; break;
-                                default: dIndex = 5
-                            } break;
-                        } else switch (x) {
-                            case 0: dIndex = 13; break;
-                            case (segment.width / 2) - 16: dIndex = 15; break;
-                            default: dIndex = 14;
-                        }
-                    } else if (segment.height > 32) switch (y) {
-                        case 0: dIndex = 10; break;
-                        case (segment.height / 2) - 16: dIndex = 12; break;
-                        default: dIndex = 11;
-                    } else dIndex = 0;
+                var sprite = sprites.tiles[segment.type]
+                for (var y = 0; y < segment.height; y += 16) {
+                    for (var x = 0; x < segment.width; x += 16) {
+                        var dIndex = 0;
+                        if (segment.width > 32) {
+                            if (segment.height > 32) switch (y) {
+                                case 0: switch (x) {
+                                    case 0: dIndex = 1; break;
+                                    case (segment.width / 2) - 16: dIndex = 3; break;
+                                    default: dIndex = 2;
+                                } break;
+                                case (segment.height / 2) - 16: switch (x) {
+                                    case 0: dIndex = 7; break;
+                                    case (segment.width / 2) - 16: dIndex = 9; break;
+                                    default: dIndex = 8;
+                                } break;
+                                default: switch (x) {
+                                    case 0: dIndex = 4; break;
+                                    case (segment.width / 2) - 16: dIndex = 6; break;
+                                    default: dIndex = 5
+                                } break;
+                            } else switch (x) {
+                                case 0: dIndex = 13; break;
+                                case (segment.width / 2) - 16: dIndex = 15; break;
+                                default: dIndex = 14;
+                            }
+                        } else if (segment.height > 32) switch (y) {
+                            case 0: dIndex = 10; break;
+                            case (segment.height / 2) - 16: dIndex = 12; break;
+                            default: dIndex = 11;
+                        } else dIndex = 0;
 
-                    if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++ 
-                    if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--; 
-                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3; 
-                    if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
-                    
-                    ctx.drawImage(sprite[dIndex], x, y);
+                        if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
+                        if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
+                        if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
+                        if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+
+                        ctx.drawImage(sprite[dIndex], x, y);
+                    }
                 }
-            }
-            Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
-        })
-    } catch {
-        
-        this.segments.filter((seg) => seg.type == "X").forEach(segment => {
-            var canvas = document.createElement('canvas')
-            canvas.width = segment.width;
-            canvas.height = segment.height;
-            var ctx = canvas.getContext("2d")
-            ctx.imageSmoothingEnabled = false;
-            ctx.scale(2, 2);
+                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
+            })
+        } catch {
 
-            var sprite = sprites.tiles[segment.type]
-            for (var y = 0; y < segment.height; y += 16) {
-                for (var x = 0; x < segment.width; x += 16) {
-                    var dIndex = 0;
-                    if (segment.width > 32) {
-                        if (segment.height > 32) switch (y) {
-                            case 0: switch (x) {
-                                case 0: dIndex = 1; break;
-                                case (segment.width / 2) - 16: dIndex = 3; break;
-                                default: dIndex = 2;
-                            } break;
-                            case (segment.height / 2) - 16: switch (x) {
-                                case 0: dIndex = 7; break;
-                                case (segment.width / 2) - 16: dIndex = 9; break;
-                                default: dIndex = 8;
-                            } break;
-                            default: switch (x) {
-                                case 0: dIndex = 4; break;
-                                case (segment.width / 2) - 16: dIndex = 6; break;
-                                default: dIndex = 5
-                            } break;
-                        } else switch (x) {
-                            case 0: dIndex = 13; break;
-                            case (segment.width / 2) - 16: dIndex = 15; break;
-                            default: dIndex = 14;
-                        }
-                    } else if (segment.height > 32) switch (y) {
-                        case 0: dIndex = 10; break;
-                        case (segment.height / 2) - 16: dIndex = 12; break;
-                        default: dIndex = 11;
-                    } else dIndex = 0;
+            this.segments.filter((seg) => seg.type == "X").forEach(segment => {
+                var canvas = document.createElement('canvas')
+                canvas.width = segment.width;
+                canvas.height = segment.height;
+                var ctx = canvas.getContext("2d")
+                ctx.imageSmoothingEnabled = false;
+                ctx.scale(2, 2);
 
-                    if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++ 
-                    if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--; 
-                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3; 
-                    if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
-                    
-                    ctx.drawImage(sprite[dIndex], x, y);
+                var sprite = sprites.tiles[segment.type]
+                for (var y = 0; y < segment.height; y += 16) {
+                    for (var x = 0; x < segment.width; x += 16) {
+                        var dIndex = 0;
+                        if (segment.width > 32) {
+                            if (segment.height > 32) switch (y) {
+                                case 0: switch (x) {
+                                    case 0: dIndex = 1; break;
+                                    case (segment.width / 2) - 16: dIndex = 3; break;
+                                    default: dIndex = 2;
+                                } break;
+                                case (segment.height / 2) - 16: switch (x) {
+                                    case 0: dIndex = 7; break;
+                                    case (segment.width / 2) - 16: dIndex = 9; break;
+                                    default: dIndex = 8;
+                                } break;
+                                default: switch (x) {
+                                    case 0: dIndex = 4; break;
+                                    case (segment.width / 2) - 16: dIndex = 6; break;
+                                    default: dIndex = 5
+                                } break;
+                            } else switch (x) {
+                                case 0: dIndex = 13; break;
+                                case (segment.width / 2) - 16: dIndex = 15; break;
+                                default: dIndex = 14;
+                            }
+                        } else if (segment.height > 32) switch (y) {
+                            case 0: dIndex = 10; break;
+                            case (segment.height / 2) - 16: dIndex = 12; break;
+                            default: dIndex = 11;
+                        } else dIndex = 0;
+
+                        if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
+                        if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
+                        if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
+                        if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+
+                        ctx.drawImage(sprite[dIndex], x, y);
+                    }
                 }
-            }
-            // TODO: add alternative to createImageBitmap for browsers lacking the feature.
-        })
-    }
+                // TODO: add alternative to createImageBitmap for browsers lacking the feature.
+            })
+        }
     }
 
 }
@@ -1342,10 +1142,9 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: []
-    },{
-        name: "Hall of Ween",
+    }, {
+        name: "Outside Hall of Ween",
         layout: [
-            "X                             XXXXXXXXX",
             "X                             XXXXXXXXX",
             "X                             XXXXXXXXX",
             "X                             XXXXXXXXX",
@@ -1363,17 +1162,59 @@ const level = [
             "X                      XXXXXXXXXXXXXXXX",
             "X                @     XXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [
             {
                 type: "E",
-                x: block(39),
-                y: block(9),
+                x: block(39.5),
+                y: block(8),
                 width: block(0),
                 height: block(2),
-                exit: 4,
+                exit: 10,
                 exitX: block(0),
-                exitY: block(53.5)
+                exitY: block(9.5)
             }
+        ]
+    }, {
+        name: "The Hall of Ween",
+        layout: [
+            
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX       XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX         XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "                                                                   ",
+            "@                                                                  ",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        ],
+        advancedLayer: [
+            {
+                type: "E",
+                x: block(-.5),
+                y: block(8),
+                width: block(0),
+                height: block(2),
+                exit: 9,
+                exitX: block(39),
+                exitY: block(9.5)
+            }
+        ],
+        npcs: [
+            //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
+            new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
+            // new LaserTurret(block(20), block(31)),
+            //new Roamer(30, 31)
         ]
     }];
