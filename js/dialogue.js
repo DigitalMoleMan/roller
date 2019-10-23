@@ -312,11 +312,25 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
-            text: [""],
+            text: ["Ooh, I didn't see you there", ""],
             textSpeed: .25,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
-            next: () => setScene("game")
+            next: () => {
+                world.npcs[0].boogify();
+                dialogue.playDialogue(bogusDialogues[6])
+            }
         }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["HA HA HA"],
+            textSpeed: .25,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                
+                setScene("game")
+            }
+        })
     ]
 };

@@ -71,13 +71,13 @@ class Player {
         this.activeItem.update();
 
         if (this.collision('x') && this.collision('y')) {
-            this.posX -= this.velX;
-            this.posY -= this.velY;
+            this.posX -= this.velX * .1;
+            this.posY -= this.velY * .1;
         }
 
-        var rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
+        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
 
-        var dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2));
+        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2));
 
 
         (!this.colX) ? this.posX += Math.cos(rotation) * dist : this.velX = 0;
@@ -103,8 +103,8 @@ class Player {
 
         if (this.colY && this.velY > 0) {
             if (this.midJump) {
-                for (var i = 0; i < 25; i++) {
-                    var colVal = 192 + Math.random() * 64;
+                for (let i = 0; i < 25; i++) {
+                    let colVal = 192 + Math.random() * 64;
                     render.pe.addParticle({
                         x: player.posX + ((Math.random() - .5) * 16),
                         y: (player.posY + 18),
@@ -130,7 +130,7 @@ class Player {
         this.band += this.velX;
         if (this.velX > 32) this.velX = 32;
         if (this.velX < -32) this.velX = -32;
-        if (this.velY > 32) this.velY = 32;
+        if (this.velY > 24) this.velY = 24;
         if (this.velY < -32) this.velY = -32;
 
 
@@ -161,8 +161,8 @@ class Player {
             (this.velY > 0) ? this.velY = this.jumpHeight : this.velY += this.jumpHeight;
             this.midJump = true;
 
-            for (var i = 0; i < 50; i++) {
-                var colVal = 192 + Math.random() * 64;
+            for (let i = 0; i < 50; i++) {
+                let colVal = 192 + Math.random() * 64;
                 render.pe.addParticle({
                     x: player.posX + Math.random(),
                     y: (player.posY + 12),
@@ -203,46 +203,33 @@ class Player {
     }
 
     collision(axis) {
-
         for (var tile of nearPlayer) {
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
                 this.hitbox[axis].bottom() > tile.y) {
+                // console.log(tile.constructor.name)
+                //console.log(tile)
                 switch (tile.type) {
-                    case 'X':
+                    case 'block':
                         return true;
                     case 'platform':
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
                     case 'elevator':
-                
-                           if (this.hitbox.x.bottom() <= tile.y - tile.velY) { 
-                               this.posY += tile.velY;
-                               this.posX += tile.velX;
-                               if (this.hitbox.x.bottom() <= tile.y) return true;
-                           }
-
-
+                        if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
+                            this.posY += tile.velY;
+                            this.posX += tile.velX;
+                            if (this.hitbox.x.bottom() <= tile.y) return true;
+                        }
                         break;
                     case 'M':
-
                         this.damage(1);
                         return true;
-
-
-                        break;
-
                     case 'W':
-
                         this.damage(1);
                         return true;
-                        break;
-                    case '#':
-                        return true;
-                        break;
                     case 'E':
-
                         world.loadLevel(level[tile.exit]);
                         gameClock = 0;
                         player.posX = tile.exitX;
@@ -251,7 +238,6 @@ class Player {
                         render.camera.x = tile.exitX;
                         render.camera.y = tile.exitY;
                         return true;
-                        break;
                 }
             };
         }
@@ -329,10 +315,10 @@ class Hookshot extends Item {
 
     update() {
 
-        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
-        hookpoints.forEach(point => {
+        let hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        for (let point of hookpoints) {
             point.fromPlayer = Math.sqrt(Math.pow((player.posX + player.velX) - (point.x + point.width / 2), 2) + Math.pow((player.posY + player.velY) - (point.y + point.height / 2), 2));
-        });
+        };
 
         switch (this.state) {
             case "retracted":
@@ -372,12 +358,12 @@ class Hookshot extends Item {
 
 
 
-                            var rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
+                            //let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
 
 
                             //player.velY += Math.sin(rotation) * 5;
-                            for (var i = 0; i < 10; i++) {
-                                var colVal = (Math.random() * 255);
+                            for (let i = 0; i < 10; i++) {
+                                let colVal = (Math.random() * 255);
                                 render.pe.addParticle({
                                     x: this.posX + (Math.random() - .5) * 12,
                                     y: this.posY + (Math.random() - .5) * 12,
@@ -393,7 +379,7 @@ class Hookshot extends Item {
 
 
                         } else {
-                            var rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
+                            let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
 
 
                             this.posX += Math.cos(rotation) * this.speed//(this.posX - (this.target.x + (this.target.width / 2))) / 3;
@@ -418,7 +404,7 @@ class Hookshot extends Item {
 
 
 
-                    var rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
+                    let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
                     if (this.target.fromPlayer >= this.length) {
 
                         this.stiffness = (this.target.fromPlayer - this.length) / 4;
@@ -448,7 +434,7 @@ class Hookshot extends Item {
                 player.dec = .93;
                 this.length = 0;
 
-                var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
+                let rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
                 this.posX += Math.cos(rotation) * (this.returnSpeed);
@@ -464,24 +450,22 @@ class Hookshot extends Item {
 
     getClosest() {
 
-        var hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        let hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
         hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
         hookpoints.forEach(point => {
 
             point.blocked = () => {
-                var nodes = []
+                let nodes = []
 
-                var rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
-                for (var i = 0; i < point.fromPlayer; i += 8) {
+                let rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+                for (let i = 0; i < point.fromPlayer; i += 8) {
                     nodes.push({
                         x: player.posX + (Math.cos(rotation) * i),
                         y: player.posY + (Math.sin(rotation) * i)
                     })
                 }
-                for (var i = 0; i < nodes.length; i++) {
-
-
-                    if (this.checkCollision(nodes[i].x, nodes[i].y, onScreenSegs)) return true;
+                for (let node of nodes) {
+                    if (this.checkCollision(node.x, node.y, onScreenSegs)) return true;
                 }
 
                 return false;
@@ -495,8 +479,7 @@ class Hookshot extends Item {
     }
 
     checkCollision(x, y, area) {
-        for (var i = 0; i < area.length; i++) {
-            var tile = area[i];
+        for (let tile of area) {
             if (x <= tile.x + tile.width &&
                 x >= tile.x &&
                 y <= tile.y + tile.height &&

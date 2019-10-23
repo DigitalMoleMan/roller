@@ -20,22 +20,9 @@ class Renderer {
         this.ctx.font = "8px Roboto Mono;";
         this.ctx.textBaseline = "top";
 
-
         canvasContainer.appendChild(this.canvas);
-
-
-        this.activeScene //= 'game';
 
         this.pe = new ParticleEngine();
-
-        //textures
-        this.sprt;
-
-    }
-
-    refreshCanvas() {
-        this.canvas.remove();
-        canvasContainer.appendChild(this.canvas);
     }
 
     /**
@@ -43,15 +30,9 @@ class Renderer {
      * @param {String} path directory of the image.
      */
     importImage(path) {
-        var img = new Image;
+        let img = new Image;
         img.src = path;
         return (img);
-    }
-
-    toPattern(img) {
-
-        var pat = this.ctx.createPattern(img, "repeat");
-        return pat;
     }
 
     /**
@@ -62,10 +43,10 @@ class Renderer {
      */
     importSprite(path, length) {
 
-        var sprite = new Array;
+        let sprite = new Array;
 
-        for (var i = 0; i < length; i++) {
-            var img = this.importImage(path + '_' + i + '.png');
+        for (let i = 0; i < length; i++) {
+            let img = this.importImage(path + '_' + i + '.png');
             sprite.push(img);
         }
 
@@ -156,26 +137,11 @@ class Renderer {
     }
 
     imgScaled(src, x, y, scale, scrollFactor = 1) {
-
-
         this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
-
-
     }
 
-
-
     text(text, x, y, size = 1, color, scrollFactor = 0) {
-        for (var i = 0; i < text.length; i++) {
-            try {
-                this.img(font[text.charCodeAt(i)], x + (i * 16), y, scrollFactor, size);
-            } catch {
-                this.ctx.font = size + "8px monospace";
-                this.ctx.fillStyle = "#fff";
-                this.ctx.fillText(text.charCodeAt(i), x + (i * 16), y)
-            }
-        }
-
+        for (let i in text) this.img(font[text.charCodeAt(i)], x + (i * (16 * size)), y, scrollFactor, size);
     }
 
 
@@ -183,7 +149,6 @@ class Renderer {
         this.ctx.save();
         this.ctx.translate(originX, originY);
         this.ctx.rotate(angle);
-
     }
 }
 
@@ -244,81 +209,82 @@ class LightingEngine {
     }
 
     update() {
-        this.sources = onScreenLights.concat(this.tempSources);
+        if (settings.graphics.enableLighting) {
+            this.sources = onScreenLights.concat(this.tempSources);
 
-        this.tempSources.forEach(source => source.lifetime--);
+            this.tempSources.forEach(source => source.lifetime--);
 
-        this.tempSources = this.tempSources.filter(source => source.lifetime > 0);
+            this.tempSources = this.tempSources.filter(source => source.lifetime > 0);
 
-        var playerPoints = [{
-            x: player.posX - 3,
-            y: player.posY - 10
-        }, {
-            x: player.posX + 3,
-            y: player.posY - 10
-        }, {
-            x: player.posX + 9,
-            y: player.posY - 4
-        }, {
-            x: player.posX + 9,
-            y: player.posY + 4
-        }, {
-            x: player.posX + 14,
-            y: player.posY + 4,
-        }, {
-            x: player.posX + 16,
-            y: player.posY + 6,
-        }, {
-            x: player.posX + 16,
-            y: player.posY + 14,
-        }, {
-            x: player.posX + 14,
-            y: player.posY + 16,
-        }, {
-            x: player.posX - 14,
-            y: player.posY + 16,
-        }, {
-            x: player.posX - 16,
-            y: player.posY + 14,
-        }, {
-            x: player.posX - 16,
-            y: player.posY + 6,
-        }, {
-            x: player.posX - 14,
-            y: player.posY + 4,
-        }, {
-            x: player.posX - 9,
-            y: player.posY + 4
-        }, {
-            x: player.posX - 9,
-            y: player.posY - 4,
-        }]
-
-
-        this.segments = this.toSegments(playerPoints)
-
-        onScreenSegs.forEach(seg => {
-            var segPoints = [{
-                x: seg.x,
-                y: seg.y
+            let playerPoints = [{
+                x: player.posX - 3,
+                y: player.posY - 10
             }, {
-                x: seg.x + seg.width,
-                y: seg.y
+                x: player.posX + 3,
+                y: player.posY - 10
             }, {
-                x: seg.x + seg.width,
-                y: seg.y + seg.height
+                x: player.posX + 9,
+                y: player.posY - 4
             }, {
-                x: seg.x,
-                y: seg.y + seg.height
+                x: player.posX + 9,
+                y: player.posY + 4
+            }, {
+                x: player.posX + 14,
+                y: player.posY + 4,
+            }, {
+                x: player.posX + 16,
+                y: player.posY + 6,
+            }, {
+                x: player.posX + 16,
+                y: player.posY + 14,
+            }, {
+                x: player.posX + 14,
+                y: player.posY + 16,
+            }, {
+                x: player.posX - 14,
+                y: player.posY + 16,
+            }, {
+                x: player.posX - 16,
+                y: player.posY + 14,
+            }, {
+                x: player.posX - 16,
+                y: player.posY + 6,
+            }, {
+                x: player.posX - 14,
+                y: player.posY + 4,
+            }, {
+                x: player.posX - 9,
+                y: player.posY + 4
+            }, {
+                x: player.posX - 9,
+                y: player.posY - 4,
             }]
-            this.segments.push(...this.toSegments(segPoints))
-        })
 
 
-        this.polygons = [];
-        this.sources.forEach(source => this.polygons.push(this.getSightPolygon(source.x, source.y, source.radiusBorder())));
+            this.segments = this.toSegments(playerPoints)
+
+            onScreenSegs.forEach(seg => {
+                var segPoints = [{
+                    x: seg.x,
+                    y: seg.y
+                }, {
+                    x: seg.x + seg.width,
+                    y: seg.y
+                }, {
+                    x: seg.x + seg.width,
+                    y: seg.y + seg.height
+                }, {
+                    x: seg.x,
+                    y: seg.y + seg.height
+                }]
+                this.segments.push(...this.toSegments(segPoints))
+            })
 
 
+            this.polygons = [];
+            this.sources.forEach(source => this.polygons.push(this.getSightPolygon(source.x, source.y, source.radiusBorder())));
+
+        }
     }
 
     /**
@@ -326,8 +292,8 @@ class LightingEngine {
      * @param {Array} points 
      */
     toSegments(points) {
-        var pSegments = []
-        for (var i = 0; i < points.length; i++) {
+        let pSegments = []
+        for (let i = 0; i < points.length; i++) {
             if (i !== points.length - 1) {
                 pSegments.push({
                     a: {
@@ -357,20 +323,20 @@ class LightingEngine {
     }
 
     getSightPolygon(sightX, sightY, radiusBorder) {
-        var segmentsBorder = radiusBorder.concat(this.segments);
+        let segmentsBorder = radiusBorder.concat(this.segments);
 
-        var points = ((segments) => {
-            var a = [];
+        let points = ((segments) => {
+            let a = [];
             segments.forEach((seg) => {
                 a.push(seg.a, seg.b);
             });
             return a;
         })(segmentsBorder);
 
-        var uniquePoints = ((points) => {
-            var set = {};
+        let uniquePoints = ((points) => {
+            let set = {};
             return points.filter((p) => {
-                var key = p.x + "," + p.y;
+                let key = p.x + "," + p.y;
                 if (key in set) {
                     return false;
                 } else {
@@ -380,24 +346,24 @@ class LightingEngine {
             });
         })(points);
 
-        var uniqueAngles = [];
-        for (var j = 0; j < uniquePoints.length; j++) {
-            var uniquePoint = uniquePoints[j];
-            var angle = Math.atan2(uniquePoint.y - sightY, uniquePoint.x - sightX);
+        let uniqueAngles = [];
+        for (let j = 0; j < uniquePoints.length; j++) {
+            let uniquePoint = uniquePoints[j];
+            let angle = Math.atan2(uniquePoint.y - sightY, uniquePoint.x - sightX);
             uniquePoint.angle = angle;
             uniqueAngles.push(angle - 0.00001, angle, angle + 0.00001);
         }
 
 
 
-        var intersects = [];
-        for (var j = 0; j < uniqueAngles.length; j++) {
-            var angle = uniqueAngles[j];
+        let intersects = [];
+        for (let j = 0; j < uniqueAngles.length; j++) {
+            let angle = uniqueAngles[j];
 
-            var dx = Math.cos(angle);
-            var dy = Math.sin(angle);
+            let dx = Math.cos(angle);
+            let dy = Math.sin(angle);
 
-            var ray = {
+            let ray = {
                 a: {
                     x: sightX,
                     y: sightY
@@ -408,9 +374,9 @@ class LightingEngine {
                 }
             };
 
-            var closestIntersect = null;
-            for (var i = 0; i < segmentsBorder.length; i++) {
-                var intersect = this.getIntersection(ray, segmentsBorder[i]);
+            let closestIntersect = null;
+            for (let i = 0; i < segmentsBorder.length; i++) {
+                let intersect = this.getIntersection(ray, segmentsBorder[i]);
                 if (!intersect) continue;
                 if (!closestIntersect || intersect.param < closestIntersect.param) {
                     closestIntersect = intersect;
@@ -432,24 +398,24 @@ class LightingEngine {
 
     getIntersection(ray, segment) {
 
-        var r_px = ray.a.x;
-        var r_py = ray.a.y;
-        var r_dx = ray.b.x - ray.a.x;
-        var r_dy = ray.b.y - ray.a.y;
+        let r_px = ray.a.x;
+        let r_py = ray.a.y;
+        let r_dx = ray.b.x - ray.a.x;
+        let r_dy = ray.b.y - ray.a.y;
 
-        var s_px = segment.a.x;
-        var s_py = segment.a.y;
-        var s_dx = segment.b.x - segment.a.x;
-        var s_dy = segment.b.y - segment.a.y;
+        let s_px = segment.a.x;
+        let s_py = segment.a.y;
+        let s_dx = segment.b.x - segment.a.x;
+        let s_dy = segment.b.y - segment.a.y;
 
-        var r_mag = Math.sqrt(r_dx * r_dx + r_dy * r_dy);
-        var s_mag = Math.sqrt(s_dx * s_dx + s_dy * s_dy);
+        let r_mag = Math.sqrt(r_dx * r_dx + r_dy * r_dy);
+        let s_mag = Math.sqrt(s_dx * s_dx + s_dy * s_dy);
         if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag) {
             return null;
         }
 
-        var T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
-        var T1 = (s_px + s_dx * T2 - r_px) / r_dx;
+        let T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
+        let T1 = (s_px + s_dx * T2 - r_px) / r_dx;
 
         if (T1 < 0) return null;
         if (T2 < 0 || T2 > 1) return null;
@@ -462,40 +428,40 @@ class LightingEngine {
     }
 
     draw() {
+        if (settings.graphics.enableLighting) {
 
 
-
-        render.ctx.globalCompositeOperation = "lighter";
-
-
-        for (var i = 0; i < this.polygons.length; i++) {
-            this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
-        }
+            render.ctx.globalCompositeOperation = "lighter";
 
 
-        //render.rect(0,0,canvasWidth, canvasHeight, "#000000")
-
-        render.ctx.globalCompositeOperation = "source-over";
-
-        if (debug && !debug) {
-            for (var i = 0; i < this.polygons.length; i++) {
-                var polygon = this.polygons[i];
-                render.ctx.strokeStyle = "#fff";
-                render.ctx.moveTo(polygon[0].x - camera.x, polygon[0].y - camera.y);
-                for (var i = 1; i < polygon.length; i++) {
-                    var intersect = polygon[i];
-
-                    render.ctx.lineTo(intersect.x - camera.x, intersect.y - camera.y);
-                }
+            for (let i = 0; i < this.polygons.length; i++) {
+                this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
             }
-            render.ctx.stroke();
-            this.segments.forEach(seg => {
-                render.line(seg.a.x, seg.a.y, seg.b.x, seg.b.y, "#f00");
-                //render.rect(seg.a.x - 2, seg.a.y - 2, 4, 4, "#fff");
-                //render.rect(seg.b.x - 2, seg.b.y - 2, 4, 4, "#fff");
-            })
-        }
 
+
+            //render.rect(0,0,canvasWidth, canvasHeight, "#000000")
+
+            render.ctx.globalCompositeOperation = "source-over";
+
+            if (debug && !debug) {
+                for (let i = 0; i < this.polygons.length; i++) {
+                    let polygon = this.polygons[i];
+                    render.ctx.strokeStyle = "#fff";
+                    render.ctx.moveTo(polygon[0].x - camera.x, polygon[0].y - camera.y);
+                    for (let i = 1; i < polygon.length; i++) {
+                        let intersect = polygon[i];
+
+                        render.ctx.lineTo(intersect.x - camera.x, intersect.y - camera.y);
+                    }
+                }
+                render.ctx.stroke();
+                this.segments.forEach(seg => {
+                    render.line(seg.a.x, seg.a.y, seg.b.x, seg.b.y, "#f00");
+                    //render.rect(seg.a.x - 2, seg.a.y - 2, 4, 4, "#fff");
+                    //render.rect(seg.b.x - 2, seg.b.y - 2, 4, 4, "#fff");
+                })
+            }
+        }
     }
 
     drawPolygon(polygon, ctx, fillStyle) {
@@ -503,8 +469,8 @@ class LightingEngine {
         ctx.fillStyle = fillStyle;
         ctx.beginPath();
         ctx.moveTo(polygon[0].x - camera.x, polygon[0].y - camera.y);
-        for (var i = 1; i < polygon.length; i++) {
-            var intersect = polygon[i];
+        for (let i = 1; i < polygon.length; i++) {
+            let intersect = polygon[i];
 
             ctx.lineTo(intersect.x - camera.x, intersect.y - camera.y);
         }
@@ -525,7 +491,7 @@ class Light {
         this.colorStops = colorStops;
         this.lifetime = options.lifetime;
         this.gradient = () => {
-            var grd = render.ctx.createRadialGradient(this.x - camera.x, this.y - camera.y, 0, this.x - camera.x + this.offsetX, this.y - camera.y + this.offsetY, this.radius);
+            let grd = render.ctx.createRadialGradient(this.x - camera.x, this.y - camera.y, 0, this.x - camera.x + this.offsetX, this.y - camera.y + this.offsetY, this.radius);
             this.colorStops.forEach(stop => grd.addColorStop(stop.index, stop.color));
             return grd;
         }

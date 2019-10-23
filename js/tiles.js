@@ -1,23 +1,29 @@
 class Tile {
-    constructor(type, x, y, width, height) {
+    constructor(type, x, y, width, height, style = '') {
         this.type = type;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.style = style
+        this.sprite = () => sprites.tiles[this.type]
     }
 
     update() {
     }
 
     draw() {
-        render.img(sprites.tiles[this.tile.type], this.x, this.y);
+        render.img(this.sprite(), this.x, this.y);
     }
 }
 
 class Block extends Tile {
-    constructor(x, y) {
-        super('block', x, y, 32, 32);
+    constructor(x, y, style = 'metal') {
+        super('block', x, y, 32, 32, style);
+    }
+
+    draw() {
+        render.img(this.sprite, this.x, this.y);
     }
 }
 

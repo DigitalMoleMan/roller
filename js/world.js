@@ -41,7 +41,7 @@ class World {
 
     interaction() {
         this.npcs.forEach(npc => console.log(npc));
-        var inRangeActors = this.npcs.filter((npc) => (
+        let inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
             player.posX > (npc.posX) &&
             player.posX < (npc.posX + npc.interactionRadius) &&
@@ -60,9 +60,9 @@ class World {
         this.npcs = [];
         this.lightSources = [];
 
-        for (var y = 0; y < lvl.layout.length; y++) {
-            for (var x = 0; x < lvl.layout[y].length; x++) {
-                var tile = lvl.layout[y][x];
+        for (let y = 0; y < lvl.layout.length; y++) {
+            for (let x = 0; x < lvl.layout[y].length; x++) {
+                let tile = lvl.layout[y][x];
                 switch (tile) {
                     case '@': {
                         this.spawn.x = block(x) + 16;
@@ -70,13 +70,11 @@ class World {
                         break;
                     }
                     case 'X': {
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(1),
-                            type: tile,
-                        });
+                        this.tiles.push(new Block(block(x), block(y), 'metal'));
+                        break
+                    }
+                    case 'D': {
+                        this.tiles.push(new Block(block(x), block(y), 'dirt'));
                         break
                     }
                     case '-': {
@@ -176,8 +174,7 @@ class World {
             }
         }
 
-        lvl.advancedLayer.forEach((tile) => {
-            var tile = tile;
+        for (let tile of lvl.advancedLayer) {
             switch (tile.type) {
                 case '@': {
                     this.spawn.x = block(tile.x) + 16;
@@ -264,18 +261,15 @@ class World {
                 }
             }
             this.tiles.push(tile)
-        });
+        };
 
-        try {
-            lvl.npcs.forEach(npc => this.npcs.push(npc))
-        } catch (error) {
+        this.npcs = lvl.npcs
 
-        }
 
         this.segments = this.tiles.filter(tile => tile.type !== "G");
         this.createMesh();
 
-        this.tiles = this.tiles.filter((tile) => tile.type !== "X");
+        this.tiles = this.tiles.filter((tile) => tile.type !== 'block');
 
 
         //this.loadNearby();
@@ -283,7 +277,7 @@ class World {
 
     update() {
         this.lightSources = [];
-        this.tiles.forEach((tile) => {
+        for (let tile of this.tiles) {
             try {
                 tile.update()
             } catch{ }
@@ -292,17 +286,17 @@ class World {
                     this.lightSources.push(tile.light);
                     break;
             }
-        })
+        }
 
 
-        this.npcs.forEach(npc => {
+        for (let npc of this.npcs) {
             switch (npc.name) {
                 case 'spikeGuard':
                     this.lightSources.push(npc.light);
                     break;
             }
             npc.update();
-        })
+        }
 
 
     }
@@ -314,7 +308,7 @@ class World {
         var last = () => nSeg[nSeg.length - 1];
         for (let tile of this.segments) {
             if (nSeg.length > 0
-                && tile.type == last().type
+                && (tile.type + tile.style) === (last().type + last().style)
                 && tile.x == (last().x + last().width)
                 && tile.y == last().y
                 && tile.type !== "elevator") {
@@ -330,7 +324,7 @@ class World {
 
         for (let seg of this.segments) {
             if (nSeg.length > 0
-                && seg.type == last().type
+                && (seg.type + seg.style) === (last().type + last().style)
                 && seg.y == (last().y + last().height)
                 && seg.x == last().x
                 && seg.width == last().width) {
@@ -350,109 +344,65 @@ class World {
     }
 
     buildTextures() {
-        try {
-            this.segments.filter((seg) => seg.type == "X").forEach(segment => {
-                var canvas = document.createElement('canvas')
-                canvas.width = segment.width;
-                canvas.height = segment.height;
-                var ctx = canvas.getContext("2d")
-                ctx.imageSmoothingEnabled = false;
-                ctx.scale(2, 2);
 
-                var sprite = sprites.tiles[segment.type]
-                for (var y = 0; y < segment.height; y += 16) {
-                    for (var x = 0; x < segment.width; x += 16) {
-                        var dIndex = 0;
-                        if (segment.width > 32) {
-                            if (segment.height > 32) switch (y) {
-                                case 0: switch (x) {
-                                    case 0: dIndex = 1; break;
-                                    case (segment.width / 2) - 16: dIndex = 3; break;
-                                    default: dIndex = 2;
-                                } break;
-                                case (segment.height / 2) - 16: switch (x) {
-                                    case 0: dIndex = 7; break;
-                                    case (segment.width / 2) - 16: dIndex = 9; break;
-                                    default: dIndex = 8;
-                                } break;
-                                default: switch (x) {
-                                    case 0: dIndex = 4; break;
-                                    case (segment.width / 2) - 16: dIndex = 6; break;
-                                    default: dIndex = 5
-                                } break;
-                            } else switch (x) {
-                                case 0: dIndex = 13; break;
-                                case (segment.width / 2) - 16: dIndex = 15; break;
-                                default: dIndex = 14;
-                            }
-                        } else if (segment.height > 32) switch (y) {
-                            case 0: dIndex = 10; break;
-                            case (segment.height / 2) - 16: dIndex = 12; break;
-                            default: dIndex = 11;
-                        } else dIndex = 0;
+        for (let segment of this.segments.filter((seg) => seg.type == 'block')) {
+            let canvas = document.createElement('canvas')
+            canvas.width = segment.width;
+            canvas.height = segment.height;
+            let ctx = canvas.getContext("2d")
+            ctx.imageSmoothingEnabled = false;
+            ctx.scale(2, 2);
+            let spritePath = `${segment.type}_${segment.style}`;
+            let sprite = sprites.tiles[spritePath]
+            let alteration = sprites.tiles['alt_' + spritePath]
+            for (let y = 0; y < segment.height; y += 16) {
+                for (let x = 0; x < segment.width; x += 16) {
+                    let dIndex = 0;
+                    if (segment.width > 32) {
+                        if (segment.height > 32) switch (y) {
+                            case 0: switch (x) {
+                                case 0: dIndex = 1; break;
+                                case (segment.width / 2) - 16: dIndex = 3; break;
+                                default: dIndex = 2;
+                            } break;
+                            case (segment.height / 2) - 16: switch (x) {
+                                case 0: dIndex = 7; break;
+                                case (segment.width / 2) - 16: dIndex = 9; break;
+                                default: dIndex = 8;
+                            } break;
+                            default: switch (x) {
+                                case 0: dIndex = 4; break;
+                                case (segment.width / 2) - 16: dIndex = 6; break;
+                                default: dIndex = 5
+                            } break;
+                        } else switch (x) {
+                            case 0: dIndex = 13; break;
+                            case (segment.width / 2) - 16: dIndex = 15; break;
+                            default: dIndex = 14;
+                        }
+                    } else if (segment.height > 32) switch (y) {
+                        case 0: dIndex = 10; break;
+                        case (segment.height / 2) - 16: dIndex = 12; break;
+                        default: dIndex = 11;
+                    } else dIndex = 0;
 
-                        if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
-                        if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
-                        if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
-                        if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+                    if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
+                    if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
+                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
+                    if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
-                        ctx.drawImage(sprite[dIndex], x, y);
-                    }
+                    ctx.drawImage(sprite[dIndex], x, y);
+                    try {
+                        if ((Math.random() * 10) < 1) ctx.drawImage(alteration[dIndex], x, y);
+                    } catch { }
                 }
-                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.texture = map[0]);
-            })
-        } catch {
-
-            this.segments.filter((seg) => seg.type == "X").forEach(segment => {
-                var canvas = document.createElement('canvas')
-                canvas.width = segment.width;
-                canvas.height = segment.height;
-                var ctx = canvas.getContext("2d")
-                ctx.imageSmoothingEnabled = false;
-                ctx.scale(2, 2);
-
-                var sprite = sprites.tiles[segment.type]
-                for (var y = 0; y < segment.height; y += 16) {
-                    for (var x = 0; x < segment.width; x += 16) {
-                        var dIndex = 0;
-                        if (segment.width > 32) {
-                            if (segment.height > 32) switch (y) {
-                                case 0: switch (x) {
-                                    case 0: dIndex = 1; break;
-                                    case (segment.width / 2) - 16: dIndex = 3; break;
-                                    default: dIndex = 2;
-                                } break;
-                                case (segment.height / 2) - 16: switch (x) {
-                                    case 0: dIndex = 7; break;
-                                    case (segment.width / 2) - 16: dIndex = 9; break;
-                                    default: dIndex = 8;
-                                } break;
-                                default: switch (x) {
-                                    case 0: dIndex = 4; break;
-                                    case (segment.width / 2) - 16: dIndex = 6; break;
-                                    default: dIndex = 5
-                                } break;
-                            } else switch (x) {
-                                case 0: dIndex = 13; break;
-                                case (segment.width / 2) - 16: dIndex = 15; break;
-                                default: dIndex = 14;
-                            }
-                        } else if (segment.height > 32) switch (y) {
-                            case 0: dIndex = 10; break;
-                            case (segment.height / 2) - 16: dIndex = 12; break;
-                            default: dIndex = 11;
-                        } else dIndex = 0;
-
-                        if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
-                        if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
-                        if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
-                        if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
-
-                        ctx.drawImage(sprite[dIndex], x, y);
-                    }
-                }
-                // TODO: add alternative to createImageBitmap for browsers lacking the feature.
-            })
+            }
+            try {
+                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
+            } catch {
+                segment.sprite = new Image();
+                segment.sprite.src = canvas.toDataURL();
+            }
         }
     }
 
@@ -481,20 +431,21 @@ class Roamer extends Enemy {
         super(posX + .5, posY + .5);
         this.hp = 3;
         this.velX = -1;
-
+        this.alive = true;
         this.sprite = () => sprites.npcs.enemies.roamer;
     }
 
     update() {
+        if(this.alive){
         if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
         this.posX += this.velX;
 
         this.getCollisionPlayer()
+        }
     }
 
     getCollision(area, offsetX = 0, offsetY = 0) {
-        for (var i = 0; i < area.length; i++) {
-            var obj = area[i];
+        for (let obj of area) {
             if (((this.posX - 8) + offsetX) < obj.x + obj.width &&
                 ((this.posX + 8) + offsetX) > obj.x &&
                 ((this.posY - 16) + offsetY) < obj.y + obj.height &&
@@ -510,7 +461,7 @@ class Roamer extends Enemy {
             ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
 
             if (player.hitbox.x.bottom() > this.posY - 14) {
-                player.velY -= 20;
+                player.velY = -10;
                 this.damage(1);
             } else {
                 player.damage(1);
@@ -520,7 +471,11 @@ class Roamer extends Enemy {
 
     damage(amount) {
         this.hp -= amount;
-        //if(this.hp <= 0) this.kill();
+        if (this.hp < 0) this.die();
+    }
+
+    die() {
+        this.alive = false;
     }
 
     draw() {
@@ -672,6 +627,7 @@ class LaserTurret extends Enemy {
 class Bogus extends Actor {
     constructor(posX, posY, onInteract) {
         super(posX, posY, onInteract, block(3));
+        this.drawnSprite = 'idle';
         this.sprite = () => sprites.npcs.bogus;
     }
 
@@ -679,8 +635,13 @@ class Bogus extends Actor {
 
     }
 
+    boogify() {
+        this.drawnSprite = 'boogus';
+        this.onInteract = () => dialogue.playDialogue(bogusDialogues[6])
+    }
+
     draw() {
-        render.img(this.sprite().idle[Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
+        render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
     }
 }
 
@@ -875,9 +836,10 @@ const level = [
         ],
         npcs: [
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
-            new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])) //block(20), block(20)),
-            // new LaserTurret(block(20), block(31)),
-            //new Roamer(30, 31)
+            new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])), //block(20), block(20)),
+            //new LaserTurret(block(20), block()),
+            new Roamer(block(40), block(81.5))
+            //new SpikeGuard(block(50), block(76))
         ]
     }, {
         name: "GA-19",
@@ -913,7 +875,8 @@ const level = [
                 exitX: block(.5),
                 exitY: block(81.5),
             }
-        ]
+        ],
+        npcs: []
     }, {
         name: "MNKO Swinging Course - Hall",
         layout: [
@@ -956,7 +919,8 @@ const level = [
                 exitX: block(0),
                 exitY: block(53.5)
             }
-        ]
+        ],
+        npcs: []
     }, {
         name: "MNKO Swinging Course - Tower",
         layout: [
@@ -1068,7 +1032,8 @@ const level = [
             exit: 1,
             exitX: block(71),
             exitY: block(5.5)
-        },]
+        },],
+        npcs: []
     },
     {
         name: "GA-19 - Vents",
@@ -1091,7 +1056,8 @@ const level = [
             exit: 1,
             exitX: block(0),
             exitY: block(5.5)
-        }]
+        }],
+        npcs: []
     }, {
         name: "Adv Layer Testing",
         layout: [
@@ -1119,6 +1085,7 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [],
+        npcs: []
     }, {
         name: "Light Test",
         layout: [
@@ -1141,7 +1108,8 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
-        advancedLayer: []
+        advancedLayer: [],
+        npcs: []
     }, {
         name: "Outside Hall of Ween",
         layout: [
@@ -1161,8 +1129,8 @@ const level = [
             "X                        XXXXXXXXXXXXXX",
             "X                      XXXXXXXXXXXXXXXX",
             "X                @     XXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
             {
@@ -1175,11 +1143,12 @@ const level = [
                 exitX: block(0),
                 exitY: block(9.5)
             }
-        ]
+        ],
+        npcs: []
     }, {
         name: "The Hall of Ween",
         layout: [
-            
+
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -1196,8 +1165,8 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
             {

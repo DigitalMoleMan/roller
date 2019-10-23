@@ -9,6 +9,13 @@ var enableCache = false;
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
+//
+var settings = {
+    graphics: {
+        enableLighting: true
+    }
+}
+
 //special
 var halloweenMode = true;
 
@@ -165,7 +172,10 @@ var sprites = {
     },
     tiles: {
         "@": render.importImage('img/tiles/break_block_0.png'),
-        "X": render.importSprite('img/tiles/block/block', 16),
+        block_metal: render.importSprite('img/tiles/block/metal', 16),
+        alt_block_metal: render.importSprite('img/tiles/block/alt_metal', 16),
+        block_dirt: render.importSprite('img/tiles/block/dirt', 16),
+        alt_block_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
         platform: render.importImage('img/tiles/platform.png'),
         elevator: render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes_floor.png'),
@@ -248,14 +258,8 @@ var sfx = {
 
 if (halloweenMode) {
     sprites.player.body = render.importSprite('img/player/hw_body', 13)
-    sprites.npcs.bogus.idle = render.importSprite('img/npcs/bogus/hw_idle', 10)
+    sprites.npcs.bogus.boogus = render.importSprite('img/npcs/bogus/hw_idle', 10)
     sprites.backgrounds[3] = render.importImage('img/backgrounds/halloween.png')
-
-    var dirt = render.importSprite('img/tiles/dirt/dirt', 10);
-
-    for(var i = 0; i<dirt.length; i++){
-        sprites.tiles["X"][i] = dirt[i]; 
-    }
 }
 
 
@@ -276,9 +280,13 @@ window.onload = () => {
         }
     }
 
+
+
     loadDialogues();
-    if (halloweenMode) world.loadLevel(level[9]);
-    else world.loadLevel(level[1]);
+    if (halloweenMode) {
+        settings.graphics.enableLighting = false;
+        world.loadLevel(level[9]);
+    } else world.loadLevel(level[1]);
 
 
     setScene("game");
@@ -308,6 +316,7 @@ window.onload = () => {
  */
 playMusic = (track) => {
     musicPlayer.src = music[track];
+    musicPlayer.currentTime = 0;
     musicPlayer.play();
 }
 
@@ -315,7 +324,6 @@ playMusic = (track) => {
  * @param {Number} sound index in sfx[]
  */
 playSound = (sound) => {
-    sound.currentTime = 0;
     (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 }
 
@@ -334,7 +342,6 @@ stopSound = (sound) => {
  */
 setScene = (scene) => {
     activeScene = scene;
-    render.activeScene = scene;
 }
 function loop() {
     if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
@@ -397,7 +404,7 @@ var scenes = {
 
         camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
-        if(!halloweenMode)lighting.update();
+        lighting.update();
 
 
         //render.camera.follow(player.pos);
@@ -451,15 +458,14 @@ var scenes = {
 
         })
 
-        onScreenSegs.filter((seg) => seg.type == "X").forEach(tile => {
+        onScreenSegs.filter((seg) => seg.type == "block").forEach(tile => {
 
             render.ctx.save();
-            var texture = tile.texture;
 
             // if(tile.drawModifier !== undefined)tile.drawModifier();
 
-
-            render.img(texture, tile.x, tile.y, 1);
+            tile.draw();
+            //render.img(texture, tile.x, tile.y, 1);
             render.ctx.restore();
 
         })
@@ -474,7 +480,7 @@ var scenes = {
 
         render.pe.tick()
 
-        if (!halloweenMode) lighting.draw();
+        lighting.draw();
 
 
         //ui
@@ -574,29 +580,27 @@ drawDebug = () => {
 
     //render.rectStroke((player.posX - 32), (player.posY - 32), 64, 64, "#00f")
 
-    world.segments.forEach(seg => render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00"))
+    for (let seg of world.segments) render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00");
     /*
                 onScreen.forEach(tile => {
                     render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#f00");
                 })
     */
-    nearPlayer.forEach(tile => {
-        render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0")
-    })
+    for (let tile of nearPlayer) render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0");
 
 
-    if (!true) {
+    if (true) {
         var playerInfo = JSON.stringify(player).split(',');
 
         render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
-        playerInfo.forEach((row, i) => {
-            render.text(row, 12, (i * 16) + 12, .75, "#fff");
-        });
+        render.ctx.fillStyle = "#fff";
+        render.ctx.font = "12px monospace"
+        for (let i in playerInfo) render.ctx.fillText(playerInfo[i], 12, (i * 12) + 12);
     }
 
     if (onMobile) {
-        var ta = input.touchAreas[activeScene];
-        for (var i = 0; i < ta.length; i++) {
+        let ta = input.touchAreas[activeScene];
+        for (let i = 0; i < ta.length; i++) {
             render.rectStroke(ta[i].x, ta[i].y, ta[i].width, ta[i].height, "#ffffff80", 2, 0);
             render.text(ta[i].bind, ta[i].x, ta[i].y, 1, "#ffffff80");
         }
