@@ -130,7 +130,7 @@ var bogusDialogues = [];
 loadDialogues = () => {
     
     if (!onMobile) {
-        if(halloweenMode){
+        if(settings.misc.halloweenMode){
             rollerDialogues = [
                 new DialogueBox({
                     speakerName: "",
@@ -150,7 +150,7 @@ loadDialogues = () => {
                 }),
                 new DialogueBox({
                     speakerName: "",
-                    text: [`Move left and right using A and D.`],
+                    text: [`Move left and right using the arrow keys.`],
                     textSpeed: 1,
                     camPosX: () => player.posX,
                     camPosY: () => player.posY,
@@ -166,7 +166,7 @@ loadDialogues = () => {
                 }),
                 new DialogueBox({
                     speakerName: "",
-                    text: [`Press N to use your active item.`],
+                    text: [`Press D to use your active item.`],
                     textSpeed: 1,
                     camPosX: () => player.posX,
                     camPosY: () => player.posY,
@@ -201,7 +201,7 @@ loadDialogues = () => {
             }),
             new DialogueBox({
                 speakerName: "",
-                text: [`Move left and right using A and D.`],
+                text: [`Move left and right using the arrow keys.`],
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,

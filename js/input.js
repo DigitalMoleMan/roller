@@ -92,7 +92,7 @@ class Input {
 
     readMobileInput() {
         var touches = [];
-        for (var i = 0; i < this.targetTouches.length; i++) touches.push(this.targetTouches[i]);
+        for (let targetTouch of this.targetTouches) touches.push(targetTouch);
 
         this.touchAreas[activeScene].forEach(area => {
             if (touches.filter((t) => (t.clientX >= area.x

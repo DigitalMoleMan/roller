@@ -3,29 +3,6 @@ block = (n) => n * 32;
 class World {
     constructor() {
 
-        this.tileTemplate = {
-            "X": {
-                width: block(1),
-                height: block(1),
-            },
-            "-": {
-                width: block(1),
-                height: block(.125),
-            },
-            "^": {
-                width: block(1),
-                height: block(0.1875),
-                range: 64,
-                speed: 1,
-            },
-            "M": {
-                x: block(1),
-                y: block(2 + .5),
-                width: block(1),
-                height: block(.5),
-            },
-        }
-
         this.spawn = {};
 
         this.tiles = [];
@@ -40,7 +17,6 @@ class World {
     }
 
     interaction() {
-        this.npcs.forEach(npc => console.log(npc));
         let inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
             player.posX > (npc.posX) &&
@@ -134,13 +110,7 @@ class World {
                             type: tile
                         });
                     case 'G':
-                        this.tiles.push({
-                            x: block(x + .25),
-                            y: block(y + .25),
-                            width: block(.5),
-                            height: block(.5),
-                            type: tile
-                        })
+                        this.tiles.push(new Hookpoint(block(x),block(y)));
                         break;
                     case 'L': {
                         this.tiles.push({
@@ -436,11 +406,11 @@ class Roamer extends Enemy {
     }
 
     update() {
-        if(this.alive){
-        if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
-        this.posX += this.velX;
+        if (this.alive) {
+            if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
+            this.posX += this.velX;
 
-        this.getCollisionPlayer()
+            this.getCollisionPlayer()
         }
     }
 
@@ -460,7 +430,7 @@ class Roamer extends Enemy {
             ((this.posY - 16) + offsetY) < player.hitbox.x.bottom() &&
             ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
 
-            if (player.hitbox.x.bottom() > this.posY - 14) {
+            if (player.hitbox.x.bottom() > this.posY - 14 && player.velY > .1) {
                 player.velY = -10;
                 this.damage(1);
             } else {
@@ -564,7 +534,7 @@ class SpikeGuard extends Enemy {
         if (this.blink > 0) this.blink += .25;
         else if ((Math.floor(Math.random() + .005) == 1)) this.blink = 1;
 
-        if (this.blink == (this.sprite().length - 1)) this.blink = 0;
+        if (this.blink == (this.sprite().idle.length - 1)) this.blink = 0;
         this.light = new Light(this.posX + (this.velX * 3), this.posY + (this.velY * 3), (this.velX * this.detectionRadius), (this.velY * this.detectionRadius), this.detectionRadius, [{
             index: 0,
             color: "#ffffffff"
@@ -590,8 +560,9 @@ class SpikeGuard extends Enemy {
 
     draw() {
 
-        render.img(this.sprite()[Math.floor(this.blink)], this.posX - (this.width / 2), this.posY - (this.height / 2))
+        render.img(this.sprite().idle[Math.floor(this.blink)], this.posX - (this.width / 2), this.posY - (this.height / 2))
 
+        if (settings.misc.halloweenMode) render.img(this.sprite().hw, this.posX - (this.width / 2), this.posY - (this.height / 2))
 
         render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#0095e9");
 
@@ -838,8 +809,8 @@ const level = [
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
             new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])), //block(20), block(20)),
             //new LaserTurret(block(20), block()),
-            new Roamer(block(40), block(81.5))
-            //new SpikeGuard(block(50), block(76))
+            //new Roamer(block(40), block(81.5))
+            new SpikeGuard(block(50), block(76))
         ]
     }, {
         name: "GA-19",

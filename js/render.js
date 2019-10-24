@@ -60,12 +60,14 @@ class Renderer {
     /**
      * @param {String} scene 
      */
+    
     update() {
-        requestAnimationFrame(render.update)
+        //requestAnimationFrame(render.update)
         scenes[activeScene].draw();
 
         if (debug) drawDebug();
     }
+    
 
     clear() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

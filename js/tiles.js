@@ -52,3 +52,9 @@ class Elevator extends Tile {
         this.draw();
     }
 }
+
+class Hookpoint extends Tile {
+    constructor(x, y){
+        super('hookpoint', x + block(.25), y + block(.25))
+    }
+}

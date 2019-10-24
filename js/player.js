@@ -64,15 +64,15 @@ class Player {
         // if (input.keys[input.binds.use]) this.use();
     }
 
-    updatePos() {
+    update() {
         this.colX = this.collision('x');
         this.colY = this.collision('y');
 
         this.activeItem.update();
 
-        if (this.collision('x') && this.collision('y')) {
-            this.posX -= this.velX * .1;
-            this.posY -= this.velY * .1;
+        if (this.colX && this.colY) {
+            this.posX -= this.velX * .5;
+            this.posY -= this.velY * .5;
         }
 
         let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
@@ -92,13 +92,6 @@ class Player {
             if (this.velY < 0) this.velY *= .1;
             if (this.velY < .1 && this.velY > -.1) this.velY = Math.round(this.velY * 100) / 100
             //this.posY = Math.round(this.posY)
-        }
-
-        if (Math.abs(this.velX) > 3 && this.colY) {
-            //loopSound(this.sfx().rolling);
-
-        } else {
-            //stopSound(this.sfx().rolling);
         }
 
         if (this.colY && this.velY > 0) {
@@ -182,7 +175,7 @@ class Player {
             this.invsFrames = 60;
             this.hp -= amount;
 
-            playSound(this.sfx().hurt);
+           // playSound(this.sfx().hurt);
             if (this.hp <= 0) this.kill();
         }
     }
@@ -203,7 +196,7 @@ class Player {
     }
 
     collision(axis) {
-        for (var tile of nearPlayer) {
+        for (let tile of nearPlayer) {
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
@@ -315,7 +308,7 @@ class Hookshot extends Item {
 
     update() {
 
-        let hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
         for (let point of hookpoints) {
             point.fromPlayer = Math.sqrt(Math.pow((player.posX + player.velX) - (point.x + point.width / 2), 2) + Math.pow((player.posY + player.velY) - (point.y + point.height / 2), 2));
         };
@@ -413,7 +406,6 @@ class Hookshot extends Item {
                         player.velY += (Math.sin(rotation) * this.stiffness);
 
 
-
                     }
                     if (this.target.fromPlayer <= this.length + 8 && this.target.fromPlayer >= this.length - 32) {
                         player.dec = .96;
@@ -450,7 +442,7 @@ class Hookshot extends Item {
 
     getClosest() {
 
-        let hookpoints = world.tiles.filter((tile) => (tile.type == "G"));
+        let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
         hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
         hookpoints.forEach(point => {
 
@@ -484,7 +476,7 @@ class Hookshot extends Item {
                 x >= tile.x &&
                 y <= tile.y + tile.height &&
                 y >= tile.y) {
-                if (tile.type !== "G") return true;
+                if (tile.type !== 'hookpoint') return true;
             }
         }
     }

@@ -13,12 +13,11 @@ const canvasContainer = document.getElementById("canvasContainer");
 var settings = {
     graphics: {
         enableLighting: true
+    },
+    misc: {
+        halloweenMode: true
     }
 }
-
-//special
-var halloweenMode = true;
-
 
 
 //Mobile
@@ -52,13 +51,13 @@ let input = new Input(
             //movement
             up: 'ArrowUp',
             down: 'ArrowDown',
-            left: 'KeyA',
-            right: 'KeyD',
+            left: 'ArrowLeft',
+            right: 'ArrowRight',
 
             //actions
             jump: 'Space',
-            sprint: 'ShiftLeft',
-            use: 'KeyN',
+           // sprint: 'ShiftLeft',
+            use: 'KeyD',
             interact: 'KeyE',
 
             //hotkeys
@@ -180,7 +179,7 @@ var sprites = {
         elevator: render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes_floor.png'),
         "W": render.importImage('img/tiles/spikes_roof.png'),
-        "G": render.importImage('img/tiles/hookpoint.png'),
+        hookpoint: render.importImage('img/tiles/hookpoint.png'),
         "L": render.importImage('img/tiles/lamp.png'),
         //"¤": render.importSprite('img/tiles/cog', 4),
 
@@ -190,7 +189,10 @@ var sprites = {
     npcs: {
         enemies: {
             roamer: render.importSprite('img/npcs/enemies/roamer/roamer', 6),
-            spikeGuard: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
+            spikeGuard: {
+                idle: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
+                hw:  render.importImage('img/npcs/enemies/spike_guard/hw.png')
+            },
             laserTurret: {
                 base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
                 arm: render.importImage('img/npcs/enemies/laser_turret/arm.png'),
@@ -205,7 +207,8 @@ var sprites = {
         render.importImage('img/backgrounds/main.png'),
         render.importImage('img/backgrounds/main2.png'),
         render.importImage('img/backgrounds/metal_bg.png'),
-        render.importImage('img/backgrounds/metal.png')
+        render.importImage('img/backgrounds/metal.png'),
+        render.importImage('img/backgrounds/halloween_sky.png')
     ],
 }
 
@@ -256,7 +259,7 @@ var sfx = {
     }
 }
 
-if (halloweenMode) {
+if (settings.misc.halloweenMode) {
     sprites.player.body = render.importSprite('img/player/hw_body', 13)
     sprites.npcs.bogus.boogus = render.importSprite('img/npcs/bogus/hw_idle', 10)
     sprites.backgrounds[3] = render.importImage('img/backgrounds/halloween.png')
@@ -268,48 +271,6 @@ musicPlayer.volume = .1;
 musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
-
-window.onload = () => {
-
-
-    if (enableCache) {
-        if ('serviceWorker' in navigator) {
-            var swURL = './sw.js';
-            navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
-                (err) => console.log('ServiceWorker registration failed: ', err));
-        }
-    }
-
-
-
-    loadDialogues();
-    if (halloweenMode) {
-        settings.graphics.enableLighting = false;
-        world.loadLevel(level[9]);
-    } else world.loadLevel(level[1]);
-
-
-    setScene("game");
-
-
-    player.posX = world.spawn.x;
-    player.posY = world.spawn.y;
-
-    camera.x = world.spawn.x - render.canvas.width / 2;
-    camera.y = world.spawn.y - render.canvas.width / 2;
-
-
-    render.attatchCamera(camera);
-
-    dialogue.playDialogue(rollerDialogues[0]);
-
-    document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    //playMusic(10);
-    setInterval(() => loop(), 1000 / 60);
-    //render.update();
-
-
-}
 
 /**
  * @param {Number} track index in music[]
@@ -343,6 +304,50 @@ stopSound = (sound) => {
 setScene = (scene) => {
     activeScene = scene;
 }
+
+window.onload = () => {
+
+
+    if (enableCache) {
+        if ('serviceWorker' in navigator) {
+            var swURL = './sw.js';
+            navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+                (err) => console.log('ServiceWorker registration failed: ', err));
+        }
+    }
+
+
+
+    loadDialogues();
+    if (settings.misc.halloweenMode) {
+        settings.graphics.enableLighting = true;
+        world.loadLevel(level[9]);
+    } else world.loadLevel(level[1]);
+
+
+    setScene("game");
+
+
+    player.posX = world.spawn.x;
+    player.posY = world.spawn.y;
+
+    camera.x = world.spawn.x - render.canvas.width / 2;
+    camera.y = world.spawn.y - render.canvas.width / 2;
+
+
+    render.attatchCamera(camera);
+
+    dialogue.playDialogue(rollerDialogues[0]);
+
+    document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
+    //playMusic(10);
+    setInterval(() => loop(), 1000 / 60);
+    //render.update();
+
+
+}
+
+
 function loop() {
     if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
     scenes[activeScene].update();
@@ -357,8 +362,6 @@ class Scene {
         this.draw = () => draw();
     }
 }
-
-
 
 var scenes = {
     menu: new Scene(() => { // update
@@ -400,7 +403,7 @@ var scenes = {
         world.update();
 
         player.readInput(input);
-        player.updatePos();
+        player.update();
 
         camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
@@ -418,9 +421,12 @@ var scenes = {
 
 
         var bg = sprites.backgrounds[3];
-        if (halloweenMode) {
-            render.rect(0, 0, render.canvas.height * 2, render.canvas.width * 2, "#262b44", 0);
-            for (var x = 0; x < (canvasWidth * 2); x += bg.width * 2) {
+        if (settings.misc.halloweenMode) {
+
+            for (let x = 0; x < (canvasWidth * 2); x += bg.width * 2) {
+                for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
+                    render.img(sprites.backgrounds[4], x + camera.x, y + camera.y, 1.1, 2);
+                }
                 render.img(bg, (x - ((camera.x / 5) % (bg.width * 2))), (canvasHeight - (bg.height * 2)) + (((world.height - canvasHeight) - camera.y) / 10), 0, 2);
             }
         } else {
