@@ -56,7 +56,7 @@ let input = new Input(
 
             //actions
             jump: 'Space',
-           // sprint: 'ShiftLeft',
+            // sprint: 'ShiftLeft',
             use: 'KeyD',
             interact: 'KeyE',
 
@@ -170,11 +170,13 @@ var sprites = {
         }
     },
     tiles: {
-        "@": render.importImage('img/tiles/break_block_0.png'),
-        block_metal: render.importSprite('img/tiles/block/metal', 16),
-        alt_block_metal: render.importSprite('img/tiles/block/alt_metal', 16),
-        block_dirt: render.importSprite('img/tiles/block/dirt', 16),
-        alt_block_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
+        // "@": render.importImage('img/tiles/break_block_0.png'),
+        block: {
+            metal: render.importSprite('img/tiles/block/metal', 16),
+            alt_block_metal: render.importSprite('img/tiles/block/alt_metal', 16),
+            dirt: render.importSprite('img/tiles/block/dirt', 16),
+            alt_block_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
+        },
         platform: render.importImage('img/tiles/platform.png'),
         elevator: render.importSprite('img/tiles/elevator', 8),
         "M": render.importImage('img/tiles/spikes_floor.png'),
@@ -191,7 +193,7 @@ var sprites = {
             roamer: render.importSprite('img/npcs/enemies/roamer/roamer', 6),
             spikeGuard: {
                 idle: render.importSprite('img/npcs/enemies/spike_guard/body_idle', 6),
-                hw:  render.importImage('img/npcs/enemies/spike_guard/hw.png')
+                hw: render.importImage('img/npcs/enemies/spike_guard/hw.png')
             },
             laserTurret: {
                 base: render.importImage('img/npcs/enemies/laser_turret/base.png'),
@@ -200,7 +202,8 @@ var sprites = {
             }
         },
         bogus: {
-            idle: render.importSprite('img/npcs/bogus/idle', 10)
+            idle: render.importSprite('img/npcs/bogus/idle', 10),
+            hw_anim: render.importImage('img/npcs/bogus/hw_anim.png')
         }
     },
     backgrounds: [
@@ -508,7 +511,9 @@ var scenes = {
             render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
         }
 
-
+       // if (world.inRangeActors.length > 0) {
+        //    render.text('E', player.posX  - block(.25), player.posY - block(3), 1, "#fff", 1);
+        //}
 
         var itemUi = sprites.ui.activeItem;
         render.ctx.save();

@@ -10,6 +10,8 @@ class World {
 
         this.segments = [];
 
+        //this.inRangeActors = [];
+
         document.addEventListener(input.binds.game.interact, () => {
             if (activeScene == "game") this.interaction();
         })
@@ -17,14 +19,9 @@ class World {
     }
 
     interaction() {
-        let inRangeActors = this.npcs.filter((npc) => (
-            //npc.type == "actor" &&
-            player.posX > (npc.posX) &&
-            player.posX < (npc.posX + npc.interactionRadius) &&
-            player.posY > (npc.posY) &&
-            player.posY < (npc.posY + npc.interactionRadius)));
-        console.log(inRangeActors);
-        if (inRangeActors.length > 0) inRangeActors[0].onInteract();
+        
+        //console.log(inRangeActors);
+        if (this.inRangeActors.length > 0) this.inRangeActors[0].onInteract();
     }
 
     loadLevel(lvl) {
@@ -145,6 +142,7 @@ class World {
         }
 
         for (let tile of lvl.advancedLayer) {
+            console.log(tile);
             switch (tile.type) {
                 case '@': {
                     this.spawn.x = block(tile.x) + 16;
@@ -268,6 +266,13 @@ class World {
             npc.update();
         }
 
+        this.inRangeActors = this.npcs.filter((npc) => (
+            //npc.type == "actor" &&
+            player.posX > (npc.posX) &&
+            player.posX < (npc.posX + npc.interactionRadius) &&
+            player.posY > (npc.posY) &&
+            player.posY < (npc.posY + npc.interactionRadius)));
+
 
     }
 
@@ -322,9 +327,8 @@ class World {
             let ctx = canvas.getContext("2d")
             ctx.imageSmoothingEnabled = false;
             ctx.scale(2, 2);
-            let spritePath = `${segment.type}_${segment.style}`;
-            let sprite = sprites.tiles[spritePath]
-            let alteration = sprites.tiles['alt_' + spritePath]
+            let sprite = sprites.tiles[segment.type][segment.style]
+            let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
             for (let y = 0; y < segment.height; y += 16) {
                 for (let x = 0; x < segment.width; x += 16) {
                     let dIndex = 0;
@@ -376,244 +380,6 @@ class World {
         }
     }
 
-}
-
-class Actor {
-    constructor(posX, posY, onInteract, interactionRadius) {
-        this.type = "actor";
-        this.posX = posX;
-        this.posY = posY;
-        this.interactionRadius = interactionRadius;
-        this.onInteract = () => onInteract();
-    }
-}
-
-class Enemy {
-    constructor(posX, posY) {
-        this.posX = posX;
-        this.posY = posY;
-        this.type = "enemies";
-    }
-}
-
-class Roamer extends Enemy {
-    constructor(posX, posY) {
-        super(posX + .5, posY + .5);
-        this.hp = 3;
-        this.velX = -1;
-        this.alive = true;
-        this.sprite = () => sprites.npcs.enemies.roamer;
-    }
-
-    update() {
-        if (this.alive) {
-            if (this.getCollision(world.segments)) this.velX -= this.velX * 2;
-            this.posX += this.velX;
-
-            this.getCollisionPlayer()
-        }
-    }
-
-    getCollision(area, offsetX = 0, offsetY = 0) {
-        for (let obj of area) {
-            if (((this.posX - 8) + offsetX) < obj.x + obj.width &&
-                ((this.posX + 8) + offsetX) > obj.x &&
-                ((this.posY - 16) + offsetY) < obj.y + obj.height &&
-                ((this.posY + 8) + offsetY) > obj.y) return true;
-        };
-        return false;
-    }
-
-    getCollisionPlayer(offsetX = 0, offsetY = 0) {
-        if (((this.posX - 8) + offsetX) < player.hitbox.x.right() &&
-            ((this.posX + 8) + offsetX) > player.hitbox.x.left() &&
-            ((this.posY - 16) + offsetY) < player.hitbox.x.bottom() &&
-            ((this.posY + 8) + offsetY) > player.hitbox.x.top()) {
-
-            if (player.hitbox.x.bottom() > this.posY - 14 && player.velY > .1) {
-                player.velY = -10;
-                this.damage(1);
-            } else {
-                player.damage(1);
-            }
-        }
-    }
-
-    damage(amount) {
-        this.hp -= amount;
-        if (this.hp < 0) this.die();
-    }
-
-    die() {
-        this.alive = false;
-    }
-
-    draw() {
-        render.img(this.sprite()[Math.round(this.posX / 2) % this.sprite().length], this.posX - block(.5), this.posY - block(.5), 1, 2);
-
-        if (debug) {
-            render.rectStroke(this.posX - 8, this.posY - 8, 16, 24, "#f00");
-        }
-    }
-}
-class SpikeGuard extends Enemy {
-
-    constructor(posX, posY) {
-        super(posX, posY);
-        this.originX = posX;
-        this.originY = posY;
-        this.velX = 0;
-        this.velY = 0;
-        this.width = block(1);
-        this.height = block(1);
-        this.name = "spikeGuard";
-        this.acceleration = .3;
-        this.deceleration = .9;
-        this.detectionRadius = 256;
-        this.sprite = () => sprites.npcs.enemies.spikeGuard;
-        this.sound = () => sfx.npcs.enemies.spikeGuard;
-
-        this.blink = 0;
-
-        this.light = new Light(this.posX, this.posY, (this.velX * this.detectionRadius), (this.velY * this.detectionRadius), this.detectionRadius, [{
-            index: 0,
-            color: "#00ffff40"
-        }, {
-            index: 1,
-            color: "#0080ff40"
-        }])
-    }
-
-
-
-
-    update() {
-
-        this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
-
-
-        this.fromOrigin = Math.sqrt(Math.pow(this.originX - this.posX, 2) + Math.pow(this.originY - this.posY, 2));
-
-        if (this.fromPlayer < this.detectionRadius) {
-
-            var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
-            this.velX += Math.cos(rotation) * this.acceleration
-            this.velY += Math.sin(rotation) * this.acceleration
-
-        } else {
-            var rotation = Math.atan2(this.originY - this.posY, this.originX - this.posX);
-            this.velX += Math.cos(rotation) * this.acceleration
-            this.velY += Math.sin(rotation) * this.acceleration
-
-            if (Math.round(this.posX) == this.originX) {
-
-                this.posX = this.originX;
-                this.velX /= 2;
-            }
-
-            if (Math.round(this.posY) == this.originY) {
-                this.posY = this.originY;
-                this.velY /= 2;
-            }
-
-        }
-
-
-        this.posX += this.velX;
-        this.posY += this.velY;
-
-
-
-        this.velX *= this.deceleration;
-        this.velY *= this.deceleration;
-
-        if (this.checkCollision()) {
-            player.damage(1);
-        }
-
-        if (this.blink > 0) this.blink += .25;
-        else if ((Math.floor(Math.random() + .005) == 1)) this.blink = 1;
-
-        if (this.blink == (this.sprite().idle.length - 1)) this.blink = 0;
-        this.light = new Light(this.posX + (this.velX * 3), this.posY + (this.velY * 3), (this.velX * this.detectionRadius), (this.velY * this.detectionRadius), this.detectionRadius, [{
-            index: 0,
-            color: "#ffffffff"
-        }, {
-            index: .005,
-            color: "#0095e9ff"
-        }, {
-            index: .01,
-            color: "#0095e980"
-        }, {
-            index: 1,
-            color: "#00000000"
-        }])
-    }
-
-    checkCollision() {
-        if (player.posX < this.posX + 16 &&
-            player.posX > this.posX - 16 &&
-            player.posY < this.posY + 16 &&
-            player.posY > this.posY - 16) return true;
-        else return false;
-    }
-
-    draw() {
-
-        render.img(this.sprite().idle[Math.floor(this.blink)], this.posX - (this.width / 2), this.posY - (this.height / 2))
-
-        if (settings.misc.halloweenMode) render.img(this.sprite().hw, this.posX - (this.width / 2), this.posY - (this.height / 2))
-
-        render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#0095e9");
-
-        if (debug) {
-            render.line(this.posX - 16, this.posY, this.posX + 16, this.posY, "#fff");
-            render.line(this.posX, this.posY - 16, this.posX, this.posY + 16, "#fff");
-        }
-    }
-}
-
-
-class LaserTurret extends Enemy {
-    constructor(posX, posY) {
-        super(posX + block(.5), posY + block(.5))
-
-        this.angle = 0;
-
-        this.sprite = () => sprites.npcs.enemies.laserTurret;
-    }
-
-    update() {
-        this.angle = Math.atan2(player.posY - this.posY, player.posX - this.posX) * 180 / Math.PI;
-    }
-
-    draw() {
-        render.img(this.sprite().base, this.posX, this.posY);
-        render.img(this.sprite().arm, this.posX, this.posY)
-
-        render.img(this.sprite().laser, this.posX, this.posY, 32, 32, this.posX, this.posY, this.angle + 180);
-    }
-}
-
-class Bogus extends Actor {
-    constructor(posX, posY, onInteract) {
-        super(posX, posY, onInteract, block(3));
-        this.drawnSprite = 'idle';
-        this.sprite = () => sprites.npcs.bogus;
-    }
-
-    update() {
-
-    }
-
-    boogify() {
-        this.drawnSprite = 'boogus';
-        this.onInteract = () => dialogue.playDialogue(bogusDialogues[6])
-    }
-
-    draw() {
-        render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
-    }
 }
 
 
@@ -1120,9 +886,9 @@ const level = [
         name: "The Hall of Ween",
         layout: [
 
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX       XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX         XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -1149,11 +915,65 @@ const level = [
                 exit: 9,
                 exitX: block(39),
                 exitY: block(9.5)
+            },
+            {
+                type: "E",
+                x: block(67),
+                y: block(8),
+                width: block(0),
+                height: block(2),
+                exit: 11,
+                exitX: block(0),
+                exitY: block(9.5)
             }
         ],
         npcs: [
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
             new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
+            // new LaserTurret(block(20), block(31)),
+            //new Roamer(30, 31)
+        ]
+    },{
+        name: "Halloween challenge 1",
+        layout: [
+
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                      G      G                                 XX",
+            "XX                                                               XX",
+            "                                                                   ",
+            "@                                                                  ",
+            "XXXX   XXXXX    XXXXX                                            XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+        ],
+        advancedLayer: [
+            /*
+            {
+                type: "E",
+                x: block(-.5),
+                y: block(8),
+                width: block(0),
+                height: block(2),
+                exit: 9,
+                exitX: block(39),
+                exitY: block(9.5)
+            },
+            */
+        ],
+        npcs: [
+            new SpikeGuard(block(5), block(5))
+            //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
+            //new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
         ]

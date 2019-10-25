@@ -337,6 +337,8 @@ class Hookshot extends Item {
 
 
                 if (input.keys[input.binds.game.use]) {
+
+                     console.log("used")
                     try {
                         if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) &&
                             this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
@@ -395,7 +397,7 @@ class Hookshot extends Item {
 
                 if (input.keys[input.binds.game.use]) {
 
-
+                   
 
                     let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
                     if (this.target.fromPlayer >= this.length) {

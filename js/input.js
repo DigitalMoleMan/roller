@@ -70,7 +70,10 @@ class Input {
             document.addEventListener('keydown', (e) => {
                 var pressedKey = e.code;
                 if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
+               // console.log(pressedKey);
+               
                 this.keys[pressedKey] = true;
+               // console.log(input.keys[input.binds.game.use]);
             });
             document.addEventListener('keyup', (e) => {
                 var releasedKey = e.code;

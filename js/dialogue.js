@@ -8,6 +8,9 @@ class DialogueHandler {
         this.textBuffer = new String;
         this.displayedText = [];
         this.textProg = 0;
+
+        this.hide = false;
+
         this.sfx = () => sfx.ui.dialogue;
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
@@ -30,6 +33,7 @@ class DialogueHandler {
 
     playDialogue(dlgObj) {
         setScene("gameDialogue");
+        this.hide = false;
         this.textProg = 0;
         this.currentDialogue = dlgObj;
     }
@@ -53,6 +57,7 @@ class DialogueHandler {
     }
 
     draw() {
+        if(!this.hide){
         var tbR = this.tbX + this.tbW;
         var tbB = this.tbY + this.tbH;
 
@@ -102,6 +107,7 @@ class DialogueHandler {
 
         //next message symbol
         if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", tbR - block(1 - (Math.sin(gameClock / 5) / 4)), tbB - block(1), 1);
+        }
     }
 }
 
@@ -312,23 +318,118 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
-            text: ["Ooh, I didn't see you there", ""],
-            textSpeed: .25,
+            text: ["WOAAH, A GHOST!"],
+            textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
-                world.npcs[0].boogify();
                 dialogue.playDialogue(bogusDialogues[6])
             }
         }),
         new DialogueBox({
-            speakerName: "B.O.O.G.U.S.",
-            text: ["HA HA HA"],
+            speakerName: "B.O.G.U.S.",
+            text: ["Knew I should have brought a vaccum cleaner", "Wait a minute, it's just the little twerp."],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[7])
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.G.U.S.",
+            text: ["Why are you wearing a lame costume?", "Is it halloween or something?", "Wait, thats right! It is, but that means..."],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                world.npcs[0].boogify();
+            }
+        }),
+        new DialogueBox({
+            speakerName: "?",
+            text: ["WAH HA HA!", "I am here to ruin your day!"],
             textSpeed: .25,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
-                
+                dialogue.playDialogue(bogusDialogues[9])
+            }
+        }),
+        new DialogueBox({
+            speakerName: "?",
+            text: ["Who am I?"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[10])
+               // setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "?",
+            text: ["Well. I am"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[11])
+                //setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["B.O.O.G.U.S, the scariest robot in the world!"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[12])
+                //setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["They call me that because I can curse people!", "And now, I have put a curse on you!", "From now on, you won't be able to take a shower!"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[13])
+                //setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["WAH HA HA HA! So delightfully evil!","The only way to undo my curse is to collect 10 candies."],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[14])
+                //setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["But that definitely won't happen", "since there definitely are no candies in", "the rooms up ahead!"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.playDialogue(bogusDialogues[15])
+                //setScene("game")
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["Smell you later you stinky thing!"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                //dialogue.playDialogue(bogusDialogues[14])
                 setScene("game")
             }
         })
