@@ -49,12 +49,12 @@ class Elevator extends Tile {
         this.x += this.velX;
         this.y += this.velY;
 
-        this.draw();
+
     }
 }
 
 class Hookpoint extends Tile {
     constructor(x, y){
-        super('hookpoint', x + block(.25), y + block(.25))
+        super('hookpoint', x + block(.25), y + block(.25), block(.5), block(.5))
     }
 }

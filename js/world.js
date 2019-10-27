@@ -19,7 +19,7 @@ class World {
     }
 
     interaction() {
-        
+
         //console.log(inRangeActors);
         if (this.inRangeActors.length > 0) this.inRangeActors[0].onInteract();
     }
@@ -42,32 +42,13 @@ class World {
                         this.spawn.y = block(y) + 16;
                         break;
                     }
-                    case 'X': {
-                        this.tiles.push(new Block(block(x), block(y), 'metal'));
-                        break
-                    }
-                    case 'D': {
-                        this.tiles.push(new Block(block(x), block(y), 'dirt'));
-                        break
-                    }
-                    case '-': {
-                        this.tiles.push(new Platform(block(x), block(y)));
-                        break
-                    }
-                    case '^': {
-                        this.tiles.push(new Elevator(block(x), block(y), 0, 1, 64));
-                        break;
-                    }
-                    case 'v': {
-                        this.tiles.push(new Elevator(block(x), block(y), 0, 1, -64));
-                        break;
-                    }
-                    case '<':
-                        this.tiles.push(new Elevator(block(x), block(y), 1, 0, 64));
-                        break;
-                    case '>':
-                        this.tiles.push(new Elevator(block(x), block(y), 1, 0, -64));
-                        break;
+                    case 'X': this.tiles.push(new Block(block(x), block(y), 'metal')); break;
+                    case 'D': this.tiles.push(new Block(block(x), block(y), 'dirt')); break
+                    case '-': this.tiles.push(new Platform(block(x), block(y))); break
+                    case '^': this.tiles.push(new Elevator(block(x), block(y), 0, 1, 64)); break;
+                    case 'v': this.tiles.push(new Elevator(block(x), block(y), 0, 1, -64));break;
+                    case '<': this.tiles.push(new Elevator(block(x), block(y), 1, 0, 64)); break;
+                    case '>': this.tiles.push(new Elevator(block(x), block(y), 1, 0, -64));break;
                     case 'M':
                         this.tiles.push({
                             x: block(x),
@@ -89,25 +70,8 @@ class World {
                             type: tile
                         });
                         break;
-                    case '¤':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(1),
-                            type: tile
-                        });
-                        break;
-                    case '#':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(1),
-                            type: tile
-                        });
                     case 'G':
-                        this.tiles.push(new Hookpoint(block(x),block(y)));
+                        this.tiles.push(new Hookpoint(block(x), block(y)));
                         break;
                     case 'L': {
                         this.tiles.push({
@@ -126,67 +90,15 @@ class World {
                         });
                     }
                         break;
-                    case 'R':
-                        this.npcs.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(1),
-                            velX: 0,
-                            frame: 0,
-                            type: tile
-                        })
-                        break;
                 }
             }
         }
 
         for (let tile of lvl.advancedLayer) {
-            console.log(tile);
             switch (tile.type) {
-                case '@': {
-                    this.spawn.x = block(tile.x) + 16;
-                    this.spawn.y = block(tile.y) + 16;
-                    break;
-                }
                 case 'X': {
                     tile.width = block(1);
                     tile.height = block(1);
-                    break;
-                }
-                case '-': {
-                    tile.width = block(1);
-                    tile.height = block(.125);
-                    break
-                }
-                case '^': {
-                    tile.width = block(1)
-                    tile.height = block(0.1875)
-                    tile.velY = 0
-                    tile.range = 64
-                    tile.speed = 1
-                    break;
-                }
-                case 'v': {
-
-                    tile.width = block(1)
-                    tile.height = block(0.1875)
-                    tile.range = 64
-                    tile.speed = 1
-                    break;
-                }
-                case '<': {
-                    tile.width = block(1)
-                    tile.height = block(0.1875)
-                    tile.range = 64
-                    tile.speed = 1
-                    break;
-                }
-                case '>': {
-                    tile.width = block(1)
-                    tile.height = block(0.1875)
-                    tile.range = 64
-                    tile.speed = 1
                     break;
                 }
                 case 'M': {
@@ -201,30 +113,6 @@ class World {
                 case 'W': {
                     tile.width = block(1)
                     tile.height = block(.5)
-                    break;
-                }
-                case '¤': {
-                    tile.width = block(1)
-                    tile.height = block(1)
-                    break;
-                }
-                case '#': {
-                    tile.width = block(1)
-                    tile.height = block(1)
-                    break;
-                }
-                case 'G': {
-                    tile.x += block(.25)
-                    tile.y += block(.25)
-                    tile.width = block(.5)
-                    tile.height = block(.5)
-                    break;
-                }
-                case 'R': {
-                    tile.width = block(1)
-                    tile.height = block(1)
-                    tile.velX = 0
-                    tile.frame = 0
                     break;
                 }
             }
@@ -366,14 +254,17 @@ class World {
                     if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
                     ctx.drawImage(sprite[dIndex], x, y);
-                    try {
+                   try {
                         if ((Math.random() * 10) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch { }
+                    } catch { 
+                    }
                 }
             }
             try {
                 Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
             } catch {
+
+                console.log("canvas img soruce")
                 segment.sprite = new Image();
                 segment.sprite.src = canvas.toDataURL();
             }
@@ -517,11 +408,11 @@ const level = [
             "XX       XXX                                                           X",
             "XX       XXX >>     XXXMMMMXXX                     XXX                 X",
             "XX       XXX        XXXXXXXXXX---   ---X                               X",
-            "XX       XXX        XXXXXXXXXX         X     XX                        X",
+            "XX       XXX        XXXXXXXXXX         XXX XXXX                        X",
             "XX       XXX        X        X         X     XX                        X",
             "XX                  X        X         X     XX                        X",
             "XX ^^               X    @   X   ---   X                               X",
-            "                        XX                                              ",
+            "                    X   XX                                              ",
             "                       XXXX                                             ",
             "XXXXX--XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXX  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
@@ -798,28 +689,24 @@ const level = [
     }, {
         name: "Adv Layer Testing",
         layout: [
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X                  X",
-            "X            X     X",
-            "X GX         X  G  X",
-            "X            X     X",
-            "X         @  X     X",
-            "XXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXX",
+            "X                              X",
+            "X                              X",
+            "X                              X",
+            "X                              X",
+            "X                     G        X",
+            "X                              X",
+            "X                              X",
+            "X  XXXXXXXXXXXXX               X",
+            "X                              X",
+            "X                              X",
+            "X    G                         X",
+            "X                              X",
+            "X                              X",
+            "X  XXXXX                       X",
+            "X                              X",
+            "X                              X",
+            "X     @                        X",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [],
         npcs: []
@@ -924,7 +811,7 @@ const level = [
                 height: block(2),
                 exit: 11,
                 exitX: block(0),
-                exitY: block(9.5)
+                exitY: block(17.5)
             }
         ],
         npcs: [
@@ -933,45 +820,54 @@ const level = [
             // new LaserTurret(block(20), block(31)),
             //new Roamer(30, 31)
         ]
-    },{
+    }, {
         name: "Halloween challenge 1",
         layout: [
 
+            
+            "                                                                 XX",
+            "                                                                 XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
-            "XX                      G      G                                 XX",
-            "XX                                                               XX",
-            "                                                                   ",
-            "@                                                                  ",
-            "XXXX   XXXXX    XXXXX                                            XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
-            "XXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXX",
+            "XX                                                               XX",
+            "XX         XXXX                                                  XX",
+            "XX         XXXX         G      G                                 XX",
+            "XX         XXXX                                                  XX",
+            "         --XXXX                                                    ",
+            "@          XXXX                                                    ",
+            "XXXX       XXXX                                                  XX",
+            "XXXX                                                             XX",
+            "XXXX                                                             XX",
+            "XXXXX                                                            XX",
+            "XXXXX                                                            XX",
+            "XXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXX",
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
-            /*
+            
             {
                 type: "E",
                 x: block(-.5),
-                y: block(8),
+                y: block(16),
                 width: block(0),
                 height: block(2),
-                exit: 9,
-                exitX: block(39),
+                exit: 10,
+                exitX: block(66.5),
                 exitY: block(9.5)
-            },
-            */
+            }
+            
         ],
         npcs: [
-            new SpikeGuard(block(5), block(5))
+            new SpikeGuard(block(40), block(5))
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
             //new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),

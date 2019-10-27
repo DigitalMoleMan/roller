@@ -10,19 +10,19 @@ class Player {
         this.velX = 0;
         this.velY = 0;
         this.hitbox = {
-            paddingX: 15,
-            paddingY: 15.5,
+            paddingX: 16,
+            paddingY: 16,
             x: {
-                left: () => (this.posX - this.hitbox.paddingX) + this.velX,
-                right: () => (this.posX + this.hitbox.paddingX) + this.velX,
-                top: () => this.posY - (this.hitbox.paddingY / 2),
-                bottom: () => this.posY + this.hitbox.paddingY
+                left: () => Math.round((this.posX - this.hitbox.paddingX) + this.velX),
+                right: () => Math.round((this.posX + this.hitbox.paddingX) + this.velX),
+                top: () => Math.round(this.posY - (this.hitbox.paddingY / 2)),
+                bottom: () => Math.round(this.posY + this.hitbox.paddingY)
             },
             y: {
-                left: () => this.posX - this.hitbox.paddingX,
-                right: () => this.posX + this.hitbox.paddingX,
-                top: () => (this.posY - this.hitbox.paddingY / 2) + this.velY,
-                bottom: () => (this.posY + this.hitbox.paddingY) + this.velY
+                left: () => Math.round(this.posX - this.hitbox.paddingX),
+                right: () => Math.round(this.posX + this.hitbox.paddingX),
+                top: () => Math.round((this.posY - this.hitbox.paddingY / 2) + this.velY),
+                bottom: () => Math.round((this.posY + this.hitbox.paddingY) + this.velY)
             }
         }
         this.acc = .4;
@@ -71,8 +71,8 @@ class Player {
         this.activeItem.update();
 
         if (this.colX && this.colY) {
-            this.posX -= this.velX * .5;
-            this.posY -= this.velY * .5;
+            this.velX -= this.velX * .1;
+            this.posY -= this.velY * .1;
         }
 
         let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
@@ -175,7 +175,7 @@ class Player {
             this.invsFrames = 60;
             this.hp -= amount;
 
-           // playSound(this.sfx().hurt);
+            // playSound(this.sfx().hurt);
             if (this.hp <= 0) this.kill();
         }
     }
@@ -258,10 +258,7 @@ class Player {
 }
 
 class Item {
-    constructor(item = {
-        unlockStatus: false
-    }) {
-        this.unlockStatus = item.unlockStatus;
+    constructor() {
     };
 }
 
@@ -286,7 +283,7 @@ class Hookshot extends Item {
         this.target;
 
         this.inputBuffer = 0;
-        this.sprite = () => sprites.player.hookshot;
+        this.sprite = () => sprites.player.equipment.hookshot;
         this.sound = () => sfx.items.hookshot;
     }
 
@@ -310,17 +307,21 @@ class Hookshot extends Item {
 
         let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
         for (let point of hookpoints) {
-            point.fromPlayer = Math.sqrt(Math.pow((player.posX + player.velX) - (point.x + point.width / 2), 2) + Math.pow((player.posY + player.velY) - (point.y + point.height / 2), 2));
+            point.fromPlayer = Math.round(Math.sqrt(Math.pow((player.posX + player.velX) - (point.x + point.width / 2), 2) + Math.pow((player.posY + player.velY) - (point.y + point.height / 2), 2)));
         };
+
+
 
         switch (this.state) {
             case "retracted":
-                this.posX = player.posX;
-                this.posY = player.posY;
+                this.posX = Math.round(player.posX);
+                this.posY = Math.round(player.posY);
                 this.length = 0;
 
+                this.target = this.getClosest();
+
                 if (this.inputBuffer > 0) {
-                    this.target = this.getClosest();
+
                     if (this.target !== undefined) {
                         this.inputBuffer = 0;
                         this.state = "shooting";
@@ -337,8 +338,6 @@ class Hookshot extends Item {
 
 
                 if (input.keys[input.binds.game.use]) {
-
-                     console.log("used")
                     try {
                         if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) &&
                             this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
@@ -349,8 +348,7 @@ class Hookshot extends Item {
                             this.posX = (this.target.x + (this.target.width / 2))
                             this.posY = (this.target.y + (this.target.height / 2))
 
-                            this.length = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
-
+                            this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
 
 
                             //let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
@@ -397,16 +395,20 @@ class Hookshot extends Item {
 
                 if (input.keys[input.binds.game.use]) {
 
-                   
+                    if (input.keys[input.binds.game.up] && this.length > 32) this.length -= 2
+                    if (input.keys[input.binds.game.down] && this.length < this.maxLength) this.length += 2
+
+                    if (this.length > this.maxLength) this.length -= 2
+
 
                     let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
                     if (this.target.fromPlayer >= this.length) {
 
                         this.stiffness = (this.target.fromPlayer - this.length) / 4;
 
-                        player.velX += (Math.cos(rotation) * this.stiffness);
+                       if(!player.colX) player.velX += (Math.cos(rotation) * this.stiffness);
+                       else player.velX -= (Math.cos(rotation) * this.stiffness);
                         player.velY += (Math.sin(rotation) * this.stiffness);
-
 
                     }
                     if (this.target.fromPlayer <= this.length + 8 && this.target.fromPlayer >= this.length - 32) {
@@ -446,30 +448,32 @@ class Hookshot extends Item {
 
         let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
         hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
-        hookpoints.forEach(point => {
+        for (let point of hookpoints) {
 
-            point.blocked = () => {
-                let nodes = []
-
-                let rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
-                for (let i = 0; i < point.fromPlayer; i += 8) {
-                    nodes.push({
-                        x: player.posX + (Math.cos(rotation) * i),
-                        y: player.posY + (Math.sin(rotation) * i)
-                    })
-                }
-                for (let node of nodes) {
-                    if (this.checkCollision(node.x, node.y, onScreenSegs)) return true;
-                }
-
-                return false;
-            }
-        })
-        hookpoints = hookpoints.filter((point) => (point.blocked() == false));
+            point.blocked = this.checkPointBlocked(point)
+        }
+        hookpoints = hookpoints.filter((point) => (point.blocked == false));
 
 
         if (hookpoints.length > 0) return hookpoints.reduce((prev, curr) => prev.fromPlayer < curr.fromPlayer ? prev : curr)
         else return undefined;
+    }
+
+    checkPointBlocked(point) {
+            let nodes = []
+
+            let rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+            for (let i = 0; i < point.fromPlayer; i += 8) {
+                nodes.push({
+                    x: player.posX + (Math.cos(rotation) * i),
+                    y: player.posY + (Math.sin(rotation) * i)
+                })
+            }
+            for (let node of nodes) {
+                if (this.checkCollision(node.x, node.y, onScreenSegs)) return true;
+            }
+
+            return false;
     }
 
     checkCollision(x, y, area) {
@@ -484,15 +488,19 @@ class Hookshot extends Item {
     }
 
     draw() {
+
+        //hook
         if (this.state !== "retracted") {
             render.line(player.posX, player.posY, this.posX, this.posY, "#fff")
-            render.img(this.sprite()[this.angle], this.posX - 6, this.posY - 6);
+            render.img(this.sprite().hook[this.angle], this.posX - 6, this.posY - 6);
         }
 
+        //recticle
+        if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - block(.25), this.target.y - block(.25))
+
         if (debug) {
-            try {
-                render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff")
-            } catch (error) { }
+            try { render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff") }
+            catch (error) { }
         }
     }
 }

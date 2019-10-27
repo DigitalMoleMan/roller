@@ -160,8 +160,11 @@ var sprites = {
         bands: render.importSprite('img/player/bands', 8),
         bandsJump: render.importSprite('img/player/bands_jump', 8),
         cannon: render.importSprite('img/player/cannon', 13),
-        hookshot: render.importSprite('img/player/hookshot', 8),
         equipment: {
+            hookshot: {
+                hook: render.importSprite('img/player/hookshot', 8),
+                recticle: render.importImage('img/ui/hookshot_recticle.png')
+            },
             booster: {
                 inactive: render.importImage('img/player/equipment/booster/inactive.png'),
                 active: render.importSprite('img/player/equipment/booster/active', 3),
@@ -173,9 +176,9 @@ var sprites = {
         // "@": render.importImage('img/tiles/break_block_0.png'),
         block: {
             metal: render.importSprite('img/tiles/block/metal', 16),
-            alt_block_metal: render.importSprite('img/tiles/block/alt_metal', 16),
+            alt_metal: render.importSprite('img/tiles/block/alt_metal', 16),
             dirt: render.importSprite('img/tiles/block/dirt', 16),
-            alt_block_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
+            alt_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
         },
         platform: render.importImage('img/tiles/platform.png'),
         elevator: render.importSprite('img/tiles/elevator', 8),
@@ -232,7 +235,9 @@ var music = [
     'audio/music/Chain Reactor.wav',
     'audio/music/Hollow.wav',
     'audio/music/Spaced Sax.wav',
-    'audio/music/the beatdown.wav'
+    'audio/music/the beatdown.wav',
+    'audio/music/a scary robot this way comes.wav',
+    'audio/music/spook time.wav'
 ];
 
 var sfx = {
@@ -259,6 +264,12 @@ var sfx = {
             next: new Audio('audio/sfx/tick.wav'),
             text: new Audio('audio/sfx/text.wav')
         }
+    },
+    npcs: {
+        bogus: {
+            lightning: new Audio('audio/sfx/lightning.wav'),
+            startup: new Audio('audio/sfx/hw_startup.wav'),
+        }
     }
 }
 
@@ -270,7 +281,7 @@ if (settings.misc.halloweenMode) {
 
 
 const musicPlayer = new Audio();
-musicPlayer.volume = .1;
+musicPlayer.volume = .2;
 musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
@@ -323,8 +334,8 @@ window.onload = () => {
 
     loadDialogues();
     if (settings.misc.halloweenMode) {
-        settings.graphics.enableLighting = true;
-        world.loadLevel(level[9]);
+        settings.graphics.enableLighting = false;
+        world.loadLevel(level[11]);
     } else world.loadLevel(level[1]);
 
 
@@ -340,14 +351,12 @@ window.onload = () => {
 
     render.attatchCamera(camera);
 
-    dialogue.playDialogue(rollerDialogues[0]);
+    //dialogue.playDialogue(rollerDialogues[0]);
 
     document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
-    //playMusic(10);
+    playMusic(14);
     setInterval(() => loop(), 1000 / 60);
     //render.update();
-
-
 }
 
 
@@ -511,9 +520,9 @@ var scenes = {
             render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
         }
 
-       // if (world.inRangeActors.length > 0) {
-        //    render.text('E', player.posX  - block(.25), player.posY - block(3), 1, "#fff", 1);
-        //}
+       if (world.inRangeActors.length > 0 && activeScene == 'game') {
+            render.text('E', world.inRangeActors[0].posX + block(1.25),world.inRangeActors[0].posY - block(.75), 1, "#fff", 1);
+        }
 
         var itemUi = sprites.ui.activeItem;
         render.ctx.save();

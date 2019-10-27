@@ -235,7 +235,7 @@ loadDialogues = () => {
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
-                next: () => setScene("game")
+                next: () => dialogue.end()
             })
         ]
     } else {
@@ -270,7 +270,7 @@ loadDialogues = () => {
                 textSpeed: 1,
                 camPosX: () => player.posX,
                 camPosY: () => player.posY,
-                next: () => setScene("game")
+                next: () => dialogue.end()
             })
         ]
     }
@@ -314,7 +314,7 @@ loadDialogues = () => {
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
-            next: () => setScene("game")
+            next: () => dialogue.end()
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
@@ -328,7 +328,7 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
-            text: ["Knew I should have brought a vaccum cleaner", "Wait a minute, it's just the little twerp."],
+            text: ["Knew I should have brought a vaccum cleaner!", "Hey! Wait a minute, it's just you..."],
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
@@ -338,17 +338,20 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.G.U.S.",
-            text: ["Why are you wearing a lame costume?", "Is it halloween or something?", "Wait, thats right! It is, but that means..."],
+            text: ["Why are you wearing that lame costume?", "Is it halloween or somethin'?", "Oh, thats right! it is! But that means..."],
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
+                if(!dialogue.hide){
+                stopSound(musicPlayer);
                 world.npcs[0].boogify();
+                }
             }
         }),
         new DialogueBox({
             speakerName: "?",
-            text: ["WAH HA HA!", "I am here to ruin your day!"],
+            text: ["WAH HA HA!", "I'm here to ruin your day!"],
             textSpeed: .25,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
@@ -379,9 +382,9 @@ loadDialogues = () => {
             }
         }),
         new DialogueBox({
-            speakerName: "B.O.O.G.U.S.",
+            speakerName: "?",
             text: ["B.O.O.G.U.S, the scariest robot in the world!"],
-            textSpeed: .5,
+            textSpeed: .25,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
@@ -391,7 +394,7 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.O.G.U.S.",
-            text: ["They call me that because I can curse people!", "And now, I have put a curse on you!", "From now on, you won't be able to take a shower!"],
+            text: ["They call me that because I curse people!", "And now, I have put a curse on YOU!", "From now on, you won't be able to take a shower!"],
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
@@ -424,13 +427,24 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.O.G.U.S.",
-            text: ["Smell you later you stinky thing!"],
+            text: ["Smell you later you stinky sod!"],
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
                 //dialogue.playDialogue(bogusDialogues[14])
-                setScene("game")
+                playMusic(14);
+                dialogue.end();
+            }
+        }),
+        new DialogueBox({
+            speakerName: "B.O.O.G.U.S.",
+            text: ["Smell you later you stinky sod!"],
+            textSpeed: .5,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => {
+                dialogue.end();
             }
         })
     ]

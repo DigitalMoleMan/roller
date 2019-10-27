@@ -225,6 +225,7 @@ class Bogus extends Actor {
         this.animProgress = 0;
         this.animLength = 112;
         this.sprite = () => sprites.npcs.bogus;
+        this.sfx = () => sfx.npcs.bogus;
     }
 
     update() {
@@ -234,23 +235,35 @@ class Bogus extends Actor {
     boogify() {
         dialogue.hide = true;
         this.animProgress = 0;
+        playSound(this.sfx().lightning)
+        
         this.playingAnimation = true;
+
     }
 
     draw() {
         if (!this.playingAnimation) {
             render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
         } else {
-            render.ctx.drawImage(this.sprite().hw_anim, block(3) * this.animProgress, 0, block(3), block(5), block(30.5) - camera.x, block(0) - camera.y, block(6), block(10));
-            if(gameClock % 4 == 0)this.animProgress++;
+            if (this.sfx().lightning.currentTime) {
+                render.ctx.drawImage(this.sprite().hw_anim, block(3) * this.animProgress, 0, block(3), block(5), block(30.5) - camera.x, block(0) - camera.y, block(6), block(10));
 
-            if(this.animProgress >= this.animLength){
-                
+                if(this.animProgress < 48 || this.sfx().startup.currentTime){
+                    console.log(this.sfx().startup.currentTime);
+                if (gameClock % 5 == 0) this.animProgress++;
+                } else {
+                    playSound(this.sfx().startup)
+                }
+            
+            if (this.animProgress >= this.animLength) {
+
                 this.drawnSprite = 'boogus';
-                this.onInteract = () => dialogue.playDialogue(bogusDialogues[15])
+                this.onInteract = () => dialogue.playDialogue(bogusDialogues[16])
                 this.playingAnimation = false;
+                playMusic(13);
                 dialogue.playDialogue(bogusDialogues[8])
             }
+        } else render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
         }
     }
 }
