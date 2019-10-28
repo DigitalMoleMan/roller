@@ -352,7 +352,7 @@ window.onload = () => {
 
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
-        world.loadLevel(level[11]);
+        world.loadLevel(level[9]);
     } else world.loadLevel(level[1]);
 
 
