@@ -65,7 +65,7 @@ class Renderer {
         //requestAnimationFrame(render.update)
         scenes[activeScene].draw();
 
-        if (debug) drawDebug();
+        if (settings.misc.debugMode) drawDebug();
     }
     
 
@@ -445,7 +445,7 @@ class LightingEngine {
 
             render.ctx.globalCompositeOperation = "source-over";
 
-            if (debug && !debug) {
+            if (settings.misc.debugMode) {
                 for (let i = 0; i < this.polygons.length; i++) {
                     let polygon = this.polygons[i];
                     render.ctx.strokeStyle = "#fff";

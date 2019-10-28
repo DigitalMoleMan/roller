@@ -74,11 +74,11 @@ class Input {
                
                 this.keys[pressedKey] = true;
                // console.log(input.keys[input.binds.game.use]);
-            });
+            }, { passive: true });
             document.addEventListener('keyup', (e) => {
                 var releasedKey = e.code;
                 this.keys[releasedKey] = false;
-            });
+            }, { passive: true });
         } else {
             this.touchAreas = touchAreas;
             this.targetTouches = [];

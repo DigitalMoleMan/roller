@@ -2,14 +2,9 @@
  * Roller - main.js
 */
 
-var debug = false;
-
-var enableCache = false;
-
 const mainDOM = document.getElementById("main");
 const canvasContainer = document.getElementById("canvasContainer");
 
-//
 var settings = {
     graphics: {
         enableLighting: true
@@ -21,6 +16,11 @@ var settings = {
     }
 }
 
+//halloween event
+var hwQuest = {
+    started: false,
+    candiesCollected: 0,
+}
 
 //Mobile
 
@@ -183,10 +183,14 @@ var sprites = {
         },
         platform: render.importImage('img/tiles/platform.png'),
         elevator: render.importSprite('img/tiles/elevator', 8),
-        "M": render.importImage('img/tiles/spikes_floor.png'),
-        "W": render.importImage('img/tiles/spikes_roof.png'),
+        spikes: {
+            metal_up: render.importImage('img/tiles/spikes_floor.png'),
+            metal_down: render.importImage('img/tiles/spikes_roof.png'),
+        },
         hookpoint: render.importImage('img/tiles/hookpoint.png'),
         "L": render.importImage('img/tiles/lamp.png'),
+        pumpkin: render.importImage('img/tiles/pumpkin.png'),
+        candy: render.importImage('img/tiles/candy.png')
     },
     npcs: {
         enemies: {
@@ -281,7 +285,7 @@ const musicPlayer = new Audio();
 musicPlayer.volume = .2;
 musicPlayer.loop = true;
 
-document.addEventListener(input.binds["global"].toggleDebug, () => debug = !debug);
+document.addEventListener(input.binds["global"].toggleDebug, () => settings.misc.debugMode = !settings.misc.debugMode);
 
 /**
  * @param {Number} track index in music[]
@@ -319,27 +323,33 @@ setScene = (scene) => {
 window.onload = () => {
 
 
-    if (enableCache) {
+    if (settings.misc.enableCache) {
         if ('serviceWorker' in navigator) {
             var swURL = './sw.js';
             navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
                 (err) => console.log('ServiceWorker registration failed: ', err));
         }
     }
-    for (let category in sfx) {
-        for (subCategory in sfx[category]) {
-            for (audio in sfx[category][subCategory]) {
-                sfx[category][subCategory][audio].play()
-                sfx[category][subCategory][audio].pause()
 
+    musicPlayer.addEventListener('canplay', () => {
+        for (let category in sfx) {
+            for (subCategory in sfx[category]) {
+                for (audio in sfx[category][subCategory]) {
+                    let sound = sfx[category][subCategory][audio];
+                    sound.play()
+                    sound.pause()
+                }
             }
         }
-        // this.sound()[s].play();
-        // this.sound()[s].pause();
-    }
+    }, {
 
+        once: true,
+        passive: true
+    })
 
     loadDialogues();
+
+
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
         world.loadLevel(level[11]);
@@ -358,9 +368,11 @@ window.onload = () => {
 
     render.attatchCamera(camera);
 
-    //dialogue.playDialogue(rollerDialogues[0]);
+    dialogue.playDialogue(rollerDialogues[0]);
 
-    document.addEventListener(input.binds["game"].togglePause, () => { if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game") });
+    document.addEventListener(input.binds["game"].togglePause, () => {
+        if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game")
+    });
     playMusic(14);
     setInterval(() => loop(), 1000 / 60);
     //render.update();
@@ -372,7 +384,7 @@ function loop() {
     scenes[activeScene].update();
     scenes[activeScene].draw();
 
-    if (debug) drawDebug();
+    if (settings.misc.debugMode) drawDebug();
 }
 
 class Scene {
@@ -459,31 +471,28 @@ var scenes = {
         world.npcs.forEach(npc => npc.draw());
 
         player.draw();
-
-
-
         // world
         //render.ctx.save();
         //render.ctx.scale(2, 2);
-        onScreen.forEach(tile => {
+        for(let tile of onScreen){
 
 
             try {
                 render.ctx.save();
-                var texture = sprites.tiles[tile.type];
+                let texture = sprites.tiles[tile.type];
 
                 if (tile.drawModifier !== undefined) tile.drawModifier();
 
 
-                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : render.img(texture, tile.x, tile.y, 1);
+                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : tile.draw()//render.img(texture, tile.x, tile.y, 1);
                 render.ctx.restore();
             } catch (error) {
                 render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
             }
 
-        })
+        }
 
-        onScreenSegs.filter((seg) => seg.type == "block").forEach(tile => {
+        for(let tile of onScreenSegs.filter((seg) => seg.type == "block")){
 
             render.ctx.save();
 
@@ -493,20 +502,12 @@ var scenes = {
             //render.img(texture, tile.x, tile.y, 1);
             render.ctx.restore();
 
-        })
-
-
+        }
         //render.ctx.restore();
-
-
-
-
-
 
         render.pe.tick()
 
         lighting.draw();
-
 
         //ui
         var hpUi = sprites.ui.hp;
@@ -529,6 +530,11 @@ var scenes = {
 
         if (world.inRangeActors.length > 0 && activeScene == 'game') {
             render.text('E', world.inRangeActors[0].posX + block(1.25), world.inRangeActors[0].posY - block(.75), 1, "#fff", 1);
+        }
+
+        if(hwQuest.started){
+            render.img(sprites.tiles.candy, block(3), block(1), 0);
+            render.text(`${hwQuest.candiesCollected}/10`, block(4), block(1));
         }
 
         var itemUi = sprites.ui.activeItem;
@@ -592,7 +598,7 @@ var scenes = {
 }
 
 drawDebug = () => {
-    //debug
+    //settings.misc.debugMode
     //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
     //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');
 
@@ -617,7 +623,7 @@ drawDebug = () => {
 
 
     if (true) {
-        var playerInfo = JSON.stringify(player).split(',');
+        let playerInfo = JSON.stringify(player).split(',');
 
         render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
         render.ctx.fillStyle = "#fff";
@@ -626,10 +632,9 @@ drawDebug = () => {
     }
 
     if (onMobile) {
-        let ta = input.touchAreas[activeScene];
-        for (let i = 0; i < ta.length; i++) {
-            render.rectStroke(ta[i].x, ta[i].y, ta[i].width, ta[i].height, "#ffffff80", 2, 0);
-            render.text(ta[i].bind, ta[i].x, ta[i].y, 1, "#ffffff80");
+        for (let ta of input.touchAreas[activeScene]) {
+            render.rectStroke(ta.x, ta.y, ta.width, ta.height, "#ffffff80", 2, 0);
+            render.text(ta.bind, ta.x, ta.y, 1, "#ffffff80");
         }
     }
     //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")

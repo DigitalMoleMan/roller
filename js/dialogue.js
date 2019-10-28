@@ -12,9 +12,9 @@ class DialogueHandler {
         this.hide = false;
 
         this.sfx = () => sfx.ui.dialogue;
+        
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
-                playSound(this.sfx().next);
                 dialogue.currentDialogue.next();
             }
         })
@@ -34,79 +34,78 @@ class DialogueHandler {
     playDialogue(dlgObj) {
         setScene("gameDialogue");
         this.hide = false;
+        this.sfx().next.volume = .5;
+        playSound(this.sfx().next);
         this.textProg = 0;
         this.currentDialogue = dlgObj;
     }
 
     end() {
-        this.currentDialogue = new Object;
         setScene("game");
+        this.currentDialogue = new Object;
     }
     msglength(n) {
         var l = 0;
-        for (var i = 0; i < n; i++) l += this.currentDialogue.text[i].length;
+        for (let i = 0; i < n; i++) l += this.currentDialogue.text[i].length;
         return l;
     }
 
     update() {
-        if (this.msglength(this.currentDialogue.text.length) > this.textProg) {
-            this.textProg += this.currentDialogue.textSpeed;
-            if(Math.ceil(this.textProg) % 2 == 0)playSound(this.sfx().text)
-            
-        } else if (this.msglength(this.currentDialogue.text.length) == this.textProg) stopSound(this.sfx().text)
+        if (this.msglength(this.currentDialogue.text.length) > this.textProg) this.textProg += this.currentDialogue.textSpeed;
     }
 
     draw() {
-        if(!this.hide){
-        var tbR = this.tbX + this.tbW;
-        var tbB = this.tbY + this.tbH;
+        if (!this.hide) {
+            var tbR = this.tbX + this.tbW;
+            var tbB = this.tbY + this.tbH;
 
-        this.color1 = "#2ce8f5";
-        this.color2 = "#0095e9";
-        this.color3 = "#124e89";
+            this.color1 = "#2ce8f5";
+            this.color2 = "#0095e9";
+            this.color3 = "#124e89";
 
 
-        // background
-        render.rect(this.tbX, this.tbY, this.tbW, this.tbH, "#002040c0", 0);
+            // background
+            render.rect(this.tbX, this.tbY, this.tbW, this.tbH, "#002040c0", 0);
 
-        //Speaker name.
-        render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
+            //Speaker name.
+            render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
 
-        //Border
-        for (var x = 0; x < this.tbW; x += 32) {
-            switch (x) {
-                case 0: {
-                    render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
+            //Border
+            for (var x = 0; x < this.tbW; x += 32) {
+                switch (x) {
+                    case 0: {
+                        render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
 
-                    for (var y = 0; y < this.tbH; y += 32) {
-                        //render.rect(this.tbX - block(1), this.tbY + y, 2, 32, "#2ce8f5");
-                        render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
+                        for (var y = 0; y < this.tbH; y += 32) {
+                            //render.rect(this.tbX - block(1), this.tbY + y, 2, 32, "#2ce8f5");
+                            render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
+                        }
+                        render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
                     }
-                    render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
-                }
-                case this.tbW: {
-                    render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
-                    for (var y = 0; y < this.tbH; y += 32) {
-                        render.img(this.sprite().mr, this.tbX + this.tbW, this.tbY + y, 0, 2);
+                    case this.tbW: {
+                        render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
+                        for (var y = 0; y < this.tbH; y += 32) {
+                            render.img(this.sprite().mr, this.tbX + this.tbW, this.tbY + y, 0, 2);
+                        }
+                        render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
                     }
-                    render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
-                }
-                default: {
-                    render.img(this.sprite().tm, this.tbX + x, this.tbY - block(1), 0, 2);
-                    render.img(this.sprite().bm, this.tbX + x, this.tbY + this.tbH, 0, 2);
+                    default: {
+                        render.img(this.sprite().tm, this.tbX + x, this.tbY - block(1), 0, 2);
+                        render.img(this.sprite().bm, this.tbX + x, this.tbY + this.tbH, 0, 2);
+                    }
                 }
             }
-        }
 
-        //dialogue message
-        for (var i = 0; i < this.currentDialogue.text.length; i++) {
-            render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
-           if(this.currentDialogue.text[i][this.textProg - this.msglength(i) - 1] == ' ') stopSound(this.sfx().text);
-        }
+            //dialogue message
+            for (var i = 0; i < this.currentDialogue.text.length; i++) {
+                render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
+                if (this.currentDialogue.text[i][this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
+                    playSound(this.sfx().text)
+                } else if(!this.sfx().paused) stopSound(this.sfx().text);   
+            }
 
-
-        //next message symbol
-        if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", tbR - block(1 - (Math.sin(gameClock / 5) / 4)), tbB - block(1), 1);
+            //next message symbol
+            if (this.textProg >= this.msglength(this.currentDialogue.text.length)) render.text(">", tbR - block(1 - (Math.sin(gameClock / 5) / 4)), tbB - block(1), 1);
         }
     }
 }
@@ -134,9 +133,9 @@ var rollerDialogues = [];
 var bogusDialogues = [];
 
 loadDialogues = () => {
-    
+
     if (!onMobile) {
-        if(settings.misc.halloweenMode){
+        if (settings.misc.halloweenMode) {
             rollerDialogues = [
                 new DialogueBox({
                     speakerName: "",
@@ -187,57 +186,57 @@ loadDialogues = () => {
                     next: () => setScene("game")
                 })
             ]
-        } else 
-        rollerDialogues = [
-            new DialogueBox({
-                speakerName: "",
-                text: ["Welcome to the [ROLLER] alpha!"],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[1])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: ["Controlls:"],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[2])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: [`Move left and right using the arrow keys.`],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[3])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: [`Press Spacebar to jump.`],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[4])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: [`Press N to use your active item.`],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.playDialogue(rollerDialogues[5])
-            }),
-            new DialogueBox({
-                speakerName: "",
-                text: [`Press E to interact/talk.`],
-                textSpeed: 1,
-                camPosX: () => player.posX,
-                camPosY: () => player.posY,
-                next: () => dialogue.end()
-            })
-        ]
+        } else
+            rollerDialogues = [
+                new DialogueBox({
+                    speakerName: "",
+                    text: ["Welcome to the [ROLLER] alpha!"],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[1])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: ["Controls:"],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[2])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Move left and right using the arrow keys.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[3])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press Spacebar to jump.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[4])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press N to use your active item.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.playDialogue(rollerDialogues[5])
+                }),
+                new DialogueBox({
+                    speakerName: "",
+                    text: [`Press E to interact/talk.`],
+                    textSpeed: 1,
+                    camPosX: () => player.posX,
+                    camPosY: () => player.posY,
+                    next: () => dialogue.end()
+                })
+            ]
     } else {
         rollerDialogues = [
             new DialogueBox({
@@ -343,9 +342,9 @@ loadDialogues = () => {
             camPosX: () => player.posX,
             camPosY: () => player.posY,
             next: () => {
-                if(!dialogue.hide){
-                stopSound(musicPlayer);
-                world.npcs[0].boogify();
+                if (!dialogue.hide) {
+                    stopSound(musicPlayer);
+                    world.npcs[0].performHalloweenTransformation();
                 }
             }
         }),
@@ -367,7 +366,7 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[10])
-               // setScene("game")
+                // setScene("game")
             }
         }),
         new DialogueBox({
@@ -405,7 +404,7 @@ loadDialogues = () => {
         }),
         new DialogueBox({
             speakerName: "B.O.O.G.U.S.",
-            text: ["WAH HA HA HA! So delightfully evil!","The only way to undo my curse is to collect 10 candies."],
+            text: ["WAH HA HA HA! So delightfully evil!", "The only way to undo my curse is to collect 10 candies."],
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
@@ -434,6 +433,7 @@ loadDialogues = () => {
             next: () => {
                 //dialogue.playDialogue(bogusDialogues[14])
                 playMusic(14);
+                hwQuest.started = true;
                 dialogue.end();
             }
         }),

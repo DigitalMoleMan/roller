@@ -46,83 +46,36 @@ class World {
                     case 'D': this.tiles.push(new Block(block(x), block(y), 'dirt')); break
                     case '-': this.tiles.push(new Platform(block(x), block(y))); break
                     case '^': this.tiles.push(new Elevator(block(x), block(y), 0, 1, 64)); break;
-                    case 'v': this.tiles.push(new Elevator(block(x), block(y), 0, 1, -64));break;
+                    case 'v': this.tiles.push(new Elevator(block(x), block(y), 0, 1, -64)); break;
                     case '<': this.tiles.push(new Elevator(block(x), block(y), 1, 0, 64)); break;
-                    case '>': this.tiles.push(new Elevator(block(x), block(y), 1, 0, -64));break;
-                    case 'M':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y + .75),
-                            width: block(1),
-                            height: block(.25),
-                            type: tile,
-                            drawModifier: () => {
-                                render.ctx.translate(0, -block(.25))
-                            }
-                        });
-                        break;
-                    case 'W':
-                        this.tiles.push({
-                            x: block(x),
-                            y: block(y),
-                            width: block(1),
-                            height: block(.25),
-                            type: tile
-                        });
-                        break;
-                    case 'G':
-                        this.tiles.push(new Hookpoint(block(x), block(y)));
-                        break;
-                    case 'L': {
-                        this.tiles.push({
-                            x: block(x + .25),
-                            y: block(y),
-                            width: block(0),
-                            height: block(0),
-                            type: tile,
-                            light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
-                                index: 0,
-                                color: "#ffc04040"
-                            }, {
-                                index: 1,
-                                color: "#00000000"
-                            }])
-                        });
-                    }
-                        break;
+                    case '>': this.tiles.push(new Elevator(block(x), block(y), 1, 0, -64)); break;
+                    case 'M': this.tiles.push(new Spikes(block(x), block(y), 'up')); break;
+                    case 'W': this.tiles.push(new Spikes(block(x), block(y), 'down')); break;
+                    case 'G': this.tiles.push(new Hookpoint(block(x), block(y))); break;
+                    case 'L': this.tiles.push({
+                        x: block(x + .25),
+                        y: block(y),
+                        width: block(0),
+                        height: block(0),
+                        type: tile,
+                        light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
+                            index: 0,
+                            color: "#ffc04040"
+                        }, {
+                            index: 1,
+                            color: "#00000000"
+                        }])
+                    }); break;
+                    case 'P': this.tiles.push(new Pumpkin(block(x), block(y))); break;
+                    case 'C': this.tiles.push(new Candy(block(x), block(y))); break;
                 }
             }
         }
 
-        for (let tile of lvl.advancedLayer) {
-            switch (tile.type) {
-                case 'X': {
-                    tile.width = block(1);
-                    tile.height = block(1);
-                    break;
-                }
-                case 'M': {
-                    tile.y += block(y + .5)
-                    tile.width = block(1)
-                    tile.height = block(.5)
-                    tile.drawModifiers = [
-                        render.ctx.translate(0, -.5)
-                    ]
-                    break;
-                }
-                case 'W': {
-                    tile.width = block(1)
-                    tile.height = block(.5)
-                    break;
-                }
-            }
-            this.tiles.push(tile)
-        };
+        for (let tile of lvl.advancedLayer) this.tiles.push(tile);
 
         this.npcs = lvl.npcs
-
-
-        this.segments = this.tiles.filter(tile => tile.type !== "G");
+        this.segments = this.tiles.filter(tile => tile.type !== 'hookpoint');
         this.createMesh();
 
         this.tiles = this.tiles.filter((tile) => tile.type !== 'block');
@@ -166,9 +119,9 @@ class World {
 
     createMesh() {
 
-        var nSeg = [];
+        let nSeg = [];
 
-        var last = () => nSeg[nSeg.length - 1];
+        let last = () => nSeg[nSeg.length - 1];
         for (let tile of this.segments) {
             if (nSeg.length > 0
                 && (tile.type + tile.style) === (last().type + last().style)
@@ -196,7 +149,6 @@ class World {
         }
 
         this.segments = nSeg.sort((a, b) => {
-            var returnVal = 0;
             if (a.x < b.x) return -1;
             else if (a.x == b.x) return 0;
             else if (a.x > b.x) return 1;
@@ -254,17 +206,16 @@ class World {
                     if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
                     ctx.drawImage(sprite[dIndex], x, y);
-                   try {
+                    try {
                         if ((Math.random() * 10) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch { 
+                    } catch {
                     }
                 }
             }
             try {
                 Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
             } catch {
-
-                console.log("canvas img soruce")
+                console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
                 segment.sprite = new Image();
                 segment.sprite.src = canvas.toDataURL();
             }
@@ -323,6 +274,7 @@ const level = [
                 exit: 1,
                 exitX: block(6),
                 exitY: block(81.5),
+                draw: () => { }
             },
         ],
         npcs: [
@@ -428,6 +380,7 @@ const level = [
                 exit: 2,
                 exitX: block(81.5),
                 exitY: block(9.5),
+                draw: () => { }
             }, {
                 type: "E",
                 x: block(72),
@@ -438,8 +391,8 @@ const level = [
                 exit: 3,
                 exitX: block(.5),
                 exitY: block(10.5),
-            },
-            {
+                draw: () => { }
+            }, {
                 type: "E",
                 x: block(72.5),
                 y: block(5),
@@ -449,6 +402,7 @@ const level = [
                 exit: 5,
                 exitX: block(.5),
                 exitY: block(1.5),
+                draw: () => { }
             },
             {
                 type: "E",
@@ -460,6 +414,7 @@ const level = [
                 exit: 6,
                 exitX: block(42),
                 exitY: block(6.5),
+                draw: () => { }
             }
         ],
         npcs: [
@@ -502,6 +457,7 @@ const level = [
                 exit: 1,
                 exitX: block(.5),
                 exitY: block(81.5),
+                draw: () => { }
             }
         ],
         npcs: []
@@ -537,6 +493,7 @@ const level = [
                 exit: 1,
                 exitX: block(71.5),
                 exitY: block(81.5),
+                draw: () => { }
             }, {
                 type: "E",
                 x: block(99.5),
@@ -545,7 +502,8 @@ const level = [
                 height: block(3),
                 exit: 4,
                 exitX: block(0),
-                exitY: block(53.5)
+                exitY: block(53.5),
+                draw: () => { }
             }
         ],
         npcs: []
@@ -618,7 +576,8 @@ const level = [
             height: block(3),
             exit: 3,
             exitX: block(98.5),
-            exitY: block(16.5)
+            exitY: block(16.5),
+            draw: () => { }
         },
         {
             type: "E",
@@ -628,7 +587,8 @@ const level = [
             height: block(1),
             exit: 5,
             exitX: block(42.5),
-            exitY: block(1.5)
+            exitY: block(1.5),
+            draw: () => { }
         }
 
         ],
@@ -650,7 +610,8 @@ const level = [
             height: block(1),
             exit: 4,
             exitX: block(0),
-            exitY: block(1.5)
+            exitY: block(1.5),
+            draw: () => { }
         }, {
             type: "E",
             x: block(-.5),
@@ -659,7 +620,8 @@ const level = [
             height: block(1),
             exit: 1,
             exitX: block(71),
-            exitY: block(5.5)
+            exitY: block(5.5),
+            draw: () => { }
         },],
         npcs: []
     },
@@ -683,7 +645,8 @@ const level = [
             height: block(1),
             exit: 1,
             exitX: block(0),
-            exitY: block(5.5)
+            exitY: block(5.5),
+            draw: () => { }
         }],
         npcs: []
     }, {
@@ -765,7 +728,8 @@ const level = [
                 height: block(2),
                 exit: 10,
                 exitX: block(0),
-                exitY: block(9.5)
+                exitY: block(9.5),
+                draw: () => { }
             }
         ],
         npcs: []
@@ -781,8 +745,8 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX         XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XX                                                               XX",
             "XX                                                               XX",
-            "                                                                   ",
-            "@                                                                  ",
+            "                                                                 PP",
+            "@                                                                PP",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -801,7 +765,8 @@ const level = [
                 height: block(2),
                 exit: 9,
                 exitX: block(39),
-                exitY: block(9.5)
+                exitY: block(9.5),
+                draw: () => { }
             },
             {
                 type: "E",
@@ -811,7 +776,8 @@ const level = [
                 height: block(2),
                 exit: 11,
                 exitX: block(0),
-                exitY: block(17.5)
+                exitY: block(17.5),
+                draw: () => { }
             }
         ],
         npcs: [
@@ -824,9 +790,7 @@ const level = [
         name: "Halloween challenge 1",
         layout: [
 
-            
-            "                                                                 XX",
-            "                                                                 XX",
+
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
@@ -838,13 +802,15 @@ const level = [
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
-            "XX         XXXX                                                  XX",
-            "XX         XXXX         G      G                                 XX",
-            "XX         XXXX                                                  XX",
-            "         --XXXX                                                    ",
-            "@          XXXX                                                    ",
-            "XXXX       XXXX                                                  XX",
-            "XXXX                                                             XX",
+            "XX                                      G                        XX",
+            "XX           C                                                     ",
+            "XX         XXXXX                                                   ",
+            "XX         XXXXX                                             XXXXXX",
+            "XX         XXXXX                                             XXXXXX",
+            "         --XXXXX--           --XXX--              --XXX          XX",
+            "@          XXXXX     M   M     XXX                  XXX          XX",
+            "XXXX       XXXXX     XXXXX                                       XX",
+            "XXXX       WWWWW                                                 XX",
             "XXXX                                                             XX",
             "XXXXX                                                            XX",
             "XXXXX                                                            XX",
@@ -853,7 +819,7 @@ const level = [
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
-            
+
             {
                 type: "E",
                 x: block(-.5),
@@ -862,12 +828,13 @@ const level = [
                 height: block(2),
                 exit: 10,
                 exitX: block(66.5),
-                exitY: block(9.5)
+                exitY: block(9.5),
+                draw: () => { }
             }
-            
+
         ],
         npcs: [
-            new SpikeGuard(block(40), block(5))
+            //new SpikeGuard(block(40), block(5))
             //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
             //new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
             // new LaserTurret(block(20), block(31)),

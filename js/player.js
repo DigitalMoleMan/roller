@@ -216,12 +216,11 @@ class Player {
                             if (this.hitbox.x.bottom() <= tile.y) return true;
                         }
                         break;
-                    case 'M':
-                        this.damage(1);
-                        return true;
-                    case 'W':
-                        this.damage(1);
-                        return true;
+                    case 'pumpkin':
+                        if (!hwQuest.started) return true;
+                        else break;
+                    case 'spikes': this.damage(1); return true;
+                    case 'candy' : tile.collect(); break;
                     case 'E':
                         world.loadLevel(level[tile.exit]);
                         gameClock = 0;
@@ -238,9 +237,11 @@ class Player {
     };
 
     draw() {
+
+        this.activeItem.draw();
         if (!(this.invsFrames % 3)) {
 
-            this.activeItem.draw();
+            
             render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
 
 
@@ -249,9 +250,9 @@ class Player {
             else render.img(this.sprite().bands[Math.floor((this.band) % this.sprite().bands.length)], (this.posX - 16), (this.posY - 16));
 
 
-            if (debug) {
-                //render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
-                //render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
+            if (settings.misc.debugMode) {
+                render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
+                render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
             }
         }
     }
@@ -286,12 +287,12 @@ class Hookshot extends Item {
         this.sprite = () => sprites.items.hookshot;
         this.sound = () => sfx.items.hookshot;
 
-       
+
     }
 
 
     use() {
-        
+
         if (this.state == "retracted") {
             this.inputBuffer = 20;
         }
@@ -488,7 +489,7 @@ class Hookshot extends Item {
         //recticle
         if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - block(.25), this.target.y - block(.25))
 
-        if (debug) {
+        if (settings.misc.debugMode) {
             try { render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff") }
             catch (error) { }
         }

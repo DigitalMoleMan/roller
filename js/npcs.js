@@ -72,7 +72,7 @@ class Roamer extends Enemy {
     draw() {
         render.img(this.sprite()[Math.round(this.posX / 2) % this.sprite().length], this.posX - block(.5), this.posY - block(.5), 1, 2);
 
-        if (debug) {
+        if (settings.misc.debugMode) {
             render.rectStroke(this.posX - 8, this.posY - 8, 16, 24, "#f00");
         }
     }
@@ -188,7 +188,7 @@ class SpikeGuard extends Enemy {
 
         render.rect((this.posX - 2) + this.velX, (this.posY - 2) + this.velY, 4, 4, "#0095e9");
 
-        if (debug) {
+        if (settings.misc.debugMode) {
             render.line(this.posX - 16, this.posY, this.posX + 16, this.posY, "#fff");
             render.line(this.posX, this.posY - 16, this.posX, this.posY + 16, "#fff");
         }
@@ -232,11 +232,11 @@ class Bogus extends Actor {
 
     }
 
-    boogify() {
+    performHalloweenTransformation() {
         dialogue.hide = true;
         this.animProgress = 0;
         playSound(this.sfx().lightning)
-        
+
         this.playingAnimation = true;
 
     }
@@ -248,22 +248,17 @@ class Bogus extends Actor {
             if (this.sfx().lightning.currentTime) {
                 render.ctx.drawImage(this.sprite().hw_anim, block(3) * this.animProgress, 0, block(3), block(5), block(30.5) - camera.x, block(0) - camera.y, block(6), block(10));
 
-                if(this.animProgress < 48 || this.sfx().startup.currentTime){
-                    console.log(this.sfx().startup.currentTime);
-                if (gameClock % 5 == 0) this.animProgress++;
-                } else {
-                    playSound(this.sfx().startup)
-                }
-            
-            if (this.animProgress >= this.animLength) {
+                ((this.animProgress < 48 || this.sfx().startup.currentTime) && gameClock % 5 == 0) ? this.animProgress++ : playSound(this.sfx().startup);
 
-                this.drawnSprite = 'boogus';
-                this.onInteract = () => dialogue.playDialogue(bogusDialogues[16])
-                this.playingAnimation = false;
-                playMusic(13);
-                dialogue.playDialogue(bogusDialogues[8])
-            }
-        } else render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
+                if (this.animProgress >= this.animLength) {
+
+                    this.drawnSprite = 'boogus';
+                    this.onInteract = () => dialogue.playDialogue(bogusDialogues[16])
+                    this.playingAnimation = false;
+                    playMusic(13);
+                    dialogue.playDialogue(bogusDialogues[8])
+                }
+            } else render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
         }
     }
 }
