@@ -15,7 +15,9 @@ var settings = {
         enableLighting: true
     },
     misc: {
-        halloweenMode: true
+        halloweenMode: true,
+        enableCache: false,
+        debugMode: false
     }
 }
 
@@ -160,24 +162,23 @@ var sprites = {
         bands: render.importSprite('img/player/bands', 8),
         bandsJump: render.importSprite('img/player/bands_jump', 8),
         cannon: render.importSprite('img/player/cannon', 13),
-        equipment: {
-            hookshot: {
-                hook: render.importSprite('img/player/hookshot', 8),
-                recticle: render.importImage('img/ui/hookshot_recticle.png')
-            },
-            booster: {
-                inactive: render.importImage('img/player/equipment/booster/inactive.png'),
-                active: render.importSprite('img/player/equipment/booster/active', 3),
-                cooldown: render.importImage('img/player/equipment/booster/cooldown.png'),
-            }
+    },
+    items: {
+        hookshot: {
+            hook: render.importSprite('img/player/hookshot', 8),
+            recticle: render.importImage('img/ui/hookshot_recticle.png')
+        },
+        booster: {
+            inactive: render.importImage('img/player/equipment/booster/inactive.png'),
+            active: render.importSprite('img/player/equipment/booster/active', 3),
+            cooldown: render.importImage('img/player/equipment/booster/cooldown.png'),
         }
     },
     tiles: {
-        // "@": render.importImage('img/tiles/break_block_0.png'),
         block: {
             metal: render.importSprite('img/tiles/block/metal', 16),
-            alt_metal: render.importSprite('img/tiles/block/alt_metal', 16),
             dirt: render.importSprite('img/tiles/block/dirt', 16),
+            alt_metal: render.importSprite('img/tiles/block/alt_metal', 16),
             alt_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
         },
         platform: render.importImage('img/tiles/platform.png'),
@@ -186,10 +187,6 @@ var sprites = {
         "W": render.importImage('img/tiles/spikes_roof.png'),
         hookpoint: render.importImage('img/tiles/hookpoint.png'),
         "L": render.importImage('img/tiles/lamp.png'),
-        //"¤": render.importSprite('img/tiles/cog', 4),
-
-
-        //"#": render.importImage('img/tiles/break_block', 2),
     },
     npcs: {
         enemies: {
@@ -329,7 +326,17 @@ window.onload = () => {
                 (err) => console.log('ServiceWorker registration failed: ', err));
         }
     }
+    for (let category in sfx) {
+        for (subCategory in sfx[category]) {
+            for (audio in sfx[category][subCategory]) {
+                sfx[category][subCategory][audio].play()
+                sfx[category][subCategory][audio].pause()
 
+            }
+        }
+        // this.sound()[s].play();
+        // this.sound()[s].pause();
+    }
 
 
     loadDialogues();
@@ -520,8 +527,8 @@ var scenes = {
             render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
         }
 
-       if (world.inRangeActors.length > 0 && activeScene == 'game') {
-            render.text('E', world.inRangeActors[0].posX + block(1.25),world.inRangeActors[0].posY - block(.75), 1, "#fff", 1);
+        if (world.inRangeActors.length > 0 && activeScene == 'game') {
+            render.text('E', world.inRangeActors[0].posX + block(1.25), world.inRangeActors[0].posY - block(.75), 1, "#fff", 1);
         }
 
         var itemUi = sprites.ui.activeItem;

@@ -283,12 +283,15 @@ class Hookshot extends Item {
         this.target;
 
         this.inputBuffer = 0;
-        this.sprite = () => sprites.player.equipment.hookshot;
+        this.sprite = () => sprites.items.hookshot;
         this.sound = () => sfx.items.hookshot;
+
+       
     }
 
 
     use() {
+        
         if (this.state == "retracted") {
             this.inputBuffer = 20;
         }
@@ -330,17 +333,13 @@ class Hookshot extends Item {
                 }
                 break;
             case "shooting":
-                //if (this.checkCollision(this.posX, this.posY, onScreen)) this.state = "retracting";
-
-
-                //if (Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)) > this.maxLength) this.state = "retracting";
-
-
 
                 if (input.keys[input.binds.game.use]) {
                     try {
-                        if (this.posX > this.target.x && this.posX < (this.target.x + this.target.width) &&
-                            this.posY > this.target.y && this.posY < (this.target.y + this.target.height)) {
+                        if (this.posX > this.target.x &&
+                            this.posX < (this.target.x + this.target.width) &&
+                            this.posY > this.target.y &&
+                            this.posY < (this.target.y + this.target.height)) {
                             playSound(this.sound().hook);
                             player.midJump = false;
                             this.state = "hooked";
@@ -350,11 +349,6 @@ class Hookshot extends Item {
 
                             this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
 
-
-                            //let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
-
-
-                            //player.velY += Math.sin(rotation) * 5;
                             for (let i = 0; i < 10; i++) {
                                 let colVal = (Math.random() * 255);
                                 render.pe.addParticle({
@@ -374,12 +368,8 @@ class Hookshot extends Item {
                         } else {
                             let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
 
-
-                            this.posX += Math.cos(rotation) * this.speed//(this.posX - (this.target.x + (this.target.width / 2))) / 3;
-                            this.posY += Math.sin(rotation) * this.speed//(this.posY - (this.target.y + (this.target.height / 2))) / 3;
-
-
-
+                            this.posX += Math.cos(rotation) * this.speed
+                            this.posY += Math.sin(rotation) * this.speed
                         }
                     } catch (error) {
                         this.state = "retracting";
@@ -406,8 +396,8 @@ class Hookshot extends Item {
 
                         this.stiffness = (this.target.fromPlayer - this.length) / 4;
 
-                       if(!player.colX) player.velX += (Math.cos(rotation) * this.stiffness);
-                       else player.velX -= (Math.cos(rotation) * this.stiffness);
+                        if (!player.colX) player.velX += (Math.cos(rotation) * this.stiffness);
+                        else player.velX -= (Math.cos(rotation) * this.stiffness);
                         player.velY += (Math.sin(rotation) * this.stiffness);
 
                     }
@@ -460,20 +450,20 @@ class Hookshot extends Item {
     }
 
     checkPointBlocked(point) {
-            let nodes = []
+        let nodes = []
 
-            let rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
-            for (let i = 0; i < point.fromPlayer; i += 8) {
-                nodes.push({
-                    x: player.posX + (Math.cos(rotation) * i),
-                    y: player.posY + (Math.sin(rotation) * i)
-                })
-            }
-            for (let node of nodes) {
-                if (this.checkCollision(node.x, node.y, onScreenSegs)) return true;
-            }
+        let rotation = Math.atan2((point.y + point.height / 2) - this.posY, (point.x + point.width / 2) - this.posX);
+        for (let i = 0; i < point.fromPlayer; i += 8) {
+            nodes.push({
+                x: player.posX + (Math.cos(rotation) * i),
+                y: player.posY + (Math.sin(rotation) * i)
+            })
+        }
+        for (let node of nodes) {
+            if (this.checkCollision(node.x, node.y, onScreenSegs)) return true;
+        }
 
-            return false;
+        return false;
     }
 
     checkCollision(x, y, area) {
@@ -516,7 +506,7 @@ class Booster extends Item {
 
         this.fuel = 20;
 
-        this.sprite = () => sprites.player.equipment.booster[this.state];
+        this.sprite = () => sprites.items.booster[this.state];
         this.dir = () => ((player.look - 6) / 6);
 
     }
