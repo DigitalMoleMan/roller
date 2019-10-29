@@ -69,10 +69,6 @@ class Renderer {
     }
     
 
-    clear() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-
     /**
      * 
      * @param {Number} x 
@@ -122,7 +118,7 @@ class Renderer {
      */
     img(src, x, y, scrollFactor = 1, scale = 1) {
 
-        try {
+        
             if (scale !== 1) {
                 render.ctx.save();
                 render.ctx.scale(scale, scale);
@@ -131,11 +127,7 @@ class Renderer {
             if (scale !== 1) {
                 render.ctx.restore();
             }
-        } catch (error) {
-            this.rect(x, y, 32, 32, "#f00", 0);
-            this.rectStroke(x, y, 32, 32, "#fff", 0)
-            this.text(src, x, y, 32, "#fff", 0)
-        }
+
     }
 
     imgScaled(src, x, y, scale, scrollFactor = 1) {
@@ -143,7 +135,7 @@ class Renderer {
     }
 
     text(text, x, y, size = 1, color, scrollFactor = 0) {
-        for (let i in text) this.img(font[text.charCodeAt(i)], x + (i * (16 * size)), y, scrollFactor, size);
+        for (let i in text) this.ctx.drawImage(fontFile, 8 * text.charCodeAt(i), 0, 8, 8, x + (i * (16 * size)), y, 16 * size, 16 * size);
     }
 
 

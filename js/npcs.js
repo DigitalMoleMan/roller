@@ -17,6 +17,8 @@ class Enemy {
     }
 }
 
+
+//enemies
 class Roamer extends Enemy {
     constructor(posX, posY) {
         super(posX + .5, posY + .5);
@@ -216,6 +218,7 @@ class LaserTurret extends Enemy {
     }
 }
 
+//actors
 class Bogus extends Actor {
     constructor(posX, posY, onInteract) {
         super(posX, posY, onInteract, block(3));

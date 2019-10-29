@@ -12,7 +12,7 @@ class DialogueHandler {
         this.hide = false;
 
         this.sfx = () => sfx.ui.dialogue;
-        
+
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
                 dialogue.currentDialogue.next();
@@ -23,7 +23,7 @@ class DialogueHandler {
 
 
         //TextBox draw variables
-        this.tbX = canvasWidth / 16;
+        this.tbX = canvasWidth / block(.5);
         this.tbY = canvasHeight - block(4.5);
         this.tbW = canvasWidth - (this.tbX * 2);
         this.tbH = block(4);
@@ -51,7 +51,19 @@ class DialogueHandler {
     }
 
     update() {
-        if (this.msglength(this.currentDialogue.text.length) > this.textProg) this.textProg += this.currentDialogue.textSpeed;
+        if (this.msglength(this.currentDialogue.text.length) > this.textProg) {
+            this.textProg += this.currentDialogue.textSpeed;
+
+            if (this.textProg % 1 == 0) {
+                for (let i in this.currentDialogue.text) {
+                    let row = this.currentDialogue.text[i];
+                    if (row[this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
+
+                        playSound(this.sfx().text)
+                    } else if (!this.sfx().paused) stopSound(this.sfx().text);
+                }
+            }
+        }
     }
 
     draw() {
@@ -71,37 +83,22 @@ class DialogueHandler {
             render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
 
             //Border
-            for (var x = 0; x < this.tbW; x += 32) {
-                switch (x) {
-                    case 0: {
-                        render.img(this.sprite().tl, this.tbX - block(1), this.tbY - block(1), 0, 2);
-
-                        for (var y = 0; y < this.tbH; y += 32) {
-                            //render.rect(this.tbX - block(1), this.tbY + y, 2, 32, "#2ce8f5");
-                            render.img(this.sprite().ml, this.tbX - block(1), this.tbY + y, 0, 2);
-                        }
-                        render.img(this.sprite().bl, this.tbX - block(1), this.tbY + this.tbH, 0, 2);
-                    }
-                    case this.tbW: {
-                        render.img(this.sprite().tr, this.tbX + this.tbW, this.tbY - block(1), 0, 2);
-                        for (var y = 0; y < this.tbH; y += 32) {
-                            render.img(this.sprite().mr, this.tbX + this.tbW, this.tbY + y, 0, 2);
-                        }
-                        render.img(this.sprite().br, this.tbX + this.tbW, this.tbY + this.tbH, 0, 2);
-                    }
-                    default: {
-                        render.img(this.sprite().tm, this.tbX + x, this.tbY - block(1), 0, 2);
-                        render.img(this.sprite().bm, this.tbX + x, this.tbY + this.tbH, 0, 2);
-                    }
-                }
+            for (var x = 0; x < this.tbW; x += block(1)) {
+                render.img(this.sprite().middle, this.tbX + x, this.tbY - block(1), 0, 1);
             }
+            render.img(this.sprite().left, this.tbX - block(1), this.tbY - block(1), 0, 1);
+            render.img(this.sprite().right, this.tbX + this.tbW, this.tbY - block(1), 0, 1);
 
             //dialogue message
-            for (var i = 0; i < this.currentDialogue.text.length; i++) {
-                render.text(this.currentDialogue.text[i].substr(0, this.textProg - this.msglength(i)), this.tbX + block(.75), this.tbY + block(.75) + block(i), 1, "#fff");
-                if (this.currentDialogue.text[i][this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
-                    playSound(this.sfx().text)
-                } else if(!this.sfx().paused) stopSound(this.sfx().text);   
+            for (let i in this.currentDialogue.text) {
+                let row = this.currentDialogue.text[i];
+
+                let drawnText = row.substr(0, this.textProg - this.msglength(i))
+
+                render.text(drawnText, this.tbX + block(.75), this.tbY + block(.75) + block(i))
+
+
+
             }
 
             //next message symbol

@@ -1,4 +1,4 @@
-block = (n) => n * 32;
+block = (n = 1) => n * 32;
 
 class World {
     constructor() {
@@ -58,6 +58,8 @@ class World {
                         width: block(0),
                         height: block(0),
                         type: tile,
+                        update: () => { },
+                        draw: () => { },
                         light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
                             index: 0,
                             color: "#ffc04040"
@@ -68,11 +70,16 @@ class World {
                     }); break;
                     case 'P': this.tiles.push(new Pumpkin(block(x), block(y))); break;
                     case 'C': this.tiles.push(new Candy(block(x), block(y))); break;
+
                 }
             }
         }
 
-        for (let tile of lvl.advancedLayer) this.tiles.push(tile);
+        for (let tile of lvl.advancedLayer) {
+            if (tile.type == 'E') tile.update = () => { }
+            this.tiles.push(tile);
+
+        }
 
         this.npcs = lvl.npcs
         this.segments = this.tiles.filter(tile => tile.type !== 'hookpoint');
@@ -87,14 +94,8 @@ class World {
     update() {
         this.lightSources = [];
         for (let tile of this.tiles) {
-            try {
-                tile.update()
-            } catch{ }
-            switch (tile.type) {
-                case 'L':
-                    this.lightSources.push(tile.light);
-                    break;
-            }
+            tile.update()
+            if (tile.type == 'L') this.lightSources.push(tile.light);
         }
 
 
@@ -789,8 +790,6 @@ const level = [
     }, {
         name: "Halloween challenge 1",
         layout: [
-
-
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                                               XX",
@@ -819,7 +818,6 @@ const level = [
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
-
             {
                 type: "E",
                 x: block(-.5),

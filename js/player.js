@@ -7,7 +7,7 @@ class Player {
 
         this.posX = posX;
         this.posY = posY;
-        this.velX = 0;
+        this.velX = 0.00;
         this.velY = 0;
         this.hitbox = {
             paddingX: 16,
@@ -136,6 +136,7 @@ class Player {
         //case handling
         if (this.velX < .01 && this.velX > -.01) this.velX = 0;
 
+
     }
 
     moveLeft() {
@@ -213,14 +214,15 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.posY += tile.velY;
                             this.posX += tile.velX;
-                            if (this.hitbox.x.bottom() <= tile.y) return true;
+                            if (this.hitbox.x.bottom() <= tile.y)
+                                return true;
                         }
                         break;
                     case 'pumpkin':
                         if (!hwQuest.started) return true;
                         else break;
                     case 'spikes': this.damage(1); return true;
-                    case 'candy' : tile.collect(); break;
+                    case 'candy': tile.collect(); break;
                     case 'E':
                         world.loadLevel(level[tile.exit]);
                         gameClock = 0;
@@ -236,12 +238,14 @@ class Player {
         return false;
     };
 
+
+
     draw() {
 
         this.activeItem.draw();
         if (!(this.invsFrames % 3)) {
 
-            
+
             render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
 
 
@@ -274,6 +278,7 @@ class Hookshot extends Item {
         this.returnSpeed = 32;
         this.state = "retracted";
 
+        this.minLength = 32;
         this.maxLength = 256;
         this.length = 0;
 
@@ -386,10 +391,9 @@ class Hookshot extends Item {
 
                 if (input.keys[input.binds.game.use]) {
 
-                    if (input.keys[input.binds.game.up] && this.length > 32) this.length -= 2
-                    if (input.keys[input.binds.game.down] && this.length < this.maxLength) this.length += 2
+                    if ((input.keys[input.binds.game.up] || this.length > this.maxLength) && this.length > this.minLength ) this.length -= 2
+                    if ((input.keys[input.binds.game.down] || this.length < this.minLength) && this.length < this.maxLength ) this.length += 2
 
-                    if (this.length > this.maxLength) this.length -= 2
 
 
                     let rotation = Math.atan2(this.posY - player.posY, this.posX - player.posX);
@@ -397,8 +401,7 @@ class Hookshot extends Item {
 
                         this.stiffness = (this.target.fromPlayer - this.length) / 4;
 
-                        if (!player.colX) player.velX += (Math.cos(rotation) * this.stiffness);
-                        else player.velX -= (Math.cos(rotation) * this.stiffness);
+                        player.velX += (Math.cos(rotation) * this.stiffness);
                         player.velY += (Math.sin(rotation) * this.stiffness);
 
                     }

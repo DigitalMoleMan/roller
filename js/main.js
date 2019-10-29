@@ -108,24 +108,6 @@ var font = [];
 
 fontFile.src = 'fonts/roller_font.png';
 
-fontFile.onload = () => {
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext("2d");
-    canvas.width = 16;
-    canvas.height = 16;
-    ctx.imageSmoothingEnabled = false;
-    ctx.scale(2, 2);
-    for (var i = 0; i < fontFile.width; i += 8) {
-        ctx.clearRect(0, 0, 16, 16);
-        ctx.drawImage(fontFile, -i, 0);
-        var char = new Image();
-        char.src = canvas.toDataURL();
-        font.push(char);
-    }
-}
-
-
-
 //Loading sprites
 var sprites = {
     ui: {
@@ -147,14 +129,9 @@ var sprites = {
             booster: render.importImage('img/ui/activeItem/booster.png'),
         },
         dialogueBox: {
-            tl: render.importImage('img/ui/dialogue_box/db_tl.png'),
-            tm: render.importImage('img/ui/dialogue_box/db_tm.png'),
-            tr: render.importImage('img/ui/dialogue_box/db_tr.png'),
-            ml: render.importImage('img/ui/dialogue_box/db_ml.png'),
-            mr: render.importImage('img/ui/dialogue_box/db_mr.png'),
-            bl: render.importImage('img/ui/dialogue_box/db_bl.png'),
-            bm: render.importImage('img/ui/dialogue_box/db_bm.png'),
-            br: render.importImage('img/ui/dialogue_box/db_br.png'),
+            left: render.importImage('img/ui/dialogue_box/border_left.png'),
+            right: render.importImage('img/ui/dialogue_box/border_right.png'),
+            middle: render.importImage('img/ui/dialogue_box/border_middle.png')
         }
     },
     player: {
@@ -300,17 +277,21 @@ playMusic = (track) => {
  * @param {Number} sound index in sfx[]
  */
 playSound = (sound) => {
+    console.log(dialogue.textProg)
+    if(sound.currentTime) sound.currentTime = 0;
+   
     (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 }
 
 loopSound = (sound) => {
     if (sound.currentTime >= sound.duration - .1) sound.currentTime = 0;
+    
     sound.play();
 }
 
 stopSound = (sound) => {
     sound.pause();
-    sound.currentTime = 0;
+    
 }
 
 /**
@@ -341,6 +322,7 @@ window.onload = () => {
                 }
             }
         }
+        console.log("ye")
     }, {
 
         once: true,
@@ -352,7 +334,7 @@ window.onload = () => {
 
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
-        world.loadLevel(level[9]);
+        world.loadLevel(level[1]);
     } else world.loadLevel(level[1]);
 
 
@@ -374,6 +356,7 @@ window.onload = () => {
         if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game")
     });
     playMusic(14);
+
     setInterval(() => loop(), 1000 / 60);
     //render.update();
 }
@@ -417,12 +400,14 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
         ));
 
+        if(settings.graphics.enableLighting){
         onScreenLights = world.lightSources.filter((tile) => (
             (camera.x - (canvasWidth)) < tile.x + tile.radius &&
             (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
             (camera.y - (canvasHeight)) < tile.y + tile.radius &&
             (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
         ));
+        }
 
         nearPlayer = world.segments.filter((tile) => (
             player.posX - 32 < tile.x + tile.width &&
@@ -446,24 +431,22 @@ var scenes = {
     }, () => { // draw
 
         const zero = 0;
-
-        render.clear();
         // background
 
 
         var bg = sprites.backgrounds[3];
         if (settings.misc.halloweenMode) {
 
-            for (let x = 0; x < (canvasWidth * 2); x += bg.width * 2) {
-                for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
-                    render.img(sprites.backgrounds[4], x + camera.x, y + camera.y, 1.1, 2);
+            for (let x = 0; x < (canvasWidth * 2); x += bg.width) {
+                for (let y = 0; y < (canvasHeight * 2); y += bg.height) {
+                    render.img(sprites.backgrounds[4], x + camera.x, y + camera.y, 1.1);
                 }
-                render.img(bg, (x - ((camera.x / 5) % (bg.width * 2))), (canvasHeight - (bg.height * 2)) + (((world.height - canvasHeight) - camera.y) / 10), 0, 2);
+                render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
             }
         } else {
             for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
                 for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 1);
                 }
             }
         }
@@ -477,18 +460,8 @@ var scenes = {
         for(let tile of onScreen){
 
 
-            try {
-                render.ctx.save();
-                let texture = sprites.tiles[tile.type];
-
-                if (tile.drawModifier !== undefined) tile.drawModifier();
-
-
-                (texture.length > 1) ? render.img(texture[Math.floor((gameClock) % texture.length)], tile.x, tile.y, 1) : tile.draw()//render.img(texture, tile.x, tile.y, 1);
+                tile.draw()//render.img(texture, tile.x, tile.y, 1);
                 render.ctx.restore();
-            } catch (error) {
-                render.rect(tile.x, tile.y, tile.width, tile.height, '#fff', 1);
-            }
 
         }
 

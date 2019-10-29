@@ -51,6 +51,10 @@ class Elevator extends Tile {
 
 
     }
+
+    draw() {
+        render.img(this.sprite()[Math.floor((gameClock) % this.sprite().length)], this.x, this.y, 1) 
+    }
 }
 
 class Hookpoint extends Tile {
