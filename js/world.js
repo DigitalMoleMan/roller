@@ -76,7 +76,7 @@ class World {
         }
 
         for (let tile of lvl.advancedLayer) {
-            if (tile.type == 'E') tile.update = () => { }
+            if (tile.type == 'door') tile.update = () => { }
             this.tiles.push(tile);
 
         }
@@ -122,6 +122,11 @@ class World {
 
         let nSeg = [];
 
+        this.segments = this.segments.sort((a, b) => {
+            if (a.y < b.y) return -1;
+        });
+
+
         let last = () => nSeg[nSeg.length - 1];
         for (let tile of this.segments) {
             if (nSeg.length > 0
@@ -133,8 +138,15 @@ class World {
             } else nSeg.push(tile)
         }
 
+
+
         this.segments = nSeg.sort((a, b) => {
-            if (a.x < b.x) return -1;
+            if (browser == 'firefox') {
+                if (a.x < b.x) return 1
+                else return -1
+            }
+            if (a.x < b.x) return -1
+            else return 1
         });
 
         nSeg = [];
@@ -208,14 +220,14 @@ class World {
 
                     ctx.drawImage(sprite[dIndex], x, y);
                     try {
-                        if ((Math.random() * 10) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch {
+                        if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
+                    } catch (error){
                     }
                 }
             }
             try {
                 Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
-            } catch {
+            } catch (error) {
                 console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
                 segment.sprite = new Image();
                 segment.sprite.src = canvas.toDataURL();
@@ -266,7 +278,7 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(5),
                 y: block(0),
                 width: block(2),
@@ -361,7 +373,7 @@ const level = [
             "XX       XXX                                                           X",
             "XX       XXX >>     XXXMMMMXXX                     XXX                 X",
             "XX       XXX        XXXXXXXXXX---   ---X                               X",
-            "XX       XXX        XXXXXXXXXX         XXX XXXX                        X",
+            "XX       XXX        XXXXXXXXXX         X     XX                        X",
             "XX       XXX        X        X         X     XX                        X",
             "XX                  X        X         X     XX                        X",
             "XX ^^               X    @   X   ---   X                               X",
@@ -372,7 +384,7 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(0),
                 y: block(80),
                 width: block(0),
@@ -383,7 +395,7 @@ const level = [
                 exitY: block(9.5),
                 draw: () => { }
             }, {
-                type: "E",
+                type: "door",
                 x: block(72),
                 y: block(80),
                 width: block(0),
@@ -394,7 +406,7 @@ const level = [
                 exitY: block(10.5),
                 draw: () => { }
             }, {
-                type: "E",
+                type: "door",
                 x: block(72.5),
                 y: block(5),
                 width: block(0),
@@ -406,7 +418,7 @@ const level = [
                 draw: () => { }
             },
             {
-                type: "E",
+                type: "door",
                 x: block(-.5),
                 y: block(5),
                 width: block(0),
@@ -449,8 +461,8 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
-                x: block(81.99),
+                type: "door",
+                x: block(82.5),
                 y: block(8),
                 width: block(0),
                 height: block(2),
@@ -486,7 +498,7 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(0),
                 y: block(10),
                 width: block(0),
@@ -496,7 +508,7 @@ const level = [
                 exitY: block(81.5),
                 draw: () => { }
             }, {
-                type: "E",
+                type: "door",
                 x: block(99.5),
                 y: block(14),
                 width: block(0),
@@ -570,7 +582,7 @@ const level = [
             "XXXXXXXMMMMMMMMMMMMMMMMMMXXXXXXX",
         ],
         advancedLayer: [{
-            type: "E",
+            type: "door",
             x: block(-.5),
             y: block(51),
             width: block(0),
@@ -581,7 +593,7 @@ const level = [
             draw: () => { }
         },
         {
-            type: "E",
+            type: "door",
             x: block(-.5),
             y: block(1),
             width: block(0),
@@ -604,7 +616,7 @@ const level = [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [{
-            type: "E",
+            type: "door",
             x: block(43.5),
             y: block(1),
             width: block(0),
@@ -614,7 +626,7 @@ const level = [
             exitY: block(1.5),
             draw: () => { }
         }, {
-            type: "E",
+            type: "door",
             x: block(-.5),
             y: block(1),
             width: block(0),
@@ -639,7 +651,7 @@ const level = [
             "XXXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXXXXXX",
         ],
         advancedLayer: [{
-            type: "E",
+            type: "door",
             x: block(42.5),
             y: block(6),
             width: block(0),
@@ -722,7 +734,7 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(39.5),
                 y: block(8),
                 width: block(0),
@@ -759,7 +771,7 @@ const level = [
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(-.5),
                 y: block(8),
                 width: block(0),
@@ -770,7 +782,7 @@ const level = [
                 draw: () => { }
             },
             {
-                type: "E",
+                type: "door",
                 x: block(67),
                 y: block(8),
                 width: block(0),
@@ -802,24 +814,24 @@ const level = [
             "XX                                                               XX",
             "XX                                                               XX",
             "XX                                      G                        XX",
-            "XX           C                                                     ",
+            "XX                                                                 ",
             "XX         XXXXX                                                   ",
             "XX         XXXXX                                             XXXXXX",
             "XX         XXXXX                                             XXXXXX",
             "         --XXXXX--           --XXX--              --XXX          XX",
-            "@          XXXXX     M   M     XXX                  XXX          XX",
-            "XXXX       XXXXX     XXXXX                                       XX",
-            "XXXX       WWWWW                                                 XX",
-            "XXXX                                                             XX",
-            "XXXXX                                                            XX",
-            "XXXXX                                                            XX",
-            "XXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXX",
+            "@          XXXXX     M C M     XXX                  XXX          XX",
+            "XXXX       XXXXX     XXXXX     XXX                               XX",
+            "XXXX       WWWWW               XXX                               XX",
+            "XXXX                           XXX                               XX",
+            "XXXXX                          XXX                               XX",
+            "XXXXX                          XXX                               XX",
+            "XXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXX",
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
             "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
             {
-                type: "E",
+                type: "door",
                 x: block(-.5),
                 y: block(16),
                 width: block(0),
@@ -828,14 +840,68 @@ const level = [
                 exitX: block(66.5),
                 exitY: block(9.5),
                 draw: () => { }
+            },
+            {
+                type: "door",
+                x: block(67.5),
+                y: block(12),
+                width: block(0),
+                height: block(2),
+                exit: 12,
+                exitX: block(-.5),
+                exitY: block(12.5),
+                draw: () => { }
             }
 
         ],
         npcs: [
-            //new SpikeGuard(block(40), block(5))
-            //new TestSign(5, 90, () => dialogue.debugMsgs[0]),
-            //new Bogus(block(32), block(7), () => dialogue.playDialogue(bogusDialogues[5])) //block(20), block(20)),
-            // new LaserTurret(block(20), block(31)),
-            //new Roamer(30, 31)
+            new HalloweenSign(block(13), block(12), () => dialogue.playDialogue(hwSigns[0])),
+            new HalloweenSign(block(32), block(15), () => dialogue.playDialogue(hwSigns[1]))
+        ]
+    }, {
+        name: "Halloween challenge 2",
+        layout: [
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX          C                                                    XX",
+            "XX                                                               XX",
+            "XXXXXXXX                                                         XX",
+            "XXXXXXXX                                                         XX",
+            "XXXXXXXX                                                         XX",
+            "XXXXX      XXX                                                   XX",
+            "XXXXX G    XXX                                                   XX",
+            "XXXXX      XXX     G                                             XX",
+            "           XXX                                                   XX",
+            "@          XXX               G                                   XX",
+            "XXXXXXXX   XXX           XXXXXXXXX                               XX",
+            "XXXXXXXX   XXX                                                   XX",
+            "XXXXXXXXMMMXXX                                                   XX",
+            "XXXXXXXXXXXXXX                                                   XX",
+            "XXXXXXXXXXXXXX                                                   XX",
+            "XXXXXXXXXXXXXX                                                   XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "XX                                                               XX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+        ],
+        advancedLayer: [
+            {
+                type: "door",
+                x: block(-.5),
+                y: block(12),
+                width: block(0),
+                height: block(2),
+                exit: 11,
+                exitX: block(-.5),
+                exitY: block(12.5),
+                draw: () => { }
+            }
+
+        ],
+        npcs: [
         ]
     }];

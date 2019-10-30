@@ -71,8 +71,8 @@ class Player {
         this.activeItem.update();
 
         if (this.colX && this.colY) {
-            this.velX -= this.velX * .1;
-            this.posY -= this.velY * .1;
+            this.posX -= this.velX * .5;
+            this.posY -= this.velY * .5;
         }
 
         let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
@@ -223,7 +223,7 @@ class Player {
                         else break;
                     case 'spikes': this.damage(1); return true;
                     case 'candy': tile.collect(); break;
-                    case 'E':
+                    case 'door':
                         world.loadLevel(level[tile.exit]);
                         gameClock = 0;
                         player.posX = tile.exitX;
@@ -278,7 +278,7 @@ class Hookshot extends Item {
         this.returnSpeed = 32;
         this.state = "retracted";
 
-        this.minLength = 32;
+        this.minLength = -3200;
         this.maxLength = 256;
         this.length = 0;
 
@@ -334,6 +334,7 @@ class Hookshot extends Item {
                     if (this.target !== undefined) {
                         this.inputBuffer = 0;
                         this.state = "shooting";
+                        this.sound().shoot.volume = .2
                         playSound(this.sound().shoot);
                     } else this.inputBuffer--;
                 }
@@ -346,6 +347,7 @@ class Hookshot extends Item {
                             this.posX < (this.target.x + this.target.width) &&
                             this.posY > this.target.y &&
                             this.posY < (this.target.y + this.target.height)) {
+                                this.sound().hook.volume = .1
                             playSound(this.sound().hook);
                             player.midJump = false;
                             this.state = "hooked";

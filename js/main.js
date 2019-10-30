@@ -2,9 +2,6 @@
  * Roller - main.js
 */
 
-const mainDOM = document.getElementById("main");
-const canvasContainer = document.getElementById("canvasContainer");
-
 var settings = {
     graphics: {
         enableLighting: true
@@ -12,15 +9,26 @@ var settings = {
     misc: {
         halloweenMode: true,
         enableCache: false,
+        gameLoopMethod: 'requestAnimationFrame',//'interval',
         debugMode: false
     }
 }
+
+var fps = 0;
+var renderedFrames = 0;
 
 //halloween event
 var hwQuest = {
     started: false,
     candiesCollected: 0,
 }
+
+//browser
+var ua = navigator.userAgent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i)
+var browser;
+if (navigator.userAgent.match(/Edge/i) || navigator.userAgent.match(/Trident.*rv[ :]*11\./i)) browser = "msie"
+else browser = ua[1].toLowerCase();
+
 
 //Mobile
 
@@ -113,12 +121,10 @@ var sprites = {
     ui: {
         hp: {
             label: render.importImage('img/ui/hp/label.png'),
-            statbar: {
-                left: render.importImage('img/ui/hp/statbar_left.png'),
-                right: render.importImage('img/ui/hp/statbar_right.png'),
-                mid: render.importImage('img/ui/hp/statbar_mid.png'),
-                point: render.importImage('img/ui/hp/point.png'),
-            },
+            left: render.importImage('img/ui/hp/statbar_left.png'),
+            right: render.importImage('img/ui/hp/statbar_right.png'),
+            mid: render.importImage('img/ui/hp/statbar_mid.png'),
+            point: render.importImage('img/ui/hp/point.png'),
         },
         activeItem: {
             label: render.importImage('img/ui/activeItem/label.png'),
@@ -185,7 +191,9 @@ var sprites = {
         bogus: {
             idle: render.importSprite('img/npcs/bogus/idle', 10),
             hw_anim: render.importImage('img/npcs/bogus/hw_anim.png')
-        }
+        },
+        hwSign: render.importImage('img/npcs/hw_sign.png')
+
     },
     backgrounds: [
         render.importImage('img/backgrounds/main.png'),
@@ -259,7 +267,7 @@ if (settings.misc.halloweenMode) {
 
 
 const musicPlayer = new Audio();
-musicPlayer.volume = .2;
+musicPlayer.volume = .1;
 musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => settings.misc.debugMode = !settings.misc.debugMode);
@@ -276,22 +284,21 @@ playMusic = (track) => {
 /**
  * @param {Number} sound index in sfx[]
  */
-playSound = (sound) => {
-    console.log(dialogue.textProg)
-    if(sound.currentTime) sound.currentTime = 0;
-   
+playSound = (sound, volume = .5) => {
+    if (sound.currentTime) sound.currentTime = 0;
+    sound.volume = volume;
     (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 }
 
 loopSound = (sound) => {
     if (sound.currentTime >= sound.duration - .1) sound.currentTime = 0;
-    
+
     sound.play();
 }
 
 stopSound = (sound) => {
     sound.pause();
-    
+
 }
 
 /**
@@ -322,7 +329,6 @@ window.onload = () => {
                 }
             }
         }
-        console.log("ye")
     }, {
 
         once: true,
@@ -357,17 +363,32 @@ window.onload = () => {
     });
     playMusic(14);
 
-    setInterval(() => loop(), 1000 / 60);
+    switch (settings.misc.gameLoopMethod) {
+        case 'interval': setInterval(() => loop(), 1000 / 60); break;
+        case 'requestAnimationFrame':
+            setInterval(() => {
+                fps = renderedFrames
+                renderedFrames = 0
+
+            }, 1000)
+            loop(); break;
+        default: setInterval(() => loop(), 1000 / 60);
+    }
     //render.update();
 }
 
 
 function loop() {
-    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
+    if (settings.misc.gameLoopMethod == 'requestAnimationFrame') requestAnimationFrame(loop);
+
     scenes[activeScene].update();
     scenes[activeScene].draw();
 
     if (settings.misc.debugMode) drawDebug();
+
+    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
+
+    renderedFrames++
 }
 
 class Scene {
@@ -400,13 +421,13 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
         ));
 
-        if(settings.graphics.enableLighting){
-        onScreenLights = world.lightSources.filter((tile) => (
-            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
-        ));
+        if (settings.graphics.enableLighting) {
+            onScreenLights = world.lightSources.filter((tile) => (
+                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+            ));
         }
 
         nearPlayer = world.segments.filter((tile) => (
@@ -457,15 +478,15 @@ var scenes = {
         // world
         //render.ctx.save();
         //render.ctx.scale(2, 2);
-        for(let tile of onScreen){
+        for (let tile of onScreen) {
 
 
-                tile.draw()//render.img(texture, tile.x, tile.y, 1);
-                render.ctx.restore();
+            tile.draw()//render.img(texture, tile.x, tile.y, 1);
+            render.ctx.restore();
 
         }
 
-        for(let tile of onScreenSegs.filter((seg) => seg.type == "block")){
+        for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) {
 
             render.ctx.save();
 
@@ -492,20 +513,22 @@ var scenes = {
         render.ctx.restore();
 
         for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.statbar.left, 48, 16, zero);
-            else if (i == player.maxHp - 1) render.img(hpUi.statbar.right, 48 + (i * 16), 16, zero)
-            else render.img(hpUi.statbar.mid, 48 + (i * 16), 16, zero);
+            if (i == 0) render.img(hpUi.left, 48, 16, zero);
+            else if (i == player.maxHp - 1) render.img(hpUi.right, 48 + (i * 16), 16, zero)
+            else render.img(hpUi.mid, 48 + (i * 16), 16, zero);
         }
 
-        for (var i = 0; i < player.hp; i++) {
-            render.img(hpUi.statbar.point, 52 + (12 * i), 16, zero)
-        }
+        for (var i = 0; i < player.hp; i++) render.img(hpUi.point, 52 + (12 * i), 16, zero)
 
         if (world.inRangeActors.length > 0 && activeScene == 'game') {
-            render.text('E', world.inRangeActors[0].posX + block(1.25), world.inRangeActors[0].posY - block(.75), 1, "#fff", 1);
+            let actor = world.inRangeActors[0]
+
+            render.text('E', actor.posX + (actor.interactionRadius / 2.5), actor.posY - block(), 1, "#fff", 1);
         }
 
-        if(hwQuest.started){
+        //render.rect(player.posX, player.posY, 32, 32, "#fff", 1);
+
+        if (hwQuest.started) {
             render.img(sprites.tiles.candy, block(3), block(1), 0);
             render.text(`${hwQuest.candiesCollected}/10`, block(4), block(1));
         }
@@ -520,6 +543,9 @@ var scenes = {
         render.img(itemUi.border, 48, 32, zero);
 
         render.img(itemUi[player.activeItem.name], 48, 32, zero);
+
+
+        //console.log(Math.round(fps / 10))
     }),
     gameDialogue: new Scene(() => { // update
         if (onMobile) input.readMobileInput();
@@ -571,6 +597,8 @@ var scenes = {
 }
 
 drawDebug = () => {
+
+    render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
     //settings.misc.debugMode
     //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
     //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');

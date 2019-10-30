@@ -7,6 +7,10 @@ class Actor {
         this.interactionRadius = interactionRadius;
         this.onInteract = () => onInteract();
     }
+
+    draw(){
+
+    }
 }
 
 class Enemy {
@@ -267,5 +271,20 @@ class Bogus extends Actor {
                 }
             } else render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
         }
+    }
+}
+
+class HalloweenSign extends Actor {
+    constructor(x, y, onInteract){
+        super(x, y, onInteract, block(1))
+        this.sprite = () => sprites.npcs.hwSign;
+    }
+    
+    update(){
+
+    }
+
+    draw(){
+        render.img(this.sprite(), this.posX, this.posY, 1);
     }
 }

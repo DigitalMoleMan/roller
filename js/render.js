@@ -12,15 +12,11 @@ class Renderer {
         });
 
         this.ctx.imageSmoothingEnabled = false;
-
-
-
         //text
-
-        this.ctx.font = "8px Roboto Mono;";
+        //this.ctx.font = "8px Roboto Mono;";
         this.ctx.textBaseline = "top";
 
-        canvasContainer.appendChild(this.canvas);
+        document.body.appendChild(this.canvas);
 
         this.pe = new ParticleEngine();
     }
@@ -60,14 +56,14 @@ class Renderer {
     /**
      * @param {String} scene 
      */
-    
+
     update() {
         //requestAnimationFrame(render.update)
         scenes[activeScene].draw();
 
         if (settings.misc.debugMode) drawDebug();
     }
-    
+
 
     /**
      * 
@@ -117,25 +113,31 @@ class Renderer {
      * @param {Number} y 
      */
     img(src, x, y, scrollFactor = 1, scale = 1) {
+        let usesScale = (scale !== 1);
 
-        
-            if (scale !== 1) {
-                render.ctx.save();
-                render.ctx.scale(scale, scale);
-            }
-            this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
-            if (scale !== 1) {
-                render.ctx.restore();
-            }
-
-    }
-
-    imgScaled(src, x, y, scale, scrollFactor = 1) {
+        if (usesScale) {
+            render.ctx.save();
+            render.ctx.scale(scale, scale);
+        }
         this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
+
+        if (usesScale) render.ctx.restore();
     }
 
     text(text, x, y, size = 1, color, scrollFactor = 0) {
-        for (let i in text) this.ctx.drawImage(fontFile, 8 * text.charCodeAt(i), 0, 8, 8, x + (i * (16 * size)), y, 16 * size, 16 * size);
+        for (let i in text){
+
+            let sx = (8 * text.charCodeAt(i))
+            let sy = 0
+            let sw = 8
+            let sh = 8
+
+            let dx = x + (i * (16 * size)) - (this.camera.x * scrollFactor)
+            let dy = y - (this.camera.y * scrollFactor)
+            let dw = 16 * size
+            let dh = 16 * size
+         this.ctx.drawImage(fontFile, sx, sy, sw, sh, dx, dy, dw, dh);
+        }
     }
 
 
@@ -150,10 +152,8 @@ class Camera {
     constructor(startX = 0, startY = 0, xSpeed = 15, ySpeed = 10) {
         this.x = startX;
         this.y = startY;
-        this.speed = {
-            x: xSpeed,
-            y: ySpeed
-        }
+        this.speedX = xSpeed;
+        this.speedY = ySpeed;
     }
 
     /**
@@ -161,20 +161,26 @@ class Camera {
      * @param {Object} target
      */
     follow(targetX, targetY) {
+        /*
+                let rotation = Math.atan2(targetY - this.posY, targetX - this.posX);
+        
+                this.posX += Math.cos(rotation) * this.speedX
+                this.posY += Math.sin(rotation) * this.speedY
+                */
         if (targetX <= (this.x + render.canvas.width / 2) && (this.x > 0)) {
-            this.x -= (((this.x + render.canvas.width / 2) - targetX) / this.speed.x);
+            this.x -= (((this.x + render.canvas.width / 2) - targetX) / this.speedX);
 
         }
 
         if (targetX >= (this.x + render.canvas.width / 2) && (this.x + render.canvas.width) < world.width) {
-            this.x += ((targetX - (this.x + render.canvas.width / 2)) / this.speed.x);
+            this.x += ((targetX - (this.x + render.canvas.width / 2)) / this.speedX);
         }
 
         if ((targetY - render.canvas.height / 2) <= this.y && (this.y > 0)) {
-            this.y -= Math.round(((this.y + render.canvas.height / 2) - targetY) / this.speed.y);
+            this.y -= Math.round(((this.y + render.canvas.height / 2) - targetY) / this.speedY);
         }
         if ((targetY - (render.canvas.height / 2)) >= this.y && (this.y + render.canvas.height) < world.height) {
-            this.y += Math.round((targetY - (this.y + render.canvas.height / 2)) / this.speed.y);
+            this.y += Math.round((targetY - (this.y + render.canvas.height / 2)) / this.speedY);
         }
 
         if (this.x < 0) {

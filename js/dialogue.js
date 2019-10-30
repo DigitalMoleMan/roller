@@ -11,6 +11,8 @@ class DialogueHandler {
 
         this.hide = false;
 
+
+        this.sprite = () => sprites.ui.dialogueBox;
         this.sfx = () => sfx.ui.dialogue;
 
         document.addEventListener(input.binds.gameDialogue.next, () => {
@@ -18,9 +20,6 @@ class DialogueHandler {
                 dialogue.currentDialogue.next();
             }
         })
-
-        this.sprite = () => sprites.ui.dialogueBox;
-
 
         //TextBox draw variables
         this.tbX = canvasWidth / block(.5);
@@ -34,8 +33,7 @@ class DialogueHandler {
     playDialogue(dlgObj) {
         setScene("gameDialogue");
         this.hide = false;
-        this.sfx().next.volume = .5;
-        playSound(this.sfx().next);
+        playSound(this.sfx().next, .3);
         this.textProg = 0;
         this.currentDialogue = dlgObj;
     }
@@ -59,7 +57,7 @@ class DialogueHandler {
                     let row = this.currentDialogue.text[i];
                     if (row[this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
 
-                        playSound(this.sfx().text)
+                        playSound(this.sfx().text, 1)
                     } else if (!this.sfx().paused) stopSound(this.sfx().text);
                 }
             }
@@ -77,17 +75,14 @@ class DialogueHandler {
 
 
             // background
-            render.rect(this.tbX, this.tbY, this.tbW, this.tbH, "#002040c0", 0);
-
-            //Speaker name.
-            render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
-
-            //Border
             for (var x = 0; x < this.tbW; x += block(1)) {
                 render.img(this.sprite().middle, this.tbX + x, this.tbY - block(1), 0, 1);
             }
             render.img(this.sprite().left, this.tbX - block(1), this.tbY - block(1), 0, 1);
             render.img(this.sprite().right, this.tbX + this.tbW, this.tbY - block(1), 0, 1);
+
+            //Speaker name.
+            render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
 
             //dialogue message
             for (let i in this.currentDialogue.text) {
@@ -128,6 +123,7 @@ class DialogueBox {
 
 var rollerDialogues = [];
 var bogusDialogues = [];
+var hwSigns = [];
 
 loadDialogues = () => {
 
@@ -440,9 +436,34 @@ loadDialogues = () => {
             textSpeed: .5,
             camPosX: () => player.posX,
             camPosY: () => player.posY,
-            next: () => {
-                dialogue.end();
-            }
+            next: () => dialogue.end()
+        })
+    ]
+
+    hwSigns = [
+        new DialogueBox({
+            speakerName: "",
+            text: ["Okay, so turns out there might actually be some", "candies here...", "- B.O.O.G.U.S."],
+            textSpeed: 100,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => dialogue.end()
+        }),
+        new DialogueBox({
+            speakerName: "",
+            text: ["HA HA HA HA! You'll never get across this HUGE gap!", "Not even if you press D to use your hookshot!", "- B.O.O.G.U.S."],
+            textSpeed: 100,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => dialogue.end()
+        }),
+        new DialogueBox({
+            speakerName: "",
+            text: ["DAMN YOU!", "", "- B.O.O.G.U.S."],
+            textSpeed: 100,
+            camPosX: () => player.posX,
+            camPosY: () => player.posY,
+            next: () => dialogue.end()
         })
     ]
 };
