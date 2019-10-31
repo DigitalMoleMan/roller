@@ -95,7 +95,7 @@ class SpikeGuard extends Enemy {
         this.width = block(1);
         this.height = block(1);
         this.name = "spikeGuard";
-        this.acceleration = .3;
+        this.acceleration = .4;
         this.deceleration = .9;
         this.detectionRadius = 256;
         this.sprite = () => sprites.npcs.enemies.spikeGuard;
@@ -122,7 +122,9 @@ class SpikeGuard extends Enemy {
 
         this.fromOrigin = Math.sqrt(Math.pow(this.originX - this.posX, 2) + Math.pow(this.originY - this.posY, 2));
 
-        if (this.fromPlayer < this.detectionRadius) {
+        this.playerFromOrigin = Math.sqrt(Math.pow(this.originX - player.posX, 2) + Math.pow(this.originY - player.posY, 2));
+
+        if (this.fromPlayer < this.detectionRadius && this.playerFromOrigin < this.detectionRadius) {
 
             var rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
             this.velX += Math.cos(rotation) * this.acceleration
@@ -176,6 +178,7 @@ class SpikeGuard extends Enemy {
             index: 1,
             color: "#00000000"
         }])
+        
     }
 
     checkCollision() {
@@ -198,6 +201,8 @@ class SpikeGuard extends Enemy {
             render.line(this.posX - 16, this.posY, this.posX + 16, this.posY, "#fff");
             render.line(this.posX, this.posY - 16, this.posX, this.posY + 16, "#fff");
         }
+
+        
     }
 }
 

@@ -53,7 +53,7 @@ class Elevator extends Tile {
     }
 
     draw() {
-        render.img(this.sprite()[Math.floor((gameClock) % this.sprite().length)], this.x, this.y, 1) 
+        render.img(this.sprite()[Math.floor((gameClock) % this.sprite().length)], this.x, this.y, 1)
     }
 }
 
@@ -86,15 +86,29 @@ class Pumpkin extends Tile {
         if (!hwQuest.started) render.img(this.sprite(), this.x, this.y);
     }
 }
+
+var candyStatus = {}
 class Candy extends Tile {
     constructor(x, y) {
         super('candy', x + 4, y, 24, 24)
-        this.collected = false;
+
+        this.id = x + '' + y
+
+        this.collected = candyStatus[this.id];
+        if (this.collected == undefined) {
+            this.collected = false;
+            candyStatus[this.id] = this.collected;
+        }
+
+
+
+        this.sfx = () => sfx.tiles.candy.collect;
     }
 
     update() {
         if (!this.collected) {
             this.y += (Math.cos((gameClock) / (4 / .3)) * .3);
+
 
 
             if (gameClock % 5 == 0) render.pe.addParticle({
@@ -111,9 +125,11 @@ class Candy extends Tile {
 
     collect() {
         if (!this.collected) {
-
+            playSound(this.sfx());
             hwQuest.candiesCollected++;
             this.collected = true;
+
+            candyStatus[this.id] = this.collected;
         }
     }
 

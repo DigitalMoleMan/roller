@@ -9,7 +9,7 @@ var settings = {
     misc: {
         halloweenMode: true,
         enableCache: false,
-        gameLoopMethod: 'requestAnimationFrame',//'interval',
+        gameLoopMethod: 'interval',
         debugMode: false
     }
 }
@@ -21,6 +21,8 @@ var renderedFrames = 0;
 var hwQuest = {
     started: false,
     candiesCollected: 0,
+    candiesToComplete: 10,
+    fadeout: 0
 }
 
 //browser
@@ -245,6 +247,11 @@ var sfx = {
             wall: new Audio('audio/sfx/hookshot_wall.wav'),
         }
     },
+    tiles: {
+        candy: {
+            collect:  new Audio('audio/sfx/hw_candy.wav')
+        }
+    },
     ui: {
         dialogue: {
             next: new Audio('audio/sfx/tick.wav'),
@@ -340,7 +347,7 @@ window.onload = () => {
 
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
-        world.loadLevel(level[1]);
+        world.loadLevel(level[9]);
     } else world.loadLevel(level[1]);
 
 
@@ -528,10 +535,6 @@ var scenes = {
 
         //render.rect(player.posX, player.posY, 32, 32, "#fff", 1);
 
-        if (hwQuest.started) {
-            render.img(sprites.tiles.candy, block(3), block(1), 0);
-            render.text(`${hwQuest.candiesCollected}/10`, block(4), block(1));
-        }
 
         var itemUi = sprites.ui.activeItem;
         render.ctx.save();
@@ -546,6 +549,28 @@ var scenes = {
 
 
         //console.log(Math.round(fps / 10))
+
+        
+        if (hwQuest.started) {
+            render.img(sprites.tiles.candy, block(3), block(1), 0);
+            render.text(`${hwQuest.candiesCollected}/${hwQuest.candiesToComplete}`, block(4), block(1));
+
+            if(hwQuest.fadeout >= 1.25){
+                console.log(hwQuest.fadeout);
+                musicPlayer.pause();
+                dialogue.playDialogue(hwEnd);
+                hwQuest.started = false;
+            }
+           
+        }
+
+        if(hwQuest.candiesCollected >= hwQuest.candiesToComplete){
+            hwQuest.fadeout += .0025
+            render.rect(0,0,canvasWidth,canvasHeight,`rgba(0,0,0,${hwQuest.fadeout})`,0);
+            
+            
+        }
+       
     }),
     gameDialogue: new Scene(() => { // update
         if (onMobile) input.readMobileInput();
@@ -598,7 +623,7 @@ var scenes = {
 
 drawDebug = () => {
 
-    render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
+    if (settings.misc.gameLoopMethod == 'requestAnimationFrame') render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
     //settings.misc.debugMode
     //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
     //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');

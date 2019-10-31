@@ -124,6 +124,9 @@ class DialogueBox {
 var rollerDialogues = [];
 var bogusDialogues = [];
 var hwSigns = [];
+var hwEnd;
+var hwEnd2;
+var hwEnd3;
 
 loadDialogues = () => {
 
@@ -465,5 +468,32 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => dialogue.end()
         })
-    ]
+    ];
+
+    hwEnd = new DialogueBox({
+        speakerName: "",
+        text: ["And so, the little rolling robot was once again able", "to take a shower."],
+        textSpeed: .25,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(hwEnd2)
+    })
+
+    hwEnd2 = new DialogueBox({
+        speakerName: "",
+        text: ["After installing a free anti-virus, B.O.G.U.S.", "was able to get rid of B.O.O.G.U.S.", "At least until next year."],
+        textSpeed: .25,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.playDialogue(hwEnd3)
+    })
+
+    hwEnd3 = new DialogueBox({
+        speakerName: "DigitalMole",
+        text: ["Thank you for playing!"],
+        textSpeed: .1,
+        camPosX: () => player.posX,
+        camPosY: () => player.posY,
+        next: () => dialogue.end()
+    })
 };

@@ -278,7 +278,7 @@ class Hookshot extends Item {
         this.returnSpeed = 32;
         this.state = "retracted";
 
-        this.minLength = -3200;
+        this.minLength = 32;
         this.maxLength = 256;
         this.length = 0;
 
