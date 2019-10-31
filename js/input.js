@@ -70,12 +70,15 @@ class Input {
             document.addEventListener('keydown', (e) => {
                 var pressedKey = e.code;
                 if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
+               // console.log(pressedKey);
+               
                 this.keys[pressedKey] = true;
-            });
+               // console.log(input.keys[input.binds.game.use]);
+            }, { passive: true });
             document.addEventListener('keyup', (e) => {
                 var releasedKey = e.code;
                 this.keys[releasedKey] = false;
-            });
+            }, { passive: true });
         } else {
             this.touchAreas = touchAreas;
             this.targetTouches = [];
@@ -92,7 +95,7 @@ class Input {
 
     readMobileInput() {
         var touches = [];
-        for (var i = 0; i < this.targetTouches.length; i++) touches.push(this.targetTouches[i]);
+        for (let targetTouch of this.targetTouches) touches.push(targetTouch);
 
         this.touchAreas[activeScene].forEach(area => {
             if (touches.filter((t) => (t.clientX >= area.x
