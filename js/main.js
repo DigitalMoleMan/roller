@@ -9,13 +9,13 @@ var settings = {
     misc: {
         halloweenMode: true,
         enableCache: false,
-        gameLoopMethod: 'interval',
+        gameLoopMethod: 'raf',
         debugMode: false
     }
 }
 
-var fps = 0;
-var renderedFrames = 0;
+//var fps = 0;
+//var renderedFrames = 0;
 
 //halloween event
 var hwQuest = {
@@ -249,7 +249,7 @@ var sfx = {
     },
     tiles: {
         candy: {
-            collect:  new Audio('audio/sfx/hw_candy.wav')
+            collect: new Audio('audio/sfx/hw_candy.wav')
         }
     },
     ui: {
@@ -343,8 +343,6 @@ window.onload = () => {
     })
 
     loadDialogues();
-
-
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
         world.loadLevel(level[9]);
@@ -371,31 +369,25 @@ window.onload = () => {
     playMusic(14);
 
     switch (settings.misc.gameLoopMethod) {
-        case 'interval': setInterval(() => loop(), 1000 / 60); break;
-        case 'requestAnimationFrame':
-            setInterval(() => {
-                fps = renderedFrames
-                renderedFrames = 0
-
-            }, 1000)
-            loop(); break;
+        case 'interval': setInterval(() => loop(Date.now()), 1000 / 30); break;
+        case 'raf': loop(); break;
         default: setInterval(() => loop(), 1000 / 60);
     }
     //render.update();
 }
 
 
-function loop() {
-    if (settings.misc.gameLoopMethod == 'requestAnimationFrame') requestAnimationFrame(loop);
-
+var deltaTime = 0;
+var previous = 0;
+var traf;
+function loop(time) {
+    if (settings.misc.gameLoopMethod == 'raf') traf = requestAnimationFrame(loop);
+    deltaTime = (time - previous) * .06;
+    previous = time;
     scenes[activeScene].update();
     scenes[activeScene].draw();
-
     if (settings.misc.debugMode) drawDebug();
-
     if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
-
-    renderedFrames++
 }
 
 class Scene {
@@ -414,7 +406,7 @@ var scenes = {
     }),
     game: new Scene(() => { // update
         if (onMobile) input.readMobileInput();
-        gameClock++;
+        gameClock += deltaTime
 
         onScreen = world.tiles.filter((tile) => (
             tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
@@ -550,31 +542,31 @@ var scenes = {
 
         //console.log(Math.round(fps / 10))
 
-        
+
         if (hwQuest.started) {
             render.img(sprites.tiles.candy, block(3), block(1), 0);
             render.text(`${hwQuest.candiesCollected}/${hwQuest.candiesToComplete}`, block(4), block(1));
 
-            if(hwQuest.fadeout >= 1.25){
+            if (hwQuest.fadeout >= 1.25) {
                 console.log(hwQuest.fadeout);
                 musicPlayer.pause();
                 dialogue.playDialogue(hwEnd);
                 hwQuest.started = false;
             }
-           
+
         }
 
-        if(hwQuest.candiesCollected >= hwQuest.candiesToComplete){
+        if (hwQuest.candiesCollected >= hwQuest.candiesToComplete) {
             hwQuest.fadeout += .0025
-            render.rect(0,0,canvasWidth,canvasHeight,`rgba(0,0,0,${hwQuest.fadeout})`,0);
-            
-            
+            render.rect(0, 0, canvasWidth, canvasHeight, `rgba(0,0,0,${hwQuest.fadeout})`, 0);
+
+
         }
-       
+
     }),
     gameDialogue: new Scene(() => { // update
         if (onMobile) input.readMobileInput();
-        gameClock++;
+        gameClock += deltaTime;
 
         onScreen = world.tiles.filter((tile) => (
             tile.x > (camera.x - 32) && tile.x < (render.canvas.width + camera.x) &&
@@ -623,7 +615,7 @@ var scenes = {
 
 drawDebug = () => {
 
-    if (settings.misc.gameLoopMethod == 'requestAnimationFrame') render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
+    //if (settings.misc.gameLoopMethod == 'raf') render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
     //settings.misc.debugMode
     //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
     //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');

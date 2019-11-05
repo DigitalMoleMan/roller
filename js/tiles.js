@@ -5,8 +5,8 @@ class Tile {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.style = style
-        this.sprite = () => sprites.tiles[this.type]
+        this.style = style;
+        this.sprite = () => sprites.tiles[this.type];
     }
 
     update() {
@@ -92,12 +92,12 @@ class Candy extends Tile {
     constructor(x, y) {
         super('candy', x + 4, y, 24, 24)
 
-        this.id = x + '' + y
+        this.candyId = x + '' + y
 
-        this.collected = candyStatus[this.id];
+        this.collected = candyStatus[this.candyId];
         if (this.collected == undefined) {
             this.collected = false;
-            candyStatus[this.id] = this.collected;
+            candyStatus[this.candyId] = this.collected;
         }
 
 
@@ -129,7 +129,7 @@ class Candy extends Tile {
             hwQuest.candiesCollected++;
             this.collected = true;
 
-            candyStatus[this.id] = this.collected;
+            candyStatus[this.candyId] = this.collected;
         }
     }
 

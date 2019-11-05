@@ -104,13 +104,17 @@ class DialogueHandler {
 
 
 class DialogueBox {
+    /**
+     * 
+     * @param {Object} options 
+     */
     constructor(options = {
-        speakerName: String(),
-        text: String(),
-        textSpeed: Number(),
-        camPosX: Function(),
-        camPosY: Function(),
-        next: Function()
+        speakerName,
+        text,
+        textSpeed,
+        camPosX,
+        camPosY,
+        next
     }) {
         this.speakerName = options.speakerName;
         this.text = options.text;

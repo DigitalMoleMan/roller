@@ -13,16 +13,16 @@ class Player {
             paddingX: 16,
             paddingY: 16,
             x: {
-                left: () => Math.round((this.posX - this.hitbox.paddingX) + this.velX),
-                right: () => Math.round((this.posX + this.hitbox.paddingX) + this.velX),
+                left: () => Math.round((this.posX - this.hitbox.paddingX) + (this.velX * deltaTime)),
+                right: () => Math.round((this.posX + this.hitbox.paddingX) + (this.velX * deltaTime)),
                 top: () => Math.round(this.posY - (this.hitbox.paddingY / 2)),
                 bottom: () => Math.round(this.posY + this.hitbox.paddingY)
             },
             y: {
                 left: () => Math.round(this.posX - this.hitbox.paddingX),
                 right: () => Math.round(this.posX + this.hitbox.paddingX),
-                top: () => Math.round((this.posY - this.hitbox.paddingY / 2) + this.velY),
-                bottom: () => Math.round((this.posY + this.hitbox.paddingY) + this.velY)
+                top: () => Math.round((this.posY - this.hitbox.paddingY / 2) + (this.velY * deltaTime)),
+                bottom: () => Math.round((this.posY + this.hitbox.paddingY) + (this.velY * deltaTime))
             }
         }
         this.acc = .4;
@@ -75,56 +75,32 @@ class Player {
             this.posY -= this.velY * .5;
         }
 
-        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
-
-        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2));
-
-
-        (!this.colX) ? this.posX += Math.cos(rotation) * dist : this.velX = 0;
-
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
 
-        if (!this.colY) {
-            this.posY += Math.sin(rotation) * dist;//this.velY;
-            (this.velY < 0) ? this.velY += .3 : this.velY += .4;
-        } else {
-            if (this.velY > .1) this.velY *= .1;
-            if (this.velY < 0) this.velY *= .1;
-            if (this.velY < .1 && this.velY > -.1) this.velY = Math.round(this.velY * 100) / 100
-            //this.posY = Math.round(this.posY)
-        }
+
 
         if (this.colY && this.velY > 0) {
-            if (this.midJump) {
-                for (let i = 0; i < 25; i++) {
-                    let colVal = 192 + Math.random() * 64;
-                    render.pe.addParticle({
-                        x: player.posX + ((Math.random() - .5) * 16),
-                        y: (player.posY + 18),
-                        velX: (Math.random() - .5) * 2.5,
-                        velY: (Math.random()) / 5,
-                        lifetime: (Math.random() * 25),
-                        size: 1 + (Math.random() * 3),
-                        color: `rgba(${colVal},${colVal},${colVal},128)`
-                    })
-                }
-
+            if (this.midJump) for (let i = 0; i < 25; i++) {
+                let colVal = 192 + Math.random() * 64;
+                render.pe.addParticle({
+                    x: player.posX + ((Math.random() - .5) * 16),
+                    y: (player.posY + 18),
+                    velX: (Math.random() - .5) * 2.5,
+                    velY: (Math.random()) / 5,
+                    lifetime: (Math.random() * 25),
+                    size: 1 + (Math.random() * 3),
+                    color: `rgba(${colVal},${colVal},${colVal},128)`
+                })
             }
             this.midJump = false;
-            //this.velY -= .1;
-
         }
 
-        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
+        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9 ;
 
-        this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
+        
 
 
-        this.band += this.velX;
-        if (this.velX > 32) this.velX = 32;
-        if (this.velX < -32) this.velX = -32;
-        if (this.velY > 24) this.velY = 24;
-        if (this.velY < -32) this.velY = -32;
+        this.band += this.velX * deltaTime;
 
 
         if (this.band < 0) this.band = sprites.player.bands.length * 100;
@@ -136,7 +112,32 @@ class Player {
         //case handling
         if (this.velX < .01 && this.velX > -.01) this.velX = 0;
 
+        if (this.colX) this.velX = 0;
 
+        
+
+        if (this.velX > 32) this.velX = 32;
+        if (this.velX < -32) this.velX = -32;
+        if (this.velY > 24) this.velY = 24;
+        if (this.velY < -32) this.velY = -32;
+
+        this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
+
+        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
+
+        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)) * deltaTime;
+
+
+        this.posX += (Math.cos(rotation) * dist)
+
+        if (!this.colY) {
+            this.posY += (Math.sin(rotation) * dist);//this.velY;
+            (this.velY < 0) ? this.velY += .3 * deltaTime: this.velY += .4 * deltaTime;
+        } else {
+            if (this.velY > .1 || this.velY < 0) this.velY *= .1;
+            if (this.velY < .1 && this.velY > -.1) this.velY = (Math.round(this.velY * 100) / 100);
+            //this.posY = Math.round(this.posY)
+        }
     }
 
     moveLeft() {
@@ -205,8 +206,7 @@ class Player {
                 // console.log(tile.constructor.name)
                 //console.log(tile)
                 switch (tile.type) {
-                    case 'block':
-                        return true;
+                    case 'block': return true;
                     case 'platform':
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
@@ -247,9 +247,7 @@ class Player {
 
 
             render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
-
-
-
+            
             if (this.midJump) render.img(this.sprite().bandsJump[Math.floor(this.band) % this.sprite().bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
             else render.img(this.sprite().bands[Math.floor((this.band) % this.sprite().bands.length)], (this.posX - 16), (this.posY - 16));
 
@@ -347,7 +345,7 @@ class Hookshot extends Item {
                             this.posX < (this.target.x + this.target.width) &&
                             this.posY > this.target.y &&
                             this.posY < (this.target.y + this.target.height)) {
-                                this.sound().hook.volume = .1
+                            this.sound().hook.volume = .1
                             playSound(this.sound().hook);
                             player.midJump = false;
                             this.state = "hooked";
@@ -376,8 +374,8 @@ class Hookshot extends Item {
                         } else {
                             let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
 
-                            this.posX += Math.cos(rotation) * this.speed
-                            this.posY += Math.sin(rotation) * this.speed
+                            this.posX += (Math.cos(rotation) * this.speed) * deltaTime
+                            this.posY += (Math.sin(rotation) * this.speed) * deltaTime
                         }
                     } catch (error) {
                         this.state = "retracting";
@@ -393,8 +391,8 @@ class Hookshot extends Item {
 
                 if (input.keys[input.binds.game.use]) {
 
-                    if ((input.keys[input.binds.game.up] || this.length > this.maxLength) && this.length > this.minLength ) this.length -= 2
-                    if ((input.keys[input.binds.game.down] || this.length < this.minLength) && this.length < this.maxLength ) this.length += 2
+                    if ((input.keys[input.binds.game.up] || this.length > this.maxLength) && this.length > this.minLength) this.length -= 2
+                    if ((input.keys[input.binds.game.down] || this.length < this.minLength) && this.length < this.maxLength) this.length += 2
 
 
 
@@ -429,8 +427,8 @@ class Hookshot extends Item {
                 let rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
-                this.posX += Math.cos(rotation) * (this.returnSpeed);
-                this.posY += Math.sin(rotation) * (this.returnSpeed);
+                this.posX += Math.cos(rotation) * (this.returnSpeed)  * deltaTime;
+                this.posY += Math.sin(rotation) * (this.returnSpeed) * deltaTime;
 
                 if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
 

@@ -1,5 +1,8 @@
 block = (n = 1) => n * 32;
 
+var worldMemory = [];
+
+
 class World {
     constructor() {
 
@@ -9,6 +12,7 @@ class World {
         this.npcs = [];
 
         this.segments = [];
+
 
         //this.inRangeActors = [];
 

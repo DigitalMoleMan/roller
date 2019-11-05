@@ -8,7 +8,7 @@ class Actor {
         this.onInteract = () => onInteract();
     }
 
-    draw(){
+    draw() {
 
     }
 }
@@ -178,7 +178,7 @@ class SpikeGuard extends Enemy {
             index: 1,
             color: "#00000000"
         }])
-        
+
     }
 
     checkCollision() {
@@ -202,7 +202,7 @@ class SpikeGuard extends Enemy {
             render.line(this.posX, this.posY - 16, this.posX, this.posY + 16, "#fff");
         }
 
-        
+
     }
 }
 
@@ -261,7 +261,7 @@ class Bogus extends Actor {
                 render.ctx.drawImage(this.sprite().hw_anim, block(3) * this.animProgress, 0, block(3), block(5), block(30.5) - camera.x, block(0) - camera.y, block(6), block(10));
 
                 if (this.animProgress < 48 || this.sfx().startup.currentTime) {
-                    if (gameClock % 5 == 0) this.animProgress++;
+                    if (Math.round(gameClock) % 5 == 0) this.animProgress++;
                 } else {
                     playSound(this.sfx().startup);
                 }
@@ -280,16 +280,16 @@ class Bogus extends Actor {
 }
 
 class HalloweenSign extends Actor {
-    constructor(x, y, onInteract){
+    constructor(x, y, onInteract) {
         super(x, y, onInteract, block(1))
         this.sprite = () => sprites.npcs.hwSign;
     }
-    
-    update(){
+
+    update() {
 
     }
 
-    draw(){
+    draw() {
         render.img(this.sprite(), this.posX, this.posY, 1);
     }
 }
