@@ -21,11 +21,7 @@ class DialogueHandler {
             }
         })
 
-        //TextBox draw variables
-        this.tbX = canvasWidth / block(.5);
-        this.tbY = canvasHeight - block(4.5);
-        this.tbW = canvasWidth - (this.tbX * 2);
-        this.tbH = block(4);
+
 
 
     };
@@ -58,6 +54,7 @@ class DialogueHandler {
                     if (row[this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
 
                         playSound(this.sfx().text, 1)
+
                     } else if (!this.sfx().paused) stopSound(this.sfx().text);
                 }
             }
@@ -66,6 +63,13 @@ class DialogueHandler {
 
     draw() {
         if (!this.hide) {
+
+            //TextBox draw variables
+            this.tbX = Math.round(canvasWidth / block(.5) / 32) * 32;
+            this.tbY = (canvasHeight - block(4.5))
+            this.tbW = Math.round((canvasWidth - (this.tbX * 2)) / 32) * 32;
+            this.tbH = block(4);
+
             var tbR = this.tbX + this.tbW;
             var tbB = this.tbY + this.tbH;
 
@@ -91,9 +95,6 @@ class DialogueHandler {
                 let drawnText = row.substr(0, this.textProg - this.msglength(i))
 
                 render.text(drawnText, this.tbX + block(.75), this.tbY + block(.75) + block(i))
-
-
-
             }
 
             //next message symbol

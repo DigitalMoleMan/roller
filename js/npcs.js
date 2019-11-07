@@ -256,6 +256,7 @@ class Bogus extends Actor {
     draw() {
         if (!this.playingAnimation) {
             render.img(this.sprite()[this.drawnSprite][Math.round(gameClock / 8) % this.sprite().idle.length], this.posX, this.posY);
+
         } else {
             if (this.sfx().lightning.currentTime) {
                 render.ctx.drawImage(this.sprite().hw_anim, block(3) * this.animProgress, 0, block(3), block(5), block(30.5) - camera.x, block(0) - camera.y, block(6), block(10));

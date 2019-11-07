@@ -7,7 +7,7 @@ var settings = {
         enableLighting: true
     },
     misc: {
-        halloweenMode: true,
+        halloweenMode: false,
         enableCache: false,
         gameLoopMethod: 'raf',
         debugMode: false
@@ -44,8 +44,8 @@ lastIndex = (array) => array.length - 1;
 
 randomIndex = (array) => array[Math.round(Math.random() * lastIndex(array))];
 
-var canvasWidth = 1024;
-var canvasHeight = 576;
+var canvasWidth = window.innerWidth;
+var canvasHeight = window.innerHeight;
 
 if (onMobile) {
     canvasWidth = window.innerWidth;
@@ -292,7 +292,7 @@ playMusic = (track) => {
  * @param {Number} sound index in sfx[]
  */
 playSound = (sound, volume = .5) => {
-    if (sound.currentTime) sound.currentTime = 0;
+
     sound.volume = volume;
     (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 }
@@ -305,7 +305,7 @@ loopSound = (sound) => {
 
 stopSound = (sound) => {
     sound.pause();
-
+    if (sound.currentTime) sound.currentTime = 0;
 }
 
 /**
@@ -366,28 +366,35 @@ window.onload = () => {
     document.addEventListener(input.binds["game"].togglePause, () => {
         if (input.keys[input.binds[activeScene].togglePause] !== true) (activeScene == "game") ? setScene("pauseMenu") : setScene("game")
     });
-    playMusic(14);
+    //playMusic(14);
 
     switch (settings.misc.gameLoopMethod) {
         case 'interval': setInterval(() => loop(Date.now()), 1000 / 30); break;
-        case 'raf': loop(); break;
+        case 'raf': loop(0); break;
         default: setInterval(() => loop(), 1000 / 60);
     }
     //render.update();
 }
 
-
 var deltaTime = 0;
 var previous = 0;
-var traf;
 function loop(time) {
-    if (settings.misc.gameLoopMethod == 'raf') traf = requestAnimationFrame(loop);
+    requestAnimationFrame(loop);
     deltaTime = (time - previous) * .06;
     previous = time;
     scenes[activeScene].update();
     scenes[activeScene].draw();
     if (settings.misc.debugMode) drawDebug();
-    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0
+    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0;
+
+}
+
+window.onresize = () => {
+    canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+
+    render.canvas.width = canvasWidth;
+    render.canvas.height = canvasHeight;
 }
 
 class Scene {
@@ -445,20 +452,17 @@ var scenes = {
 
         lighting.update();
 
-
-        //render.camera.follow(player.pos);
-
     }, () => { // draw
 
         const zero = 0;
         // background
-
+        render.rect(0, 0, canvasWidth, canvasHeight, '#181425', 0);
 
         var bg = sprites.backgrounds[3];
         if (settings.misc.halloweenMode) {
 
-            for (let x = 0; x < (canvasWidth * 2); x += bg.width) {
-                for (let y = 0; y < (canvasHeight * 2); y += bg.height) {
+            for (let x = 0; x < (canvasWidth); x += bg.width) {
+                for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
                     render.img(sprites.backgrounds[4], x + camera.x, y + camera.y, 1.1);
                 }
                 render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
@@ -466,7 +470,7 @@ var scenes = {
         } else {
             for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
                 for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 1);
+                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
                 }
             }
         }
@@ -474,29 +478,11 @@ var scenes = {
         world.npcs.forEach(npc => npc.draw());
 
         player.draw();
+
         // world
-        //render.ctx.save();
-        //render.ctx.scale(2, 2);
-        for (let tile of onScreen) {
+        for (let tile of onScreen) tile.draw()
 
-
-            tile.draw()//render.img(texture, tile.x, tile.y, 1);
-            render.ctx.restore();
-
-        }
-
-        for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) {
-
-            render.ctx.save();
-
-            // if(tile.drawModifier !== undefined)tile.drawModifier();
-
-            tile.draw();
-            //render.img(texture, tile.x, tile.y, 1);
-            render.ctx.restore();
-
-        }
-        //render.ctx.restore();
+        for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) tile.draw();
 
         render.pe.tick()
 
@@ -525,9 +511,6 @@ var scenes = {
             render.text('E', actor.posX + (actor.interactionRadius / 2.5), actor.posY - block(), 1, "#fff", 1);
         }
 
-        //render.rect(player.posX, player.posY, 32, 32, "#fff", 1);
-
-
         var itemUi = sprites.ui.activeItem;
         render.ctx.save();
         render.ctx.translate(-itemUi.label.width, 0);
@@ -538,10 +521,6 @@ var scenes = {
         render.img(itemUi.border, 48, 32, zero);
 
         render.img(itemUi[player.activeItem.name], 48, 32, zero);
-
-
-        //console.log(Math.round(fps / 10))
-
 
         if (hwQuest.started) {
             render.img(sprites.tiles.candy, block(3), block(1), 0);
@@ -559,8 +538,6 @@ var scenes = {
         if (hwQuest.candiesCollected >= hwQuest.candiesToComplete) {
             hwQuest.fadeout += .0025
             render.rect(0, 0, canvasWidth, canvasHeight, `rgba(0,0,0,${hwQuest.fadeout})`, 0);
-
-
         }
 
     }),
@@ -593,7 +570,6 @@ var scenes = {
         camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
 
         lighting.update();
-
         dialogue.update();
 
 
@@ -606,7 +582,6 @@ var scenes = {
         if (onMobile) input.readMobileInput();
 
         menu.update();
-        //if (input.keys[input.binds.pause]) setScene("game");
     }, () => { // draw
         scenes.game.draw();
         menu.draw();
@@ -615,28 +590,12 @@ var scenes = {
 
 drawDebug = () => {
 
-    //if (settings.misc.gameLoopMethod == 'raf') render.text(`fps: ${fps}`, block(5), block(5), 1, '#fff', 0)
-    //settings.misc.debugMode
-    //render.rectStatic(0, render.canvas.height / 2, render.canvas.width, 1, '#f00');
-    //render.rectStatic(render.canvas.width / 2, 0, 1, render.canvas.height, '#0f0');
-
     var hb = player.hitbox;
-
-    //ctx.setTransform(1,0,0,1,0,0)
-
-    //render.rectStroke(hb.x.left(), hb.y.top(), hb.x.right() - hb.x.left(), hb.y.bottom() - hb.y.top(), "#ff0");
-
     render.rectStroke(hb.x.left(), hb.x.top(), hb.x.right() - hb.x.left(), hb.x.bottom() - hb.x.top(), "#f00");
     render.rectStroke(hb.y.left(), hb.y.top(), hb.y.right() - hb.y.left(), hb.y.bottom() - hb.y.top(), "#0f0");
 
-    //render.rectStroke((player.posX - 32), (player.posY - 32), 64, 64, "#00f")
-
     for (let seg of world.segments) render.rectStroke(seg.x, seg.y, seg.width, seg.height, "#f00");
-    /*
-                onScreen.forEach(tile => {
-                    render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#f00");
-                })
-    */
+
     for (let tile of nearPlayer) render.rectStroke(tile.x, tile.y, tile.width, tile.height, "#0f0");
 
 
@@ -651,11 +610,11 @@ drawDebug = () => {
 
     if (onMobile) {
         for (let ta of input.touchAreas[activeScene]) {
-            render.rectStroke(ta.x, ta.y, ta.width, ta.height, "#ffffff80", 2, 0);
-            render.text(ta.bind, ta.x, ta.y, 1, "#ffffff80");
+            render.rectStroke(ta.x(), ta.y(), ta.width(), ta.height(), "#ffffff80", 2, 0);
+            render.text(ta.bind, ta.x(), ta.y(), 1, "#ffffff80");
         }
     }
-    //render.line(player.posX, player.posY, player.posX + (player.velX) + player.hitbox.padding, player.posY + (player.velY) + player.hitbox.padding, "#ff0")
+
 }
 
 

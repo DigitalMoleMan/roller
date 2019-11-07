@@ -23,8 +23,6 @@ class World {
     }
 
     interaction() {
-
-        //console.log(inRangeActors);
         if (this.inRangeActors.length > 0) this.inRangeActors[0].onInteract();
     }
 
@@ -225,7 +223,8 @@ class World {
                     ctx.drawImage(sprite[dIndex], x, y);
                     try {
                         if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch (error){
+                    } catch (error) {
+                        console.log(error);
                     }
                 }
             }
@@ -482,6 +481,7 @@ const level = [
         name: "MNKO Swinging Course - Hall",
         layout: [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "X                               XXX                                                             XXX",
             "X                               XXX                                                             XXX",
             "X            G                  XXX                                                             XXX",
@@ -504,7 +504,7 @@ const level = [
             {
                 type: "door",
                 x: block(0),
-                y: block(10),
+                y: block(11),
                 width: block(0),
                 height: block(2),
                 exit: 1,
@@ -514,7 +514,7 @@ const level = [
             }, {
                 type: "door",
                 x: block(99.5),
-                y: block(14),
+                y: block(15),
                 width: block(0),
                 height: block(3),
                 exit: 4,

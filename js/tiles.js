@@ -44,8 +44,8 @@ class Elevator extends Tile {
     }
 
     update() {
-        if (this.speedH !== 0) this.velX = -Math.sin((gameClock) / (this.range / this.speedH)) * this.speedH;
-        if (this.speedV !== 0) this.velY = -Math.sin((gameClock) / (this.range / this.speedV)) * this.speedV;
+        if (this.speedH !== 0) this.velX = (-Math.sin(Math.round(gameClock) / (this.range / this.speedH)) * this.speedH);
+        if (this.speedV !== 0) this.velY = (-Math.sin(Math.round(gameClock) / (this.range / this.speedV)) * this.speedV);
         this.x += this.velX;
         this.y += this.velY;
 

@@ -47,8 +47,6 @@ class Player {
 
         this.sprite = () => sprites.player;
         this.sfx = () => sfx.player;
-
-
     }
 
     readInput(input) {
@@ -75,9 +73,8 @@ class Player {
             this.posY -= this.velY * .5;
         }
 
+        //decrease deceleration when in the air
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
-
-
 
         if (this.colY && this.velY > 0) {
             if (this.midJump) for (let i = 0; i < 25; i++) {
@@ -95,65 +92,48 @@ class Player {
             this.midJump = false;
         }
 
-        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9 ;
+        //extend jump if player is holding the jump button
+        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
 
-        
-
-
-        this.band += this.velX * deltaTime;
-
-
-        if (this.band < 0) this.band = sprites.player.bands.length * 100;
+        //kill player upon going below the world height
         if (this.posY >= world.height + 128) this.kill();
 
-        if (this.invsFrames > 0) this.invsFrames--;
-
+        //decrease the amount of frames until the player can take damage again.
+        if (this.invsFrames) this.setInvsFrames(this.invsFrames - 1);
 
         //case handling
         if (this.velX < .01 && this.velX > -.01) this.velX = 0;
 
+        //set player velocity to 0 on collision
         if (this.colX) this.velX = 0;
 
-        
-
+        //limit player velocity
         if (this.velX > 32) this.velX = 32;
         if (this.velX < -32) this.velX = -32;
         if (this.velY > 24) this.velY = 24;
         if (this.velY < -32) this.velY = -32;
 
-        this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
-
-        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
-
-        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)) * deltaTime;
 
 
-        this.posX += (Math.cos(rotation) * dist)
+        this.updateSprite();
 
-        if (!this.colY) {
-            this.posY += (Math.sin(rotation) * dist);//this.velY;
-            (this.velY < 0) ? this.velY += .3 * deltaTime: this.velY += .4 * deltaTime;
-        } else {
-            if (this.velY > .1 || this.velY < 0) this.velY *= .1;
-            if (this.velY < .1 && this.velY > -.1) this.velY = (Math.round(this.velY * 100) / 100);
-            //this.posY = Math.round(this.posY)
-        }
+        this.updatePosition();
     }
 
     moveLeft() {
-
         this.velX -= this.acc;
-        if (this.look > 0) this.look--;
     }
 
     moveRight() {
         this.velX += this.acc;
-        if (this.look < 12) this.look++;
     }
 
     jump() {
         if (!this.midJump) {
-            (this.velY > 0) ? this.velY = this.jumpHeight : this.velY += this.jumpHeight;
+            this.jumpHeight = this.calculateJumpHeight();
+
+
+            (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
 
             for (let i = 0; i < 50; i++) {
@@ -174,9 +154,8 @@ class Player {
 
     damage(amount) {
         if (this.invsFrames <= 0) {
-            this.invsFrames = 60;
+            this.setInvsFrames(60)
             this.hp -= amount;
-
             // playSound(this.sfx().hurt);
             if (this.hp <= 0) this.kill();
         }
@@ -238,7 +217,41 @@ class Player {
         return false;
     };
 
+    updatePosition() {
 
+        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
+
+        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)) * deltaTime;
+
+
+        this.posX += (Math.cos(rotation) * dist)
+
+        if (!this.colY) {
+            this.posY += (Math.sin(rotation) * dist);//this.velY;
+            (this.velY < 0) ? this.velY += .3 * deltaTime : this.velY += .4 * deltaTime;
+        } else {
+            if (this.velY > .1 || this.velY < 0) this.velY *= .1;
+            if (this.velY < .1 && this.velY > -.1) this.velY = (Math.round(this.velY * 100) / 100);
+            //this.posY = Math.round(this.posY)
+        }
+    }
+
+    setInvsFrames(amount) {
+        this.invsFrames = amount;
+    }
+
+    calculateJumpHeight() {
+        let jh = Math.round((9 + (Math.abs(this.velX) * .1)) * 100) / 100;
+        return jh
+    }
+
+    updateSprite() {
+        if (this.velX > 0 && this.look < 12) this.look++;
+        if (this.velX < 0 && this.look > 0) this.look--;
+        this.band += this.velX * deltaTime;
+
+        if (this.band < 0) this.band = sprites.player.bands.length * 100;
+    }
 
     draw() {
 
@@ -247,7 +260,7 @@ class Player {
 
 
             render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
-            
+
             if (this.midJump) render.img(this.sprite().bandsJump[Math.floor(this.band) % this.sprite().bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
             else render.img(this.sprite().bands[Math.floor((this.band) % this.sprite().bands.length)], (this.posX - 16), (this.posY - 16));
 
@@ -290,7 +303,6 @@ class Hookshot extends Item {
         this.sprite = () => sprites.items.hookshot;
         this.sound = () => sfx.items.hookshot;
 
-
     }
 
 
@@ -332,7 +344,7 @@ class Hookshot extends Item {
                     if (this.target !== undefined) {
                         this.inputBuffer = 0;
                         this.state = "shooting";
-                        this.sound().shoot.volume = .2
+
                         playSound(this.sound().shoot);
                     } else this.inputBuffer--;
                 }
@@ -340,45 +352,41 @@ class Hookshot extends Item {
             case "shooting":
 
                 if (input.keys[input.binds.game.use]) {
-                    try {
-                        if (this.posX > this.target.x &&
-                            this.posX < (this.target.x + this.target.width) &&
-                            this.posY > this.target.y &&
-                            this.posY < (this.target.y + this.target.height)) {
-                            this.sound().hook.volume = .1
-                            playSound(this.sound().hook);
-                            player.midJump = false;
-                            this.state = "hooked";
+                    if (this.posX > this.target.x &&
+                        this.posX < (this.target.x + this.target.width) &&
+                        this.posY > this.target.y &&
+                        this.posY < (this.target.y + this.target.height)) {
 
-                            this.posX = (this.target.x + (this.target.width / 2))
-                            this.posY = (this.target.y + (this.target.height / 2))
+                        playSound(this.sound().hook, .2);
+                        player.midJump = false;
+                        this.state = "hooked";
 
-                            this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
+                        this.posX = (this.target.x + (this.target.width / 2))
+                        this.posY = (this.target.y + (this.target.height / 2))
 
-                            for (let i = 0; i < 10; i++) {
-                                let colVal = (Math.random() * 255);
-                                render.pe.addParticle({
-                                    x: this.posX + (Math.random() - .5) * 12,
-                                    y: this.posY + (Math.random() - .5) * 12,
-                                    velX: (Math.random() - .5) * 3,
-                                    velY: (Math.random() - .5) * 3,
-                                    lifetime: 5 + (Math.random() * 10),
-                                    size: 2 + (Math.random() - .5) * 2,
-                                    color: `rgba(255,${colVal},0,255)`,
-                                    glow: true
-                                })
+                        this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
 
-                            }
+                        for (let i = 0; i < 10; i++) {
+                            let colVal = (Math.random() * 255);
+                            render.pe.addParticle({
+                                x: this.posX + (Math.random() - .5) * 12,
+                                y: this.posY + (Math.random() - .5) * 12,
+                                velX: (Math.random() - .5) * 3,
+                                velY: (Math.random() - .5) * 3,
+                                lifetime: 5 + (Math.random() * 10),
+                                size: 2 + (Math.random() - .5) * 2,
+                                color: `rgba(255,${colVal},0,255)`,
+                                glow: true
+                            })
 
-
-                        } else {
-                            let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
-
-                            this.posX += (Math.cos(rotation) * this.speed) * deltaTime
-                            this.posY += (Math.sin(rotation) * this.speed) * deltaTime
                         }
-                    } catch (error) {
-                        this.state = "retracting";
+
+
+                    } else {
+                        let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
+
+                        this.posX += (Math.cos(rotation) * this.speed) * deltaTime
+                        this.posY += (Math.sin(rotation) * this.speed) * deltaTime
                     }
                 } else {
                     this.state = "retracting";
@@ -403,7 +411,6 @@ class Hookshot extends Item {
 
                         player.velX += (Math.cos(rotation) * this.stiffness);
                         player.velY += (Math.sin(rotation) * this.stiffness);
-
                     }
                     if (this.target.fromPlayer <= this.length + 8 && this.target.fromPlayer >= this.length - 32) {
                         player.dec = .96;
@@ -415,6 +422,7 @@ class Hookshot extends Item {
 
                 } else {
                     player.dec = .93;
+
                     player.midJump = true;
                     this.state = "retracting";
                 }
@@ -427,7 +435,7 @@ class Hookshot extends Item {
                 let rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
-                this.posX += Math.cos(rotation) * (this.returnSpeed)  * deltaTime;
+                this.posX += Math.cos(rotation) * (this.returnSpeed) * deltaTime;
                 this.posY += Math.sin(rotation) * (this.returnSpeed) * deltaTime;
 
                 if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
@@ -440,12 +448,9 @@ class Hookshot extends Item {
 
     getClosest() {
 
-        let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
+        let hookpoints = onScreen.filter((tile) => (tile.type == 'hookpoint'));
         hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
-        for (let point of hookpoints) {
-
-            point.blocked = this.checkPointBlocked(point)
-        }
+        for (let point of hookpoints) point.blocked = this.checkPointBlocked(point)
         hookpoints = hookpoints.filter((point) => (point.blocked == false));
 
 
@@ -490,7 +495,7 @@ class Hookshot extends Item {
         }
 
         //recticle
-        if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - block(.25), this.target.y - block(.25))
+        if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - 8, this.target.y - 8)
 
         if (settings.misc.debugMode) {
             try { render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff") }
