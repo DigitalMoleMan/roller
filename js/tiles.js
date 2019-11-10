@@ -20,10 +20,12 @@ class Tile {
 class Block extends Tile {
     constructor(x, y, style = 'metal') {
         super('block', x, y, 32, 32, style);
+        this.bitmap;
     }
 
+
     draw() {
-        render.img(this.sprite, this.x, this.y);
+        if(this.bitmap !== undefined) render.img(this.bitmap, this.x, this.y);
     }
 }
 
@@ -46,8 +48,8 @@ class Elevator extends Tile {
     update() {
         if (this.speedH !== 0) this.velX = (-Math.sin(Math.round(gameClock) / (this.range / this.speedH)) * this.speedH);
         if (this.speedV !== 0) this.velY = (-Math.sin(Math.round(gameClock) / (this.range / this.speedV)) * this.speedV);
-        this.x += this.velX;
-        this.y += this.velY;
+        this.x += this.velX * deltaTime;
+        this.y += this.velY * deltaTime;
 
 
     }

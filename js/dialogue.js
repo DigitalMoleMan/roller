@@ -46,12 +46,12 @@ class DialogueHandler {
 
     update() {
         if (this.msglength(this.currentDialogue.text.length) > this.textProg) {
-            this.textProg += this.currentDialogue.textSpeed;
+            this.textProg += this.currentDialogue.textSpeed * deltaTime;
 
-            if (this.textProg % 1 == 0) {
+            if (Math.round(this.textProg) % 1 == 0) {
                 for (let i in this.currentDialogue.text) {
                     let row = this.currentDialogue.text[i];
-                    if (row[this.textProg - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== this.textProg) {
+                    if (row[Math.round(this.textProg) - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== Math.round(this.textProg)) {
 
                         playSound(this.sfx().text, 1)
 
@@ -86,7 +86,7 @@ class DialogueHandler {
             render.img(this.sprite().right, this.tbX + this.tbW, this.tbY - block(1), 0, 1);
 
             //Speaker name.
-            render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 1, "#fff", 0);
+            render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 2, 0);
 
             //dialogue message
             for (let i in this.currentDialogue.text) {
@@ -94,7 +94,7 @@ class DialogueHandler {
 
                 let drawnText = row.substr(0, this.textProg - this.msglength(i))
 
-                render.text(drawnText, this.tbX + block(.75), this.tbY + block(.75) + block(i))
+                render.text(drawnText, this.tbX + block(.75), this.tbY + block(.75) + block(i), 2)
             }
 
             //next message symbol

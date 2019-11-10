@@ -111,12 +111,12 @@ var onScreen = [];
 var onScreenSegs = [];
 var onScreenLights = [];
 
-const fontFile = new Image();
+const fontFile = new SpriteSheet('fonts/roller_font.png', 8, 8);
 
 
 var font = [];
 
-fontFile.src = 'fonts/roller_font.png';
+//fontFile.src = 'fonts/roller_font.png';
 
 //Loading sprites
 var sprites = {
@@ -143,9 +143,10 @@ var sprites = {
         }
     },
     player: {
-        body: render.importSprite('img/player/body', 13),
-        bands: render.importSprite('img/player/bands', 8),
-        bandsJump: render.importSprite('img/player/bands_jump', 8),
+        body: new SpriteSheet('img/player/body_sheet.png', 32, 32),
+        bands: new SpriteSheet('img/player/bands_sheet.png', 32, 32),
+        bandsJump: new SpriteSheet('img/player/bands_jump_sheet.png', 32, 32),
+        bandsFall: new SpriteSheet('img/player/bands_fall_sheet.png', 32, 32),
         cannon: render.importSprite('img/player/cannon', 13),
     },
     items: {
@@ -368,20 +369,31 @@ window.onload = () => {
     });
     //playMusic(14);
 
+    //setInterval(() => intervalUpdate(), 1000 / 60);
+    settings.misc.gameLoopMethod = 'raf'
     switch (settings.misc.gameLoopMethod) {
-        case 'interval': setInterval(() => loop(Date.now()), 1000 / 30); break;
+        case 'interval': setInterval(() => loop(Date.now()), 1000 / 60); break;
         case 'raf': loop(0); break;
         default: setInterval(() => loop(), 1000 / 60);
     }
     //render.update();
 }
 
+intervalUpdate = () => {
+    
+}
+
 var deltaTime = 0;
 var previous = 0;
 function loop(time) {
     requestAnimationFrame(loop);
-    deltaTime = (time - previous) * .06;
+
+    if (previous == 0) previous = time - 1;
+    deltaTime = ((time - previous) / 16);
+    // console.log(deltaTime);
     previous = time;
+
+    if (onMobile) input.readMobileInput();
     scenes[activeScene].update();
     scenes[activeScene].draw();
     if (settings.misc.debugMode) drawDebug();
@@ -412,7 +424,7 @@ var scenes = {
         //render.rectStatic(0, 0, render.canvas.width, render.canvas.height, '#000');
     }),
     game: new Scene(() => { // update
-        if (onMobile) input.readMobileInput();
+
         gameClock += deltaTime
 
         onScreen = world.tiles.filter((tile) => (
@@ -427,14 +439,7 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
         ));
 
-        if (settings.graphics.enableLighting) {
-            onScreenLights = world.lightSources.filter((tile) => (
-                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
-            ));
-        }
+        
 
         nearPlayer = world.segments.filter((tile) => (
             player.posX - 32 < tile.x + tile.width &&
@@ -450,7 +455,7 @@ var scenes = {
 
         camera.follow(player.posX + (player.velX * 5), player.posY + (player.velY * 5));
 
-        lighting.update();
+
 
     }, () => { // draw
 
@@ -477,13 +482,15 @@ var scenes = {
 
         world.npcs.forEach(npc => npc.draw());
 
+        
         player.draw();
 
+       
+        lighting.update();
         // world
         for (let tile of onScreen) tile.draw()
 
         for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) tile.draw();
-
         render.pe.tick()
 
         lighting.draw();
@@ -542,7 +549,6 @@ var scenes = {
 
     }),
     gameDialogue: new Scene(() => { // update
-        if (onMobile) input.readMobileInput();
         gameClock += deltaTime;
 
         onScreen = world.tiles.filter((tile) => (
@@ -569,7 +575,6 @@ var scenes = {
 
         camera.follow(dialogue.currentDialogue.camPosX(), dialogue.currentDialogue.camPosY());
 
-        lighting.update();
         dialogue.update();
 
 
@@ -579,7 +584,6 @@ var scenes = {
 
     }),
     pauseMenu: new Scene(() => { // update
-        if (onMobile) input.readMobileInput();
 
         menu.update();
     }, () => { // draw
@@ -602,7 +606,7 @@ drawDebug = () => {
     if (true) {
         let playerInfo = JSON.stringify(player).split(',');
 
-        render.rectStatic(6, 6, 160, (playerInfo.length * 12) + 12, "#11111180");
+        render.rect(0, 0, 160, (playerInfo.length * 12) + 12, "#11111180", 0);
         render.ctx.fillStyle = "#fff";
         render.ctx.font = "12px monospace"
         for (let i in playerInfo) render.ctx.fillText(playerInfo[i], 12, (i * 12) + 12);

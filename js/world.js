@@ -6,6 +6,8 @@ var worldMemory = [];
 class World {
     constructor() {
 
+        this.ready = false;
+
         this.spawn = {};
 
         this.tiles = [];
@@ -27,6 +29,7 @@ class World {
     }
 
     loadLevel(lvl) {
+        this.ready = false;
 
         this.width = block(lvl.layout[0].length);
         this.height = block(lvl.layout.length);
@@ -91,6 +94,7 @@ class World {
 
 
         //this.loadNearby();
+        this.ready = true;
     }
 
     update() {
@@ -116,8 +120,6 @@ class World {
             player.posX < (npc.posX + npc.interactionRadius) &&
             player.posY > (npc.posY) &&
             player.posY < (npc.posY + npc.interactionRadius)));
-
-
     }
 
     createMesh() {
@@ -221,19 +223,16 @@ class World {
                     if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
                     ctx.drawImage(sprite[dIndex], x, y);
-                    try {
-                        if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch (error) {
-                        console.log(error);
-                    }
+                    if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
+
                 }
             }
             try {
-                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
+                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
             } catch (error) {
                 console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
-                segment.sprite = new Image();
-                segment.sprite.src = canvas.toDataURL();
+                segment.bitmap = new Image();
+                segment.bitmap.src = canvas.toDataURL();
             }
         }
     }
