@@ -182,72 +182,77 @@ class World {
     buildTextures() {
 
         for (let segment of this.segments.filter((seg) => seg.type == 'block')) {
-            let canvas = document.createElement('canvas')
-            canvas.width = segment.width;
-            canvas.height = segment.height;
-            let ctx = canvas.getContext("2d")
-            ctx.imageSmoothingEnabled = false;
-            ctx.scale(2, 2);
+            try {
+                let canvas = document.createElement('canvas')
+                canvas.width = segment.width;
+                canvas.height = segment.height;
+                let ctx = canvas.getContext("2d")
+                ctx.imageSmoothingEnabled = false;
+                ctx.scale(2, 2);
 
-            //console.log(segment)
+                //console.log(segment)
 
-            let sprite = sprites.tiles[segment.type][segment.style]
-            let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
-            for (let y = 0; y < segment.height; y += 16) {
-                for (let x = 0; x < segment.width; x += 16) {
-                    let dIndex = 0;
-                    if (segment.width > 32) {
-                        if (segment.height > 32) switch (y) {
-                            case 0: switch (x) {
-                                case 0: dIndex = 1; break;
-                                case (segment.width / 2) - 16: dIndex = 3; break;
-                                default: dIndex = 2;
-                            } break;
-                            case (segment.height / 2) - 16: switch (x) {
-                                case 0: dIndex = 7; break;
-                                case (segment.width / 2) - 16: dIndex = 9; break;
-                                default: dIndex = 8;
-                            } break;
-                            default: switch (x) {
-                                case 0: dIndex = 4; break;
-                                case (segment.width / 2) - 16: dIndex = 6; break;
-                                default: dIndex = 5
-                            } break;
-                        } else switch (x) {
-                            case 0: dIndex = 13; break;
-                            case (segment.width / 2) - 16: dIndex = 15; break;
-                            default: dIndex = 14;
-                        }
-                    } else if (segment.height > 32) switch (y) {
-                        case 0: dIndex = 10; break;
-                        case (segment.height / 2) - 16: dIndex = 12; break;
-                        default: dIndex = 11;
-                    } else dIndex = 0;
+                let sprite = sprites.tiles[segment.type][segment.style]
+                let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
+                for (let y = 0; y < segment.height; y += 16) {
+                    for (let x = 0; x < segment.width; x += 16) {
+                        let dIndex = 0;
+                        if (segment.width > 32) {
+                            if (segment.height > 32) switch (y) {
+                                case 0: switch (x) {
+                                    case 0: dIndex = 1; break;
+                                    case (segment.width / 2) - 16: dIndex = 3; break;
+                                    default: dIndex = 2;
+                                } break;
+                                case (segment.height / 2) - 16: switch (x) {
+                                    case 0: dIndex = 7; break;
+                                    case (segment.width / 2) - 16: dIndex = 9; break;
+                                    default: dIndex = 8;
+                                } break;
+                                default: switch (x) {
+                                    case 0: dIndex = 4; break;
+                                    case (segment.width / 2) - 16: dIndex = 6; break;
+                                    default: dIndex = 5
+                                } break;
+                            } else switch (x) {
+                                case 0: dIndex = 13; break;
+                                case (segment.width / 2) - 16: dIndex = 15; break;
+                                default: dIndex = 14;
+                            }
+                        } else if (segment.height > 32) switch (y) {
+                            case 0: dIndex = 10; break;
+                            case (segment.height / 2) - 16: dIndex = 12; break;
+                            default: dIndex = 11;
+                        } else dIndex = 0;
 
-                    if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
-                    if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
-                    if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
-                    if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
+                        if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
+                        if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
+                        if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
+                        if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
-                    ctx.drawImage(sprite[dIndex], x, y);
-                    if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
+                        ctx.drawImage(sprite[dIndex], x, y);
+                        if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
 
 
-
-                    try {
-                        Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
-                    } catch (error) {
-                        console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
-                        segment.bitmap = new Image();
-                        segment.bitmap.src = canvas.toDataURL();
                     }
                 }
-            }
+                try {
+                    Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
+                } catch (error) {
+                    console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
+                    segment.bitmap = new Image();
+                    segment.bitmap.src = canvas.toDataURL();
+                }
 
+
+            } catch{
+
+            }
         }
 
     }
 }
+
 
 
 const level = [
