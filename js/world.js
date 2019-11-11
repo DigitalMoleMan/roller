@@ -5,9 +5,6 @@ var worldMemory = [];
 
 class World {
     constructor() {
-
-        this.ready = false;
-
         this.spawn = {};
 
         this.tiles = [];
@@ -97,8 +94,6 @@ class World {
 
         this.tiles = this.tiles.filter((tile) => tile.type !== 'block');
 
-        //this.loadNearby();
-        this.ready = true;
     }
 
     update() {
@@ -146,15 +141,13 @@ class World {
             } else nSeg.push(tile)
         }
 
-
-
         this.segments = nSeg.sort((a, b) => {
             if (browser == 'firefox') {
                 if (a.x < b.x) return 1
-                else return -1
+                return -1
             }
             if (a.x < b.x) return -1
-            else return 1
+            return 1
         });
 
         nSeg = [];
@@ -171,8 +164,8 @@ class World {
 
         this.segments = nSeg.sort((a, b) => {
             if (a.x < b.x) return -1;
-            else if (a.x == b.x) return 0;
-            else if (a.x > b.x) return 1;
+            if (a.x == b.x) return 0;
+            if (a.x > b.x) return 1;
         })
 
         this.buildTextures();
@@ -245,7 +238,7 @@ class World {
                 }
 
 
-            } catch{
+            } catch {
 
             }
         }
