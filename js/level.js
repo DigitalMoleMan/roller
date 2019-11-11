@@ -4,6 +4,8 @@ class Level {
         this.name = name;
         this.tiles = tiles;
         this.npcs = npcs;
+
+        this.doors = doors;
     }
 }
 

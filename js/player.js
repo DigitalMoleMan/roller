@@ -185,6 +185,7 @@ class Player {
                 // console.log(tile.constructor.name)
                 //console.log(tile)
                 switch (tile.type) {
+                    case 'barrier': return true;
                     case 'block': return true;
                     case 'platform':
                         if (this.hitbox.x.bottom() <= tile.y) return true;

@@ -279,6 +279,8 @@ musicPlayer.loop = true;
 
 document.addEventListener(input.binds["global"].toggleDebug, () => settings.misc.debugMode = !settings.misc.debugMode);
 
+
+let musicDuration = 1;
 /**
  * @param {Number} track index in music[]
  */
@@ -286,6 +288,8 @@ playMusic = (track) => {
     musicPlayer.src = music[track];
     musicPlayer.currentTime = 0;
     musicPlayer.play();
+
+    musicDuration = musicPlayer.duration;
 }
 
 /**
@@ -385,7 +389,8 @@ function loop(time) {
     scenes[activeScene].update();
     scenes[activeScene].draw();
     if (settings.misc.debugMode) drawDebug();
-    if (musicPlayer.currentTime >= (musicPlayer.duration)) musicPlayer.currentTime = 0;
+
+    if (musicPlayer.currentTime >= musicDuration) musicPlayer.currentTime = 0;
 
 }
 
@@ -395,6 +400,8 @@ window.onresize = () => {
 
     render.canvas.width = canvasWidth;
     render.canvas.height = canvasHeight;
+
+    render.renewCanvas();
 }
 
 class Scene {

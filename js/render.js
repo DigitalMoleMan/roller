@@ -12,6 +12,7 @@ class Renderer {
         });
 
         this.ctx.imageSmoothingEnabled = false;
+
         //text
         //this.ctx.font = "8px Roboto Mono;";
         this.ctx.textBaseline = "top";
@@ -19,6 +20,19 @@ class Renderer {
         document.body.appendChild(this.canvas);
 
         this.pe = new ParticleEngine();
+    }
+
+    renewCanvas() {
+        this.canvas.remove();
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        this.ctx = this.canvas.getContext('2d', {
+            alpha: false
+        });
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.textBaseline = "top";
+        document.body.appendChild(this.canvas);
     }
 
     /**
@@ -125,7 +139,7 @@ class Renderer {
     }
 
     text(text, x, y, size = 1, color, scrollFactor = 0) {
-        for (let i in text){
+        for (let i in text) {
 
             let sx = (8 * text.charCodeAt(i))
             let sy = 0
@@ -136,7 +150,7 @@ class Renderer {
             let dy = y - (this.camera.y * scrollFactor)
             let dw = 16 * size
             let dh = 16 * size
-         this.ctx.drawImage(fontFile, sx, sy, sw, sh, dx, dy, dw, dh);
+            this.ctx.drawImage(fontFile, sx, sy, sw, sh, dx, dy, dw, dh);
         }
     }
 
