@@ -35,8 +35,6 @@ class Player {
         this.colX = false;
         this.colY = false;
 
-
-        this.bandVel = 0;
         this.look = 6;
         this.band = 0;
 
@@ -77,13 +75,13 @@ class Player {
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
 
         if (this.colY && this.velY > 0) {
-            if (this.midJump) for (let i = 0; i < 25; i++) {
+            if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
                 let colVal = 192 + Math.random() * 64;
                 render.pe.addParticle({
-                    x: player.posX + ((Math.random() - .5) * 16),
-                    y: (player.posY + 18),
+                    x: player.posX + ((Math.random() - .5) * 32),
+                    y: (player.posY + 16),
                     velX: (Math.random() - .5) * 2.5,
-                    velY: (Math.random()) / 5,
+                    velY: (Math.random() - 1) * .25,
                     lifetime: (Math.random() * 25),
                     size: 1 + (Math.random() * 3),
                     color: `rgba(${colVal},${colVal},${colVal},128)`
@@ -93,7 +91,7 @@ class Player {
         }
 
         //extend jump if player is holding the jump button
-        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
+        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9 ;
 
         //kill player upon going below the world height
         if (this.posY >= world.height + 128) this.kill();
@@ -108,10 +106,10 @@ class Player {
         if (this.colX) this.velX = 0;
 
         //limit player velocity
-        if (this.velX > 32) this.velX = 32;
-        if (this.velX < -32) this.velX = -32;
-        if (this.velY > 24) this.velY = 24;
-        if (this.velY < -32) this.velY = -32;
+        //if (this.velX > 32) this.velX = 32;
+        //if (this.velX < -32) this.velX = -32;
+        //if (this.velY > 32) this.velY = 32;
+        //if (this.velY < -32) this.velY = -32;
 
 
 
@@ -136,13 +134,13 @@ class Player {
             (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
 
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 20; i++) {
                 let colVal = 192 + Math.random() * 64;
                 render.pe.addParticle({
-                    x: player.posX + Math.random(),
-                    y: (player.posY + 12),
-                    velX: (Math.random() - .5) * 1.5,
-                    velY: (Math.random() - .5) / 4,
+                    x: player.posX + ((Math.random() - .5) * 16),
+                    y: this.hitbox.y.bottom(),
+                    velX: (Math.random() - .5),
+                    velY: (Math.random() - 1) / 4,
                     lifetime: (Math.random() * 20),
                     size: 1 + (Math.random() * 3),
                     color: `rgba(${colVal},${colVal},${colVal},128)`
@@ -192,8 +190,8 @@ class Player {
                         else break;
                     case 'elevator':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.posY += tile.velY;
-                            this.posX += tile.velX;
+                            this.posY += tile.velY * deltaTime;
+                            this.posX += tile.velX * deltaTime;
                             if (this.hitbox.x.bottom() <= tile.y)
                                 return true;
                         }
@@ -251,7 +249,7 @@ class Player {
         if (this.velX < 0 && this.look > 0) this.look--;
         this.band += this.velX * deltaTime;
 
-        if (this.band < 0) this.band = sprites.player.bands.length * 100;
+        if (this.band < 0) this.band += 8;
     }
 
     draw() {
@@ -259,11 +257,11 @@ class Player {
         this.activeItem.draw();
         if (!(this.invsFrames % 3)) {
 
+            render.drawSprite(this.sprite().body, this.look, (this.posX - 16), (this.posY - 16), 1, 1);
 
-            render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
-
-            if (this.midJump) render.img(this.sprite().bandsJump[Math.floor(this.band) % this.sprite().bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
-            else render.img(this.sprite().bands[Math.floor((this.band) % this.sprite().bands.length)], (this.posX - 16), (this.posY - 16));
+            if (this.velY < -1) render.drawSprite(this.sprite().bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
+            if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+            if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
 
 
             if (settings.misc.debugMode) {

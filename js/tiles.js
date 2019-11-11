@@ -30,10 +30,12 @@ class Barrier extends Tile {
 class Block extends Tile {
     constructor(x, y, style = 'metal') {
         super('block', x, y, 32, 32, style);
+        this.bitmap;
     }
 
+
     draw() {
-        render.img(this.sprite, this.x, this.y);
+        if(this.bitmap !== undefined) render.img(this.bitmap, this.x, this.y);
     }
 }
 

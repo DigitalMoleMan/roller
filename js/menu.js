@@ -30,7 +30,7 @@ class Menu {
 				this.selector %= this.options.length;
 			});
 		}
-		else this.options.forEach(option => input.touchAreas.pauseMenu.push(option));
+		else for (let option of this.options) input.touchAreas.pauseMenu.push(option);
 	}
 
 	update(){
@@ -42,12 +42,12 @@ class Menu {
 
 		var centerX = canvasWidth / 2;
 		var centerY = canvasHeight / 2;
-		render.rectStatic(0, 0, canvasWidth, canvasHeight, "#00000080");
-		render.rectStatic(block(3), block(1), canvasWidth - block(6), canvasHeight - block(2), "#404060c0");
+		render.rect(0, 0, canvasWidth, canvasHeight, "#00000080", 0);
+		render.rect(block(3), block(1), canvasWidth - block(6), canvasHeight - block(2), "#404060c0", 0);
 
 		this.options.forEach((option, i) => {
-			render.rectStatic(option.x, option.y, option.width, option.height, "#8080f080");
-			render.text(option.display, centerX - block(3), block(2.25) + (i * block(2.5)), 1);
+			render.rect(option.x, option.y, option.width, option.height, "#8080f080", 0);
+			render.text(option.display, centerX - block(3), block(2.25) + (i * block(2.5)), 2, 0);
 
 			
 		})
