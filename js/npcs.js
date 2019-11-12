@@ -117,7 +117,7 @@ class SpikeGuard extends Enemy {
 
     update() {
 
-        
+
 
         this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
 
@@ -133,9 +133,11 @@ class SpikeGuard extends Enemy {
             this.velY += (Math.sin(rotation) * this.acceleration) * deltaTime
 
         } else {
-            var rotation = Math.atan2(this.originY - this.posY, this.originX - this.posX);
-            this.velX += (Math.cos(rotation) * this.acceleration) * deltaTime
-            this.velY += (Math.sin(rotation) * this.acceleration) * deltaTime
+            if (this.fromOrigin > .1) {
+                var rotation = Math.atan2(this.originY - this.posY, this.originX - this.posX);
+                this.velX += (Math.cos(rotation) * this.acceleration) * deltaTime
+                this.velY += (Math.sin(rotation) * this.acceleration) * deltaTime
+            }
 
             if (Math.round(this.posX) == this.originX) {
 
@@ -154,8 +156,6 @@ class SpikeGuard extends Enemy {
             player.damage(1);
         }
 
-
-
         this.posX += this.velX;
         this.posY += this.velY;
 
@@ -164,7 +164,7 @@ class SpikeGuard extends Enemy {
         this.velX *= (this.deceleration);
         this.velY *= (this.deceleration);
 
-       
+
         if (this.blink > 0) this.blink += .25;
         else if ((Math.floor(Math.random() + .005) == 1)) this.blink = 1;
 

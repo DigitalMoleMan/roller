@@ -18,6 +18,8 @@ class DialogueHandler {
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
                 dialogue.currentDialogue.next();
+            } else if (activeScene == "gameDialogue" && this.textProg <= this.msglength(this.currentDialogue.text.length)) {
+                this.textProg = this.msglength(this.currentDialogue.text.length);
             }
         })
 

@@ -75,7 +75,20 @@ class Player {
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
 
         if (this.colY && this.velY > 0) {
-            if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
+            if (this.velY > 24) {
+                for (let i = 0; i < this.velY; i++) {
+                    let colVal = 192 + Math.random() * 64;
+                    render.pe.addParticle({
+                        x: player.posX + ((Math.random() - .5) * 32),
+                        y: player.hitbox.x.bottom(),
+                        velX: (Math.random() - .5) * 2.5,
+                        velY: (Math.random() - 1) * .5,
+                        lifetime: (Math.random() * 25),
+                        size: 1 + (Math.random() * 3),
+                        color: `rgba(${colVal},${colVal / 2},0,128)`
+                    })
+                }
+            } else if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
                 let colVal = 192 + Math.random() * 64;
                 render.pe.addParticle({
                     x: player.posX + ((Math.random() - .5) * 32),
@@ -91,7 +104,7 @@ class Player {
         }
 
         //extend jump if player is holding the jump button
-        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9 ;
+        if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
 
         //kill player upon going below the world height
         if (this.posY >= world.height + 128) this.kill();
@@ -261,6 +274,24 @@ class Player {
 
             if (this.velY < -1) render.drawSprite(this.sprite().bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
             if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+            if (this.velY > 24) {
+                render.ctx.globalCompositeOperation = "hard-light";
+                render.drawSprite(this.sprite().bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
+                render.ctx.globalCompositeOperation = "source-over";
+
+                for (let i = 0; i < this.velY; i++) {
+                    let colVal = 192 + Math.random() * 64;
+                    render.pe.addParticle({
+                        x: player.posX + ((Math.random() - .5) * 32),
+                        y: player.posY + ((Math.random() - .5) * 32),
+                        velX: (Math.random() - .5) * 5,
+                        velY: -this.velY / 5,
+                        lifetime: (Math.random() * 25),
+                        size: 1 + (Math.random() * 1),
+                        color: `rgba(${colVal},${colVal / 2},0,128)`
+                    })
+                }
+            }
             if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
 
 

@@ -147,6 +147,7 @@ var sprites = {
         bands: new SpriteSheet('img/player/bands_sheet.png', 32, 32),
         bandsJump: new SpriteSheet('img/player/bands_jump_sheet.png', 32, 32),
         bandsFall: new SpriteSheet('img/player/bands_fall_sheet.png', 32, 32),
+        bandsMeteor: new SpriteSheet('img/player/bands_meteor_sheet.png', 32, 32),
         cannon: render.importSprite('img/player/cannon', 13),
     },
     items: {
@@ -384,7 +385,7 @@ window.onload = () => {
 }
 
 intervalUpdate = () => {
-    
+
 }
 
 var deltaTime = 0;
@@ -446,7 +447,7 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
         ));
 
-        
+
 
         nearPlayer = world.segments.filter((tile) => (
             player.posX - 32 < tile.x + tile.width &&
@@ -489,10 +490,10 @@ var scenes = {
 
         world.npcs.forEach(npc => npc.draw());
 
-        
+
         player.draw();
 
-       
+
         lighting.update();
         // world
         for (let tile of onScreen) tile.draw()
