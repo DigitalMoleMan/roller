@@ -112,15 +112,9 @@ class SpikeGuard extends Enemy {
         }])
     }
 
-
-
-
     update() {
 
-
-
         this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
-
 
         this.fromOrigin = Math.sqrt(Math.pow(this.originX - this.posX, 2) + Math.pow(this.originY - this.posY, 2));
 
@@ -205,8 +199,6 @@ class SpikeGuard extends Enemy {
             render.line(this.posX - 16, this.posY, this.posX + 16, this.posY, "#fff");
             render.line(this.posX, this.posY - 16, this.posX, this.posY + 16, "#fff");
         }
-
-
     }
 }
 
@@ -230,8 +222,6 @@ class LaserTurret extends Enemy {
         render.img(this.sprite().laser, this.posX, this.posY, 32, 32, this.posX, this.posY, this.angle + 180);
     }
 }
-
-//actors
 class Bogus extends Actor {
     constructor(posX, posY, onInteract) {
         super(posX, posY, onInteract, block(3));

@@ -28,7 +28,6 @@ class Player {
         this.acc = .4;
         this.dec = .93;
 
-
         this.jumpHeight = 0;
         this.midJump = false;
 
@@ -48,16 +47,11 @@ class Player {
     }
 
     readInput(input) {
-        var key = input.keys;
-        var bind = input.binds.game;
+        let key = input.keys;
+        let bind = input.binds.game;
 
         if (key[bind.left]) this.moveLeft();
         if (key[bind.right]) this.moveRight();
-
-
-        //if (input.keys[input.binds.jump]) this.jump();
-
-        // if (input.keys[input.binds.use]) this.use();
     }
 
     update() {
@@ -106,9 +100,6 @@ class Player {
         //extend jump if player is holding the jump button
         if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
 
-        //kill player upon going below the world height
-        if (this.posY >= world.height + 128) this.kill();
-
         //decrease the amount of frames until the player can take damage again.
         if (this.invsFrames) this.setInvsFrames(this.invsFrames - 1);
 
@@ -117,14 +108,6 @@ class Player {
 
         //set player velocity to 0 on collision
         if (this.colX) this.velX = 0;
-
-        //limit player velocity
-        //if (this.velX > 32) this.velX = 32;
-        //if (this.velX < -32) this.velX = -32;
-        //if (this.velY > 32) this.velY = 32;
-        //if (this.velY < -32) this.velY = -32;
-
-
 
         this.updateSprite();
 
@@ -142,7 +125,6 @@ class Player {
     jump() {
         if (!this.midJump) {
             this.jumpHeight = this.calculateJumpHeight();
-
 
             (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
@@ -178,7 +160,6 @@ class Player {
         this.posY = world.spawn.y;
         this.velX = 0;
         this.velY = 0;
-
         this.hp = this.maxHp;
         this.invsFrames = 0;
         camera.x = world.spawn.x - render.canvas.width / 2;
@@ -188,13 +169,16 @@ class Player {
     }
 
     collision(axis) {
-        for (let tile of nearPlayer) {
+        for (let tile of world.segments.filter((tile) => (
+            this.hitbox[axis].left() < tile.x + tile.width &&
+            this.hitbox[axis].right() > tile.x &&
+            this.hitbox[axis].top() < tile.y + tile.height &&
+            this.hitbox[axis].bottom() > tile.y
+        ))) {
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
                 this.hitbox[axis].bottom() > tile.y) {
-                // console.log(tile.constructor.name)
-                //console.log(tile)
                 switch (tile.type) {
                     case 'barrier': return true;
                     case 'block': return true;
@@ -205,8 +189,7 @@ class Player {
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
                             this.posY += tile.velY * deltaTime;
                             this.posX += tile.velX * deltaTime;
-                            if (this.hitbox.x.bottom() <= tile.y)
-                                return true;
+                            if (this.hitbox.x.bottom() <= tile.y) return true;
                         }
                         break;
                     case 'pumpkin':
@@ -274,6 +257,20 @@ class Player {
 
             if (this.velY < -1) render.drawSprite(this.sprite().bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
             if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+            if (this.velY > 20) {
+                for (let i = 0; i < this.velY; i++) {
+                    let colVal = 192 + Math.random() * 64;
+                    render.pe.addParticle({
+                        x: player.posX + ((Math.random() - .5) * 32),
+                        y: player.posY + ((Math.random() - .5) * 32),
+                        velX: (Math.random() - .5) * 5,
+                        velY: -this.velY / 5,
+                        lifetime: (Math.random() * 25),
+                        size: 1 + (Math.random() * 1),
+                        color: `rgba(${colVal},${colVal / 2},0,128)`
+                    })
+                }
+            }
             if (this.velY > 24) {
                 render.ctx.globalCompositeOperation = "hard-light";
                 render.drawSprite(this.sprite().bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);

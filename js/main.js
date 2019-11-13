@@ -14,9 +14,6 @@ var settings = {
     }
 }
 
-//var fps = 0;
-//var renderedFrames = 0;
-
 //halloween event
 var hwQuest = {
     started: false,
@@ -25,20 +22,21 @@ var hwQuest = {
     fadeout: 0
 }
 
-//browser
-var ua = navigator.userAgent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i)
-var browser;
-if (navigator.userAgent.match(/Edge/i) || navigator.userAgent.match(/Trident.*rv[ :]*11\./i)) browser = "msie"
-else browser = ua[1].toLowerCase();
+getBrowserName = () => {
+    let browserName = '';
+    try {
+        var ua = navigator.userAgent.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i)
+        if (navigator.userAgent.match(/Edge/i) || navigator.userAgent.match(/Trident.*rv[ :]*11\./i)) browserName = "msie"
+        else browserName = ua[1].toLowerCase();
+    } catch {
+        browserName = 'unknown';
+    }
+    return browserName;
+}
 
-
-//Mobile
+var browser = getBrowserName();
 
 var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-
-
-//let menu = new Menu();
 
 lastIndex = (array) => array.length - 1;
 
@@ -46,11 +44,6 @@ randomIndex = (array) => array[Math.round(Math.random() * lastIndex(array))];
 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
-
-if (onMobile) {
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-}
 
 let render = new Renderer(canvasWidth, canvasHeight);
 
@@ -116,9 +109,6 @@ const fontFile = new SpriteSheet('fonts/roller_font.png', 8, 8);
 
 var font = [];
 
-//fontFile.src = 'fonts/roller_font.png';
-
-//Loading sprites
 var sprites = {
     ui: {
         hp: {
@@ -209,8 +199,6 @@ var sprites = {
 }
 
 var pattern = [];
-
-//Loading Audio
 
 var music = [
     'audio/music/Ready_to_Roll.wav',
@@ -321,16 +309,17 @@ setScene = (scene) => {
     activeScene = scene;
 }
 
+initServiceWorker = () => {
+    if ('serviceWorker' in navigator) {
+        var swURL = './sw.js';
+        navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
+            (err) => console.log('ServiceWorker registration failed: ', err));
+    }
+}
+
 window.onload = () => {
 
-
-    if (settings.misc.enableCache) {
-        if ('serviceWorker' in navigator) {
-            var swURL = './sw.js';
-            navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
-                (err) => console.log('ServiceWorker registration failed: ', err));
-        }
-    }
+    if (settings.misc.enableCache) initServiceWorker();
 
     musicPlayer.addEventListener('canplay', () => {
         for (let category in sfx) {
@@ -349,6 +338,8 @@ window.onload = () => {
     })
 
     loadDialogues();
+
+
     if (settings.misc.halloweenMode) {
         settings.graphics.enableLighting = false;
         world.loadLevel(level[9]);
@@ -384,12 +375,9 @@ window.onload = () => {
     //render.update();
 }
 
-intervalUpdate = () => {
-
-}
-
 var deltaTime = 0;
 var previous = 0;
+
 function loop(time) {
     requestAnimationFrame(loop);
 
@@ -410,10 +398,6 @@ function loop(time) {
 window.onresize = () => {
     canvasWidth = window.innerWidth;
     canvasHeight = window.innerHeight;
-
-    render.canvas.width = canvasWidth;
-    render.canvas.height = canvasHeight;
-
     render.renewCanvas();
 }
 
@@ -448,13 +432,14 @@ var scenes = {
         ));
 
 
-
-        nearPlayer = world.segments.filter((tile) => (
-            player.posX - 32 < tile.x + tile.width &&
-            player.posX + 32 > tile.x &&
-            player.posY - 32 < tile.y + tile.height &&
-            player.posY + 32 > tile.y
-        ));
+        /*
+                nearPlayer = world.segments.filter((tile) => (
+                    player.posX - 32 < tile.x + tile.width &&
+                    player.posX + 32 > tile.x &&
+                    player.posY - 32 < tile.y + tile.height &&
+                    player.posY + 32 > tile.y
+                ));
+                */
 
         world.update();
 

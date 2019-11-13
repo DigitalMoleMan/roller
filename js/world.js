@@ -467,7 +467,7 @@ const level = [
             "X                                  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "X        @                         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXMMMMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         ],
         advancedLayer: [
             {
@@ -505,7 +505,7 @@ const level = [
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
-            "XXXX                   XXXXXX         XXXXXX                                        XXXXXXXXXXXXXXX",
+            "XXXXMMMMMMMMMMMMMMMMMMMXXXXXXMMMMMMMMMXXXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [
             {
