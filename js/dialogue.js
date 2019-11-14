@@ -41,7 +41,7 @@ class DialogueHandler {
         this.currentDialogue = new Object;
     }
     msglength(n) {
-        var l = 0;
+        let l = 0;
         for (let i = 0; i < n; i++) l += this.currentDialogue.text[i].length;
         return l;
     }

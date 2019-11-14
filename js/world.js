@@ -60,15 +60,16 @@ class World {
                         width: block(0),
                         height: block(0),
                         type: tile,
-                        update: () => { },
+                        update: () => {
+                            this.lightSources.push(new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
+                                index: 0,
+                                color: "#ffc04040"
+                            }, {
+                                index: 1,
+                                color: "#00000000"
+                            }]));
+                        },
                         draw: () => { },
-                        light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
-                            index: 0,
-                            color: "#ffc04040"
-                        }, {
-                            index: 1,
-                            color: "#00000000"
-                        }])
                     }); break;
                     case 'P': this.tiles.push(new Pumpkin(block(x), block(y))); break;
                     case 'C': this.tiles.push(new Candy(block(x), block(y))); break;
@@ -80,7 +81,6 @@ class World {
         for (let tile of lvl.advancedLayer) {
             if (tile.type == 'door') tile.update = () => { }
             this.tiles.push(tile);
-
         }
 
         this.npcs = lvl.npcs
@@ -89,6 +89,7 @@ class World {
             new Barrier(block(-1.75), block(-1.75), block(1), this.height + block(3.5)),
             new Barrier(this.width + block(.75), block(-1), block(1), this.height + block(3.5)),
             new Barrier(block(-1.75), block(-1.75), this.width + block(3.5), block(1)),
+            new Barrier(block(-1.75), this.height + block(.75), this.width + block(3.5), block(1)),
         );
         this.createMesh();
 
@@ -98,20 +99,9 @@ class World {
 
     update() {
         this.lightSources = [];
-        for (let tile of this.tiles) {
-            tile.update()
-            if (tile.type == 'L') this.lightSources.push(tile.light);
-        }
 
-
-        for (let npc of this.npcs) {
-            switch (npc.name) {
-                case 'spikeGuard':
-                    this.lightSources.push(npc.light);
-                    break;
-            }
-            npc.update();
-        }
+        for (let tile of this.tiles) tile.update()
+        for (let npc of this.npcs) npc.update();
 
         this.inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
@@ -173,8 +163,12 @@ class World {
     }
 
     buildTextures() {
+        let blockSegments = this.segments.filter((seg) => seg.type == 'block').sort((a, b) => {
+            if (a.y < b.y) return -1;
+        });
+        //console.log(blockSegments);
 
-        for (let segment of this.segments.filter((seg) => seg.type == 'block')) {
+        for (let segment of blockSegments) {
             try {
                 let canvas = document.createElement('canvas')
                 canvas.width = segment.width;
@@ -187,6 +181,8 @@ class World {
 
                 let sprite = sprites.tiles[segment.type][segment.style]
                 let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
+
+
                 for (let y = 0; y < segment.height; y += 16) {
                     for (let x = 0; x < segment.width; x += 16) {
                         let dIndex = 0;
@@ -218,20 +214,29 @@ class World {
                             default: dIndex = 11;
                         } else dIndex = 0;
 
+
+
                         if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
                         if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
                         if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
                         if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
-                        ctx.drawImage(sprite[dIndex], x, y);
+                        ctx.drawImage(sprite.source, sprite.sourceWidth * dIndex, 0, sprite.sourceWidth, sprite.sourceHeight, x, y, 16, 16);
                         if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
 
 
                     }
+
+
                 }
+
+
+
                 try {
+
                     Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
                 } catch (error) {
+                    console.log(sprite);
                     console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
                     segment.bitmap = new Image();
                     segment.bitmap.src = canvas.toDataURL();
@@ -445,7 +450,7 @@ const level = [
             new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])), //block(20), block(20)),
             //new LaserTurret(block(20), block()),
             //new Roamer(block(40), block(81.5))
-            new SpikeGuard(block(50), block(76))
+            new SpikeGuard(block(50), block(76)),
         ]
     }, {
         name: "GA-19",
@@ -676,6 +681,7 @@ const level = [
         }],
         npcs: [
             new SpikeGuard(block(21.5), block(10)),
+
         ]
     }, {
         name: "Adv Layer Testing",

@@ -19,7 +19,7 @@ class Renderer {
 
         document.body.appendChild(this.canvas);
 
-        this.pe = new ParticleEngine();
+        this.particleEngine = new ParticleEngine();
     }
 
     renewCanvas() {
@@ -440,13 +440,15 @@ class LightingEngine {
     draw() {
         if (settings.graphics.enableLighting) {
 
+            render.ctx.save();
 
             render.ctx.globalCompositeOperation = "lighter";
+            render.ctx.filter = 'blur(6px)';
 
-            for (let i = 0; i < this.polygons.length; i++) {
-                this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
-            }
-            render.ctx.globalCompositeOperation = "source-over";
+            for (let i = 0; i < this.polygons.length; i++) this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
+
+            render.ctx.restore();
+
 
             if (settings.misc.debugMode) {
                 for (let polygon of this.polygons) {
@@ -454,7 +456,6 @@ class LightingEngine {
                     render.ctx.moveTo(polygon[0].x - camera.x, polygon[0].y - camera.y);
                     for (let i = 1; i < polygon.length; i++) {
                         let intersect = polygon[i];
-
                         render.ctx.lineTo(intersect.x - camera.x, intersect.y - camera.y);
                     }
                 }
@@ -541,7 +542,7 @@ class ParticleEngine {
         this.particles = [];
     }
 
-    tick() {
+    update() {
 
         this.particles.forEach((particle, index) => {
             render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);

@@ -52,6 +52,7 @@ class Player {
 
         if (key[bind.left]) this.moveLeft();
         if (key[bind.right]) this.moveRight();
+
     }
 
     update() {
@@ -72,7 +73,7 @@ class Player {
             if (this.velY > 24) {
                 for (let i = 0; i < this.velY; i++) {
                     let colVal = 192 + Math.random() * 64;
-                    render.pe.addParticle({
+                    render.particleEngine.addParticle({
                         x: player.posX + ((Math.random() - .5) * 32),
                         y: player.hitbox.x.bottom(),
                         velX: (Math.random() - .5) * 2.5,
@@ -84,7 +85,7 @@ class Player {
                 }
             } else if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
                 let colVal = 192 + Math.random() * 64;
-                render.pe.addParticle({
+                render.particleEngine.addParticle({
                     x: player.posX + ((Math.random() - .5) * 32),
                     y: (player.posY + 16),
                     velX: (Math.random() - .5) * 2.5,
@@ -131,7 +132,7 @@ class Player {
 
             for (let i = 0; i < 20; i++) {
                 let colVal = 192 + Math.random() * 64;
-                render.pe.addParticle({
+                render.particleEngine.addParticle({
                     x: player.posX + ((Math.random() - .5) * 16),
                     y: this.hitbox.y.bottom(),
                     velX: (Math.random() - .5),
@@ -260,7 +261,7 @@ class Player {
             if (this.velY > 20) {
                 for (let i = 0; i < this.velY; i++) {
                     let colVal = 192 + Math.random() * 64;
-                    render.pe.addParticle({
+                    render.particleEngine.addParticle({
                         x: player.posX + ((Math.random() - .5) * 32),
                         y: player.posY + ((Math.random() - .5) * 32),
                         velX: (Math.random() - .5) * 5,
@@ -278,7 +279,7 @@ class Player {
 
                 for (let i = 0; i < this.velY; i++) {
                     let colVal = 192 + Math.random() * 64;
-                    render.pe.addParticle({
+                    render.particleEngine.addParticle({
                         x: player.posX + ((Math.random() - .5) * 32),
                         y: player.posY + ((Math.random() - .5) * 32),
                         velX: (Math.random() - .5) * 5,
@@ -395,7 +396,7 @@ class Hookshot extends Item {
 
                         for (let i = 0; i < 10; i++) {
                             let colVal = (Math.random() * 255);
-                            render.pe.addParticle({
+                            render.particleEngine.addParticle({
                                 x: this.posX + (Math.random() - .5) * 12,
                                 y: this.posY + (Math.random() - .5) * 12,
                                 velX: (Math.random() - .5) * 3,
@@ -594,7 +595,7 @@ class Booster extends Item {
                 var colVal = () => (Math.random() * 128);
 
                 for (var i = 0; i < 1; i++) {
-                    render.pe.addParticle({
+                    render.particleEngine.addParticle({
                         x: (player.posX - (22 * this.dir())) + (Math.random() - .5) * 4,
                         y: (player.posY + 3) + (Math.random() - .5) * 4,
                         velX: (Math.random()) * (-this.dir()),

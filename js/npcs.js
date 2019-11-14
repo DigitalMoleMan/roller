@@ -114,6 +114,8 @@ class SpikeGuard extends Enemy {
 
     update() {
 
+        world.lightSources.push(this.light);
+
         this.fromPlayer = Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2));
 
         this.fromOrigin = Math.sqrt(Math.pow(this.originX - this.posX, 2) + Math.pow(this.originY - this.posY, 2));

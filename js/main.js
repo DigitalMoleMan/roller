@@ -153,7 +153,7 @@ var sprites = {
     },
     tiles: {
         block: {
-            metal: render.importSprite('img/tiles/block/metal', 16),
+            metal: new SpriteSheet('img/tiles/block/block_metal_sheet.png', 16, 16),
             dirt: render.importSprite('img/tiles/block/dirt', 16),
             alt_metal: render.importSprite('img/tiles/block/alt_metal', 16),
             alt_dirt: render.importSprite('img/tiles/block/alt_dirt', 0),
@@ -194,6 +194,7 @@ var sprites = {
         render.importImage('img/backgrounds/main2.png'),
         render.importImage('img/backgrounds/metal_bg.png'),
         render.importImage('img/backgrounds/metal.png'),
+        render.importImage('img/backgrounds/halloween.png'),
         render.importImage('img/backgrounds/halloween_sky.png')
     ],
 }
@@ -259,7 +260,6 @@ var sfx = {
 if (settings.misc.halloweenMode) {
     sprites.player.body = render.importSprite('img/player/hw_body', 13)
     sprites.npcs.bogus.boogus = render.importSprite('img/npcs/bogus/hw_idle', 10)
-    sprites.backgrounds[3] = render.importImage('img/backgrounds/halloween.png')
 }
 
 
@@ -332,7 +332,6 @@ window.onload = () => {
             }
         }
     }, {
-
         once: true,
         passive: true
     })
@@ -383,16 +382,19 @@ function loop(time) {
 
     if (previous == 0) previous = time - 1;
     deltaTime = ((time - previous) / 16);
-    // console.log(deltaTime);
+
+
+
     previous = time;
 
-    if (onMobile) input.readMobileInput();
-    scenes[activeScene].update();
-    scenes[activeScene].draw();
-    if (settings.misc.debugMode) drawDebug();
+    if (deltaTime < 1.5) {
+        if (onMobile) input.readMobileInput();
+        scenes[activeScene].update();
+        scenes[activeScene].draw();
+        if (settings.misc.debugMode) drawDebug();
 
-    if (musicPlayer.currentTime >= musicDuration) musicPlayer.currentTime = 0;
-
+        if (musicPlayer.currentTime >= musicDuration) musicPlayer.currentTime = 0;
+    }
 }
 
 window.onresize = () => {
@@ -400,6 +402,34 @@ window.onresize = () => {
     canvasHeight = window.innerHeight;
     render.renewCanvas();
 }
+
+class Background {
+    constructor(parts, drawFunction) {
+        this.parts = parts;
+        this.draw = () => drawFunction(parts);
+    }
+}
+
+let metalBackground = new Background([sprites.backgrounds[3]], (parts) => {
+    let bg = parts[0];
+
+    for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
+        for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
+            render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+        }
+    }
+})
+
+let hwBackground = new Background([sprites.backgrounds[4], sprites.backgrounds[5]], (parts) => {
+    let bg = parts[0];
+    let bg2 = parts[1];
+    for (let x = 0; x < (canvasWidth); x += bg.width) {
+        for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
+            render.img(bg2, x + camera.x, y + camera.y, 1.1);
+        }
+        render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
+    }
+})
 
 class Scene {
     constructor(update, draw) {
@@ -431,16 +461,6 @@ var scenes = {
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
         ));
 
-
-        /*
-                nearPlayer = world.segments.filter((tile) => (
-                    player.posX - 32 < tile.x + tile.width &&
-                    player.posX + 32 > tile.x &&
-                    player.posY - 32 < tile.y + tile.height &&
-                    player.posY + 32 > tile.y
-                ));
-                */
-
         world.update();
 
         player.readInput(input);
@@ -456,22 +476,7 @@ var scenes = {
         // background
         render.rect(0, 0, canvasWidth, canvasHeight, '#181425', 0);
 
-        var bg = sprites.backgrounds[3];
-        if (settings.misc.halloweenMode) {
-
-            for (let x = 0; x < (canvasWidth); x += bg.width) {
-                for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
-                    render.img(sprites.backgrounds[4], x + camera.x, y + camera.y, 1.1);
-                }
-                render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
-            }
-        } else {
-            for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
-                for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-                    render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
-                }
-            }
-        }
+        hwBackground.draw();
 
         world.npcs.forEach(npc => npc.draw());
 
@@ -479,17 +484,24 @@ var scenes = {
         player.draw();
 
 
-        lighting.update();
+
         // world
         for (let tile of onScreen) tile.draw()
 
         for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) tile.draw();
-        render.pe.tick()
+        render.particleEngine.update()
 
+
+        if (deltaTime < 1.1) {
+            lighting.update();
+        }
         lighting.draw();
 
+
+
+
         //ui
-        var hpUi = sprites.ui.hp;
+        let hpUi = sprites.ui.hp;
 
         render.ctx.save();
         render.ctx.translate(-hpUi.label.width, zero);
@@ -521,25 +533,6 @@ var scenes = {
         render.img(itemUi.border, 48, 32, zero);
 
         render.img(itemUi[player.activeItem.name], 48, 32, zero);
-
-        if (hwQuest.started) {
-            render.img(sprites.tiles.candy, block(3), block(1), 0);
-            render.text(`${hwQuest.candiesCollected}/${hwQuest.candiesToComplete}`, block(4), block(1));
-
-            if (hwQuest.fadeout >= 1.25) {
-                console.log(hwQuest.fadeout);
-                musicPlayer.pause();
-                dialogue.playDialogue(hwEnd);
-                hwQuest.started = false;
-            }
-
-        }
-
-        if (hwQuest.candiesCollected >= hwQuest.candiesToComplete) {
-            hwQuest.fadeout += .0025
-            render.rect(0, 0, canvasWidth, canvasHeight, `rgba(0,0,0,${hwQuest.fadeout})`, 0);
-        }
-
     }),
     gameDialogue: new Scene(() => { // update
         gameClock += deltaTime;
@@ -554,13 +547,6 @@ var scenes = {
             (camera.x + canvasWidth + (canvasWidth / 2)) > tile.x &&
             (camera.y - (canvasHeight / 2)) < tile.y + tile.height &&
             (camera.y + canvasHeight + (canvasHeight / 2)) > tile.y
-        ));
-
-        onScreenLights = world.lightSources.filter((tile) => (
-            (camera.x - (canvasWidth)) < tile.x + tile.radius &&
-            (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
-            (camera.y - (canvasHeight)) < tile.y + tile.radius &&
-            (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
         ));
 
         world.update();
