@@ -15,9 +15,9 @@ class Actor {
 
 class Enemy {
     constructor(posX, posY) {
+        this.type = "enemy";
         this.posX = posX;
         this.posY = posY;
-        this.type = "enemies";
     }
 }
 

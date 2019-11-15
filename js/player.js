@@ -84,16 +84,7 @@ class Player {
                     })
                 }
             } else if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
-                let colVal = 192 + Math.random() * 64;
-                render.particleEngine.addParticle({
-                    x: player.posX + ((Math.random() - .5) * 32),
-                    y: (player.posY + 16),
-                    velX: (Math.random() - .5) * 2.5,
-                    velY: (Math.random() - 1) * .25,
-                    lifetime: (Math.random() * 25),
-                    size: 1 + (Math.random() * 3),
-                    color: `rgba(${colVal},${colVal},${colVal},128)`
-                })
+                render.particleEngine.particles.push(new DustParticle(this.posX, this.hitbox.x.bottom()))
             }
             this.midJump = false;
         }
@@ -130,12 +121,12 @@ class Player {
             (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 10; i++) {
                 let colVal = 192 + Math.random() * 64;
                 render.particleEngine.addParticle({
-                    x: player.posX + ((Math.random() - .5) * 16),
+                    x: player.posX + ((Math.random() - .5) * 32),
                     y: this.hitbox.y.bottom(),
-                    velX: (Math.random() - .5),
+                    velX: (Math.random() - .5) / 2,
                     velY: (Math.random() - 1) / 4,
                     lifetime: (Math.random() * 20),
                     size: 1 + (Math.random() * 3),
@@ -260,43 +251,21 @@ class Player {
             if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
             if (this.velY > 20) {
                 for (let i = 0; i < this.velY; i++) {
-                    let colVal = 192 + Math.random() * 64;
-                    render.particleEngine.addParticle({
-                        x: player.posX + ((Math.random() - .5) * 32),
-                        y: player.posY + ((Math.random() - .5) * 32),
-                        velX: (Math.random() - .5) * 5,
-                        velY: -this.velY / 5,
-                        lifetime: (Math.random() * 25),
-                        size: 1 + (Math.random() * 1),
-                        color: `rgba(${colVal},${colVal / 2},0,128)`
-                    })
+                    render.particleEngine.particles.push(new MeteorParticle(this.posX, this.posY, this.velY))
                 }
             }
-            if (this.velY > 24) {
-                render.ctx.globalCompositeOperation = "hard-light";
-                render.drawSprite(this.sprite().bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
-                render.ctx.globalCompositeOperation = "source-over";
-
-                for (let i = 0; i < this.velY; i++) {
-                    let colVal = 192 + Math.random() * 64;
-                    render.particleEngine.addParticle({
-                        x: player.posX + ((Math.random() - .5) * 32),
-                        y: player.posY + ((Math.random() - .5) * 32),
-                        velX: (Math.random() - .5) * 5,
-                        velY: -this.velY / 5,
-                        lifetime: (Math.random() * 25),
-                        size: 1 + (Math.random() * 1),
-                        color: `rgba(${colVal},${colVal / 2},0,128)`
-                    })
-                }
-            }
-            if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+        }
+        if (this.velY > 24) {
+            render.ctx.globalCompositeOperation = "hard-light";
+            render.drawSprite(this.sprite().bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
+            render.ctx.globalCompositeOperation = "source-over";
+        }
+        if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
 
 
-            if (settings.misc.debugMode) {
-                render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
-                render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
-            }
+        if (settings.misc.debugMode) {
+            render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
+            render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
         }
     }
 }
@@ -316,6 +285,8 @@ class Hookshot extends Item {
         this.speed = 16;
         this.returnSpeed = 32;
         this.state = "retracted";
+
+        this.timeInAir = 0;
 
         this.minLength = 32;
         this.maxLength = 256;
@@ -365,6 +336,8 @@ class Hookshot extends Item {
                 this.posY = Math.round(player.posY);
                 this.length = 0;
 
+                this.timeInAir = 0;
+
                 this.target = this.getClosest();
 
                 if (this.inputBuffer > 0) {
@@ -413,8 +386,10 @@ class Hookshot extends Item {
                     } else {
                         let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
 
-                        this.posX += (Math.cos(rotation) * this.speed) * deltaTime
-                        this.posY += (Math.sin(rotation) * this.speed) * deltaTime
+                        this.posX += (Math.cos(rotation) * (this.speed)) * deltaTime
+                        this.posY += (Math.sin(rotation) * (this.speed)) * deltaTime
+
+                        this.timeInAir++;
                     }
                 } else {
                     this.state = "retracting";
@@ -423,6 +398,7 @@ class Hookshot extends Item {
 
             case "hooked": {
 
+                this.timeInAir = 0;
                 if (player.midJump) this.state = "retracting";
 
                 if (input.keys[input.binds.game.use]) {
@@ -457,6 +433,7 @@ class Hookshot extends Item {
             }
                 break;
             case "retracting":
+                this.timeInAir = 0;
                 player.dec = .93;
                 this.length = 0;
 

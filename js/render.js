@@ -144,6 +144,14 @@ class Renderer {
         )
     }
 
+    /**
+     * 
+     * @param {String} text 
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} size 
+     * @param {Number} scrollFactor 
+     */
     text(text, x, y, size = 2, scrollFactor = 0) {
         for (let i = 0; i < text.length; i++) {
             let dx = x + (i * (fontFile.sourceWidth * size));
@@ -545,11 +553,15 @@ class ParticleEngine {
     update() {
 
         this.particles.forEach((particle, index) => {
-            render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
-            particle.x += particle.velX * deltaTime;
-            particle.y += particle.velY * deltaTime;
-            particle.size -= .05;
-            (particle.lifetime > 0) ? particle.lifetime -= deltaTime : this.particles.splice(index, 1);
+            if (particle.lifetime > 0) {
+                particle.lifetime -= deltaTime
+                render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
+                particle.x += particle.velX * deltaTime;
+                particle.y += particle.velY * deltaTime;
+                particle.size -= .05;
+            } else {
+                this.particles.splice(index, 1);
+            }
 
         })
 
@@ -573,3 +585,49 @@ class ParticleEngine {
     }
 }
 
+class Particle {
+    constructor(x, y, lifetime = 1, params) {
+        this.x = x;
+        this.y = y;
+        this.lifetime = lifetime;
+        for (let param in params) this[param] = params[param];
+    }
+}
+
+let pRandom = (n = 1) => (Math.random() - .5) * n;
+
+console.log(pRandom(1));
+
+class DustParticle extends Particle {
+    constructor(x, y) {
+        let colorVal = 192 + Math.random() * 64;
+        super(
+            x + (pRandom(32)),
+            y,
+            (Math.random() * 25),
+            {
+                velX: pRandom(2.5),
+                velY: -(Math.random() * .25),
+                size: 1 + (Math.random() * 3),
+                color: `rgba(${colorVal},${colorVal},${colorVal},128)`
+            }
+        )
+    }
+}
+
+class MeteorParticle extends Particle {
+    constructor(x, y, vY) {
+        let colorVal = 192 + Math.random() * 64;
+        super(
+            x + ((Math.random() - .5) * 32),
+            y + ((Math.random() - .5) * 32),
+            (Math.random() * 25),
+            {
+                velX: (Math.random() - .5) * 5,
+                velY: -vY / 5,
+                size: 1 + (Math.random() * 1),
+                color: `rgba(${colorVal},${colorVal / 2},0,128)`
+            }
+        )
+    }
+}

@@ -525,7 +525,7 @@ const level = [
                 draw: () => { }
             }, {
                 type: "door",
-                x: block(99.5),
+                x: block(99),
                 y: block(15),
                 width: block(0),
                 height: block(3),

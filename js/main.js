@@ -410,26 +410,28 @@ class Background {
     }
 }
 
-let metalBackground = new Background([sprites.backgrounds[3]], (parts) => {
-    let bg = parts[0];
+let backgrounds = {
+    metal: new Background([sprites.backgrounds[3]], (parts) => {
+        let bg = parts[0];
 
-    for (var y = 0; y < (canvasHeight * 3); y += (bg.height * 2)) {
-        for (var x = 0; x < (canvasWidth * 3); x += (bg.width * 2)) {
-            render.img(bg, x - ((camera.x) % (bg.width * 4)), y - ((camera.y) % (bg.height * 4)), 0, 2);
+        for (let y = 0; y < (canvasHeight * 4); y += (bg.height * 2)) {
+            for (let x = 0; x < (canvasWidth * 4); x += (bg.width * 2)) {
+                render.img(bg, x, y, .75, 2);
+            }
         }
-    }
-})
+    }),
 
-let hwBackground = new Background([sprites.backgrounds[4], sprites.backgrounds[5]], (parts) => {
-    let bg = parts[0];
-    let bg2 = parts[1];
-    for (let x = 0; x < (canvasWidth); x += bg.width) {
-        for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
-            render.img(bg2, x + camera.x, y + camera.y, 1.1);
+    hw: new Background([sprites.backgrounds[4], sprites.backgrounds[5]], (parts) => {
+        let bg = parts[0];
+        let bg2 = parts[1];
+        for (let x = 0; x < (canvasWidth); x += bg.width) {
+            for (let y = 0; y < (canvasHeight * 2); y += bg.height * 2) {
+                render.img(bg2, x + camera.x, y + camera.y, 1.1);
+            }
+            render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
         }
-        render.img(bg, (x - ((camera.x / 5) % (bg.width))), (canvasHeight - (bg.height)) + (((world.height - canvasHeight) - camera.y) / 10), 0);
-    }
-})
+    })
+}
 
 class Scene {
     constructor(update, draw) {
@@ -472,29 +474,29 @@ var scenes = {
 
     }, () => { // draw
 
-        const zero = 0;
-        // background
         render.rect(0, 0, canvasWidth, canvasHeight, '#181425', 0);
 
-        hwBackground.draw();
+        backgrounds.metal.draw();
 
         world.npcs.forEach(npc => npc.draw());
 
 
         player.draw();
 
-
-
         // world
         for (let tile of onScreen) tile.draw()
 
         for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) tile.draw();
-        render.particleEngine.update()
+
+
 
 
         if (deltaTime < 1.1) {
+            render.particleEngine.update()
             lighting.update();
         }
+
+
         lighting.draw();
 
 
@@ -503,36 +505,26 @@ var scenes = {
         //ui
         let hpUi = sprites.ui.hp;
 
-        render.ctx.save();
-        render.ctx.translate(-hpUi.label.width, zero);
+        render.img(hpUi.label, 32, 16, 0);
 
-        render.img(hpUi.label, 48, 16, 0);
-        render.ctx.restore();
-
-        for (var i = 0; i < player.maxHp; i++) {
-            if (i == 0) render.img(hpUi.left, 48, 16, zero);
-            else if (i == player.maxHp - 1) render.img(hpUi.right, 48 + (i * 16), 16, zero)
-            else render.img(hpUi.mid, 48 + (i * 16), 16, zero);
+        for (let i = 0; i < player.maxHp; i++) {
+            if (i == 0) render.img(hpUi.left, 48, 16, 0);
+            else if (i == player.maxHp - 1) render.img(hpUi.right, 48 + (i * 16), 16, 0)
+            else render.img(hpUi.mid, 48 + (i * 16), 16, 0);
         }
 
-        for (var i = 0; i < player.hp; i++) render.img(hpUi.point, 52 + (12 * i), 16, zero)
+        for (var i = 0; i < player.hp; i++) render.img(hpUi.point, 52 + (12 * i), 16, 0)
 
         if (world.inRangeActors.length > 0 && activeScene == 'game') {
-            let actor = world.inRangeActors[0]
-
-            render.text('E', actor.posX + (actor.interactionRadius / 2.5), actor.posY - block(), 1, "#fff", 1);
+            let actor = world.inRangeActors[0];
+            render.text('E', actor.posX + (actor.interactionRadius / 2.5), actor.posY - block(), 2, 1);
         }
 
         var itemUi = sprites.ui.activeItem;
-        render.ctx.save();
-        render.ctx.translate(-itemUi.label.width, 0);
 
-        render.img(itemUi.label, 48, 32, zero);
-
-        render.ctx.restore();
-        render.img(itemUi.border, 48, 32, zero);
-
-        render.img(itemUi[player.activeItem.name], 48, 32, zero);
+        render.img(itemUi.label, 12, 32, 0);
+        render.img(itemUi.border, 48, 32, 0);
+        render.img(itemUi[player.activeItem.name], 48, 32, 0);
     }),
     gameDialogue: new Scene(() => { // update
         gameClock += deltaTime;
