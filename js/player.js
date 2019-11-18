@@ -161,7 +161,7 @@ class Player {
     }
 
     collision(axis) {
-        for (let tile of world.segments.filter((tile) => (
+        for (let tile of onScreenSegs.filter((tile) => (
             this.hitbox[axis].left() < tile.x + tile.width &&
             this.hitbox[axis].right() > tile.x &&
             this.hitbox[axis].top() < tile.y + tile.height &&

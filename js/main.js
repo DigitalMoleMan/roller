@@ -2,7 +2,7 @@
  * Roller - main.js
 */
 
-var settings = {
+let settings = {
     graphics: {
         enableLighting: true
     },
@@ -15,7 +15,7 @@ var settings = {
 }
 
 //halloween event
-var hwQuest = {
+let hwQuest = {
     started: false,
     candiesCollected: 0,
     candiesToComplete: 10,
@@ -34,16 +34,16 @@ getBrowserName = () => {
     return browserName;
 }
 
-var browser = getBrowserName();
+let browser = getBrowserName();
 
-var onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+let onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 lastIndex = (array) => array.length - 1;
 
 randomIndex = (array) => array[Math.round(Math.random() * lastIndex(array))];
 
-var canvasWidth = window.innerWidth;
-var canvasHeight = window.innerHeight;
+let canvasWidth = window.innerWidth;
+let canvasHeight = window.innerHeight;
 
 let render = new Renderer(canvasWidth, canvasHeight);
 
@@ -97,19 +97,19 @@ let dialogue = new DialogueHandler();
 let lighting = new LightingEngine();
 let particleEng = new ParticleEngine();
 
-var gameClock = 0;
-var activeScene
-var nearPlayer = [];
-var onScreen = [];
-var onScreenSegs = [];
-var onScreenLights = [];
+let gameClock = 0;
+let activeScene
+let nearPlayer = [];
+let onScreen = [];
+let onScreenSegs = [];
+let onScreenLights = [];
 
 const fontFile = new SpriteSheet('fonts/roller_font.png', 8, 8);
 
 
-var font = [];
+let font = [];
 
-var sprites = {
+let sprites = {
     ui: {
         hp: {
             label: render.importImage('img/ui/hp/label.png'),
@@ -199,9 +199,7 @@ var sprites = {
     ],
 }
 
-var pattern = [];
-
-var music = [
+let music = [
     'audio/music/Ready_to_Roll.wav',
     'audio/music/Among disks and drives.wav',
     'audio/music/A mile too deep.wav',
@@ -219,7 +217,7 @@ var music = [
     'audio/music/spook time.wav'
 ];
 
-var sfx = {
+let sfx = {
     player: {
         movement: {
             jump: new Audio('audio/sfx/player/jump.wav'),
@@ -286,14 +284,12 @@ playMusic = (track) => {
  * @param {Number} sound index in sfx[]
  */
 playSound = (sound, volume = .5) => {
-
     sound.volume = volume;
     (sound.length == undefined) ? sound.play() : randomIndex(sound).play();
 }
 
 loopSound = (sound) => {
     if (sound.currentTime >= sound.duration - .1) sound.currentTime = 0;
-
     sound.play();
 }
 
@@ -311,7 +307,7 @@ setScene = (scene) => {
 
 initServiceWorker = () => {
     if ('serviceWorker' in navigator) {
-        var swURL = './sw.js';
+        let swURL = './sw.js';
         navigator.serviceWorker.register(swURL).then((registration) => console.log('ServiceWorker registration successful with scope: ', registration.scope),
             (err) => console.log('ServiceWorker registration failed: ', err));
     }
@@ -347,13 +343,11 @@ window.onload = () => {
 
     setScene("game");
 
-
     player.posX = world.spawn.x;
     player.posY = world.spawn.y;
 
     camera.x = world.spawn.x - render.canvas.width / 2;
     camera.y = world.spawn.y - render.canvas.width / 2;
-
 
     render.attatchCamera(camera);
 
@@ -374,8 +368,8 @@ window.onload = () => {
     //render.update();
 }
 
-var deltaTime = 0;
-var previous = 0;
+let deltaTime = 0;
+let previous = 0;
 
 function loop(time) {
     requestAnimationFrame(loop);
@@ -440,7 +434,7 @@ class Scene {
     }
 }
 
-var scenes = {
+let scenes = {
     menu: new Scene(() => { // update
 
     }, () => { // draw

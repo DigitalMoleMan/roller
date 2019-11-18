@@ -33,9 +33,8 @@ class Block extends Tile {
         this.bitmap;
     }
 
-
     draw() {
-        if(this.bitmap !== undefined) render.img(this.bitmap, this.x, this.y);
+        if (this.bitmap !== undefined) render.img(this.bitmap, this.x, this.y);
     }
 }
 
@@ -60,8 +59,6 @@ class Elevator extends Tile {
         if (this.speedV !== 0) this.velY = (-Math.sin(Math.round(gameClock) / (this.range / this.speedV)) * this.speedV);
         this.x += this.velX * deltaTime;
         this.y += this.velY * deltaTime;
-
-
     }
 
     draw() {
