@@ -585,49 +585,41 @@ class ParticleEngine {
     }
 }
 
+let pRandom = (n = 1) => (Math.random() - .5) * n;
+
 class Particle {
-    constructor(x, y, lifetime = 1, params) {
-        this.x = x;
-        this.y = y;
-        this.lifetime = lifetime;
+    constructor(params) {
         for (let param in params) this[param] = params[param];
+        render.particleEngine.particles.push(this);
     }
 }
 
-let pRandom = (n = 1) => (Math.random() - .5) * n;
-
-console.log(pRandom(1));
-
 class DustParticle extends Particle {
-    constructor(x, y) {
+    constructor(x, y, velX = 0, velY = 0) {
         let colorVal = 192 + Math.random() * 64;
-        super(
-            x + (pRandom(32)),
-            y,
-            (Math.random() * 25),
-            {
-                velX: pRandom(2.5),
-                velY: -(Math.random() * .25),
-                size: 1 + (Math.random() * 3),
-                color: `rgba(${colorVal},${colorVal},${colorVal},128)`
-            }
-        )
+        super({
+            x: x,
+            y: y,
+            lifetime: (Math.random() * 25),
+            velX: velX,
+            velY: velY,
+            size: 1 + (Math.random() * 3),
+            color: `rgba(${colorVal},${colorVal},${colorVal},128)`
+        })
     }
 }
 
 class MeteorParticle extends Particle {
-    constructor(x, y, vY) {
+    constructor(x, y, velX, velY) {
         let colorVal = 192 + Math.random() * 64;
-        super(
-            x + ((Math.random() - .5) * 32),
-            y + ((Math.random() - .5) * 32),
-            (Math.random() * 25),
-            {
-                velX: (Math.random() - .5) * 5,
-                velY: -vY / 5,
-                size: 1 + (Math.random() * 1),
-                color: `rgba(${colorVal},${colorVal / 2},0,128)`
-            }
-        )
+        super({
+            x: x + ((Math.random() - .5) * 32),
+            y: y + ((Math.random() - .5) * 32),
+            lifetime: (Math.random() * 25),
+            velX: velX,
+            velY: velY,
+            size: 1 + (Math.random() * 1),
+            color: `rgba(${colorVal},${colorVal / 2},0,128)`
+        })
     }
 }

@@ -360,6 +360,8 @@ window.onload = () => {
 
     //setInterval(() => intervalUpdate(), 1000 / 60);
     settings.misc.gameLoopMethod = 'raf'
+
+    first = Date.now()
     switch (settings.misc.gameLoopMethod) {
         case 'interval': setInterval(() => loop(Date.now()), 1000 / 60); break;
         case 'raf': loop(0); break;
@@ -368,18 +370,21 @@ window.onload = () => {
     //render.update();
 }
 
+
 let deltaTime = 0;
 let previous = 0;
+
+
 
 function loop(time) {
     requestAnimationFrame(loop);
 
+
     if (previous == 0) previous = time - 1;
     deltaTime = ((time - previous) / 16);
 
-
-
     previous = time;
+
 
     if (deltaTime < 1.5) {
         if (onMobile) input.readMobileInput();
@@ -389,6 +394,8 @@ function loop(time) {
 
         if (musicPlayer.currentTime >= musicDuration) musicPlayer.currentTime = 0;
     }
+
+
 }
 
 window.onresize = () => {
@@ -482,15 +489,8 @@ let scenes = {
 
         for (let tile of onScreenSegs.filter((seg) => seg.type == "block")) tile.draw();
 
-
-
-
-        if (deltaTime < 1.1) {
-            render.particleEngine.update()
-            lighting.update();
-        }
-
-
+        render.particleEngine.update()
+        lighting.update();
         lighting.draw();
 
 

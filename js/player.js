@@ -71,20 +71,14 @@ class Player {
 
         if (this.colY && this.velY > 0) {
             if (this.velY > 24) {
-                for (let i = 0; i < this.velY; i++) {
-                    let colVal = 192 + Math.random() * 64;
-                    render.particleEngine.addParticle({
-                        x: player.posX + ((Math.random() - .5) * 32),
-                        y: player.hitbox.x.bottom(),
-                        velX: (Math.random() - .5) * 2.5,
-                        velY: (Math.random() - 1) * .5,
-                        lifetime: (Math.random() * 25),
-                        size: 1 + (Math.random() * 3),
-                        color: `rgba(${colVal},${colVal / 2},0,128)`
-                    })
-                }
+                for (let i = 0; i < this.velY; i++) new MeteorParticle(
+                    this.posX + ((Math.random() - .5) * 32),
+                    this.hitbox.x.bottom(),
+                    (Math.random() - .5) * 2.5,
+                    (Math.random() - 1) * .5,
+                );
             } else if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
-                render.particleEngine.particles.push(new DustParticle(this.posX, this.hitbox.x.bottom()))
+                new DustParticle(this.posX + pRandom(32), this.hitbox.x.bottom(), pRandom(this.velY / 5), -Math.random() / 5)
             }
             this.midJump = false;
         }
@@ -121,18 +115,7 @@ class Player {
             (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
 
-            for (let i = 0; i < 10; i++) {
-                let colVal = 192 + Math.random() * 64;
-                render.particleEngine.addParticle({
-                    x: player.posX + ((Math.random() - .5) * 32),
-                    y: this.hitbox.y.bottom(),
-                    velX: (Math.random() - .5) / 2,
-                    velY: (Math.random() - 1) / 4,
-                    lifetime: (Math.random() * 20),
-                    size: 1 + (Math.random() * 3),
-                    color: `rgba(${colVal},${colVal},${colVal},128)`
-                })
-            }
+            for (let i = 0; i < 10; i++) new DustParticle(this.posX + pRandom(32), this.hitbox.x.bottom(), pRandom(this.velY / 8), -Math.random() / 2);
             //playSound(this.sfx().jump);
         }
     }
@@ -250,9 +233,12 @@ class Player {
             if (this.velY < -1) render.drawSprite(this.sprite().bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
             if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
             if (this.velY > 20) {
-                for (let i = 0; i < this.velY; i++) {
-                    render.particleEngine.particles.push(new MeteorParticle(this.posX, this.posY, this.velY))
-                }
+                for (let i = 0; i < this.velY; i++) new MeteorParticle(
+                    this.posX,
+                    this.posY,
+                    (Math.random() - .5) * 5,
+                    -this.velY / 5
+                );
             }
         }
         if (this.velY > 24) {
@@ -261,7 +247,6 @@ class Player {
             render.ctx.globalCompositeOperation = "source-over";
         }
         if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
-
 
         if (settings.misc.debugMode) {
             render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");

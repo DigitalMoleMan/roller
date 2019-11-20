@@ -163,10 +163,11 @@ class World {
     }
 
     buildTextures() {
-        let blockSegments = this.segments.filter((seg) => seg.type == 'block').sort((a, b) => {
+        let blockSegments = this.segments.filter((seg) => seg.type == 'block')
+
+        blockSegments = blockSegments.sort((a, b) => {
             if (a.y < b.y) return -1;
         });
-        //console.log(blockSegments);
 
         for (let segment of blockSegments) {
             let canvas = document.createElement('canvas')
@@ -175,8 +176,6 @@ class World {
             let ctx = canvas.getContext("2d")
             ctx.imageSmoothingEnabled = false;
             ctx.scale(2, 2);
-
-            //console.log(segment)
 
             let sprite = sprites.tiles[segment.type][segment.style]
             let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
@@ -227,8 +226,7 @@ class World {
             try {
                 Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
             } catch (error) {
-                console.log(sprite);
-                console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
+                console.log(`Failed to call createImageBitmap() on ${sprite.type} - Fallback to canvas.toDataURL()`);
                 segment.bitmap = new Image();
                 segment.bitmap.src = canvas.toDataURL();
             }
