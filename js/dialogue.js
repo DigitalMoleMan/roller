@@ -12,8 +12,9 @@ class DialogueHandler {
         this.hide = false;
 
 
-        this.sprite = () => sprites.ui.dialogueBox;
-        this.sfx = () => sfx.ui.dialogue;
+        this.lastLength = 0;
+        this.sprite = sprites.ui.dialogueBox;
+        this.sfx = sfx.ui.dialogue;
 
         document.addEventListener(input.binds.gameDialogue.next, () => {
             if (activeScene == "gameDialogue" && this.textProg >= this.msglength(this.currentDialogue.text.length)) {
@@ -23,7 +24,7 @@ class DialogueHandler {
             }
         })
 
-
+        this.test = 0;
 
 
     };
@@ -31,8 +32,9 @@ class DialogueHandler {
     playDialogue(dlgObj) {
         setScene("gameDialogue");
         this.hide = false;
-        playSound(this.sfx().next, .3);
+        playSound(this.sfx.next, .3);
         this.textProg = 0;
+        this.lastLength = -1;
         this.currentDialogue = dlgObj;
     }
 
@@ -53,11 +55,10 @@ class DialogueHandler {
             if (Math.round(this.textProg) % 1 == 0) {
                 for (let i in this.currentDialogue.text) {
                     let row = this.currentDialogue.text[i];
-                    if (row[Math.round(this.textProg) - this.msglength(i) - 1] !== ' ' && this.msglength(this.currentDialogue.text.length) !== Math.round(this.textProg)) {
-
-                        playSound(this.sfx().text, 1)
-
-                    } else if (!this.sfx().paused) stopSound(this.sfx().text);
+                    if (row[Math.round(this.textProg) - this.msglength(i) - 1] !== ' ' && this.lastLength < Math.round(this.textProg)) {
+                        playSound(this.sfx.text, 1)
+                        this.lastLength = Math.round(this.textProg);
+                    }
                 }
             }
         }
@@ -82,10 +83,10 @@ class DialogueHandler {
 
             // background
             for (var x = 0; x < this.tbW; x += block(1)) {
-                render.img(this.sprite().middle, this.tbX + x, this.tbY - block(1), 0, 1);
+                render.img(this.sprite.middle, this.tbX + x, this.tbY - block(1), 0, 1);
             }
-            render.img(this.sprite().left, this.tbX - block(1), this.tbY - block(1), 0, 1);
-            render.img(this.sprite().right, this.tbX + this.tbW, this.tbY - block(1), 0, 1);
+            render.img(this.sprite.left, this.tbX - block(1), this.tbY - block(1), 0, 1);
+            render.img(this.sprite.right, this.tbX + this.tbW, this.tbY - block(1), 0, 1);
 
             //Speaker name.
             render.text(this.currentDialogue.speakerName, this.tbX, this.tbY, 2, 0);
@@ -182,11 +183,11 @@ loadDialogues = () => {
                 }),
                 new DialogueBox({
                     speakerName: "",
-                    text: [`Press E to interact/talk.`],
+                    text: [`Press E to interact / talk.`],
                     textSpeed: 1,
                     camPosX: () => player.posX,
                     camPosY: () => player.posY,
-                    next: () => setScene("game")
+                    next: () => dialogue.end()
                 })
             ]
         } else
@@ -369,7 +370,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[10])
-                // setScene("game")
             }
         }),
         new DialogueBox({
@@ -380,7 +380,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[11])
-                //setScene("game")
             }
         }),
         new DialogueBox({
@@ -391,7 +390,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[12])
-                //setScene("game")
             }
         }),
         new DialogueBox({
@@ -402,7 +400,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[13])
-                //setScene("game")
             }
         }),
         new DialogueBox({
@@ -413,7 +410,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[14])
-                //setScene("game")
             }
         }),
         new DialogueBox({
@@ -424,7 +420,6 @@ loadDialogues = () => {
             camPosY: () => player.posY,
             next: () => {
                 dialogue.playDialogue(bogusDialogues[15])
-                //setScene("game")
             }
         }),
         new DialogueBox({

@@ -35,33 +35,7 @@ class Renderer {
         document.body.appendChild(this.canvas);
     }
 
-    /**
-     * imports an image.
-     * @param {String} path directory of the image.
-     */
-    importImage(path) {
-        let img = new Image;
-        img.src = path;
-        return (img);
-    }
 
-    /**
-     * imports a series of images as a sprite
-     * @param {String} path directory of the sprite.
-     * @param {Number} length The number of frames the sprite has.
-     * @returns {Array} returns an array where each index represents a frame.
-     */
-    importSprite(path, length) {
-
-        let sprite = new Array;
-
-        for (let i = 0; i < length; i++) {
-            let img = this.importImage(path + '_' + i + '.png');
-            sprite.push(img);
-        }
-
-        return sprite
-    }
 
     attatchCamera(camera) {
         this.camera = camera;
@@ -161,13 +135,7 @@ class Renderer {
 
 }
 
-class SpriteSheet {
-    constructor(source, sourceWidth, sourceHeight) {
-        this.source = render.importImage(source);
-        this.sourceWidth = sourceWidth;
-        this.sourceHeight = sourceHeight;
-    }
-}
+
 class Camera {
     constructor(startX = 0, startY = 0, xSpeed = 15, ySpeed = 10) {
         this.x = startX;

@@ -42,8 +42,8 @@ class Player {
 
         this.activeItem = new Hookshot() //new Booster()
 
-        this.sprite = () => sprites.player;
-        this.sfx = () => sfx.player;
+        this.sprite = sprites.player;
+        this.sfx = sfx.player;
     }
 
     readInput(input) {
@@ -228,10 +228,10 @@ class Player {
         this.activeItem.draw();
         if (!(this.invsFrames % 3)) {
 
-            render.drawSprite(this.sprite().body, this.look, (this.posX - 16), (this.posY - 16), 1, 1);
+            render.drawSprite(this.sprite.body, this.look, (this.posX - 16), (this.posY - 16), 1, 1);
 
-            if (this.velY < -1) render.drawSprite(this.sprite().bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
-            if (this.velY > 1) render.drawSprite(this.sprite().bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+            if (this.velY < -1) render.drawSprite(this.sprite.bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
+            if (this.velY > 1) render.drawSprite(this.sprite.bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
             if (this.velY > 20) {
                 for (let i = 0; i < this.velY; i++) new MeteorParticle(
                     this.posX,
@@ -243,10 +243,10 @@ class Player {
         }
         if (this.velY > 24) {
             render.ctx.globalCompositeOperation = "hard-light";
-            render.drawSprite(this.sprite().bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
+            render.drawSprite(this.sprite.bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
             render.ctx.globalCompositeOperation = "source-over";
         }
-        if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite().bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+        if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite.bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
 
         if (settings.misc.debugMode) {
             render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
@@ -284,8 +284,8 @@ class Hookshot extends Item {
         this.target;
 
         this.inputBuffer = 0;
-        this.sprite = () => sprites.items.hookshot;
-        this.sound = () => sfx.items.hookshot;
+        this.sprite = sprites.items.hookshot;
+        this.sfx = sfx.items.hookshot;
 
     }
 
@@ -331,7 +331,7 @@ class Hookshot extends Item {
                         this.inputBuffer = 0;
                         this.state = "shooting";
 
-                        playSound(this.sound().shoot);
+                        playSound(this.sfx.shoot);
                     } else this.inputBuffer--;
                 }
                 break;
@@ -343,7 +343,7 @@ class Hookshot extends Item {
                         this.posY > this.target.y &&
                         this.posY < (this.target.y + this.target.height)) {
 
-                        playSound(this.sound().hook, .2);
+                        playSound(this.sfx.hook, .2);
                         player.midJump = false;
                         this.state = "hooked";
 
@@ -481,11 +481,11 @@ class Hookshot extends Item {
         //hook
         if (this.state !== "retracted") {
             render.line(player.posX, player.posY, this.posX, this.posY, "#fff")
-            render.img(this.sprite().hook[this.angle], this.posX - 6, this.posY - 6);
+            render.img(this.sprite.hook[this.angle], this.posX - 6, this.posY - 6);
         }
 
         //recticle
-        if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - 8, this.target.y - 8)
+        if (this.target !== undefined) render.img(this.sprite.recticle, this.target.x - 8, this.target.y - 8)
 
         if (settings.misc.debugMode) {
             try { render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff") }
@@ -505,7 +505,7 @@ class Booster extends Item {
 
         this.fuel = 20;
 
-        this.sprite = () => sprites.items.booster[this.state];
+        this.sprite = sprites.items.booster[this.state];
         this.dir = () => ((player.look - 6) / 6);
 
     }
@@ -552,7 +552,7 @@ class Booster extends Item {
 
             case "active":
 
-                render.img(this.sprite()[Math.round(gameClock / 4) % this.sprite().length], -(player.look * 2), player.posY - 4);
+                render.img(this.sprite[Math.round(gameClock / 4) % this.sprite.length], -(player.look * 2), player.posY - 4);
 
                 var colVal = () => (Math.random() * 128);
 
@@ -569,7 +569,7 @@ class Booster extends Item {
                 }
 
                 break;
-            default: render.img(this.sprite(), -(player.look * 2), player.posY - 4);
+            default: render.img(this.sprite, -(player.look * 2), player.posY - 4);
                 break;
         }
         render.ctx.restore();
