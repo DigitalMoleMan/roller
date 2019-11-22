@@ -5,8 +5,8 @@ class Tile {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.style = style
-        this.sprite = () => sprites.tiles[this.type]
+        this.style = style;
+        this.sprite = () => sprites.tiles[this.type];
     }
 
     update() {
@@ -17,13 +17,24 @@ class Tile {
     }
 }
 
-class Block extends Tile {
-    constructor(x, y, style = 'metal') {
-        super('block', x, y, 32, 32, style);
+class Barrier extends Tile {
+    constructor(x, y, width, height) {
+        super('barrier', x, y, width, height);
     }
 
     draw() {
-        render.img(this.sprite, this.x, this.y);
+
+    }
+}
+
+class Block extends Tile {
+    constructor(x, y, style = 'metal') {
+        super('block', x, y, 32, 32, style);
+        this.bitmap;
+    }
+
+    draw() {
+        if (this.bitmap !== undefined) render.img(this.bitmap, this.x, this.y);
     }
 }
 
@@ -44,12 +55,10 @@ class Elevator extends Tile {
     }
 
     update() {
-        if (this.speedH !== 0) this.velX = -Math.sin((gameClock) / (this.range / this.speedH)) * this.speedH;
-        if (this.speedV !== 0) this.velY = -Math.sin((gameClock) / (this.range / this.speedV)) * this.speedV;
-        this.x += this.velX;
-        this.y += this.velY;
-
-
+        if (this.speedH !== 0) this.velX = (-Math.sin(Math.round(gameClock) / (this.range / this.speedH)) * this.speedH);
+        if (this.speedV !== 0) this.velY = (-Math.sin(Math.round(gameClock) / (this.range / this.speedV)) * this.speedV);
+        this.x += this.velX * deltaTime;
+        this.y += this.velY * deltaTime;
     }
 
     draw() {
@@ -92,12 +101,12 @@ class Candy extends Tile {
     constructor(x, y) {
         super('candy', x + 4, y, 24, 24)
 
-        this.id = x + '' + y
+        this.candyId = x + '' + y
 
-        this.collected = candyStatus[this.id];
+        this.collected = candyStatus[this.candyId];
         if (this.collected == undefined) {
             this.collected = false;
-            candyStatus[this.id] = this.collected;
+            candyStatus[this.candyId] = this.collected;
         }
 
 
@@ -129,7 +138,7 @@ class Candy extends Tile {
             hwQuest.candiesCollected++;
             this.collected = true;
 
-            candyStatus[this.id] = this.collected;
+            candyStatus[this.candyId] = this.collected;
         }
     }
 

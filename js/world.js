@@ -1,14 +1,17 @@
 block = (n = 1) => n * 32;
 
+var worldMemory = [];
+
+
 class World {
     constructor() {
-
         this.spawn = {};
 
         this.tiles = [];
         this.npcs = [];
 
         this.segments = [];
+
 
         //this.inRangeActors = [];
 
@@ -19,12 +22,11 @@ class World {
     }
 
     interaction() {
-
-        //console.log(inRangeActors);
         if (this.inRangeActors.length > 0) this.inRangeActors[0].onInteract();
     }
 
     loadLevel(lvl) {
+        this.ready = false;
 
         this.width = block(lvl.layout[0].length);
         this.height = block(lvl.layout.length);
@@ -58,15 +60,16 @@ class World {
                         width: block(0),
                         height: block(0),
                         type: tile,
-                        update: () => { },
+                        update: () => {
+                            this.lightSources.push(new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
+                                index: 0,
+                                color: "#ffc04040"
+                            }, {
+                                index: 1,
+                                color: "#00000000"
+                            }]));
+                        },
                         draw: () => { },
-                        light: new Light(block(x + .5), block(y + .1), 0, 455, 460, [{
-                            index: 0,
-                            color: "#ffc04040"
-                        }, {
-                            index: 1,
-                            color: "#00000000"
-                        }])
                     }); break;
                     case 'P': this.tiles.push(new Pumpkin(block(x), block(y))); break;
                     case 'C': this.tiles.push(new Candy(block(x), block(y))); break;
@@ -78,35 +81,27 @@ class World {
         for (let tile of lvl.advancedLayer) {
             if (tile.type == 'door') tile.update = () => { }
             this.tiles.push(tile);
-
         }
 
         this.npcs = lvl.npcs
         this.segments = this.tiles.filter(tile => tile.type !== 'hookpoint');
+        this.segments.push(
+            new Barrier(block(-1.75), block(-1.75), block(1), this.height + block(3.5)),
+            new Barrier(this.width + block(.75), block(-1), block(1), this.height + block(3.5)),
+            new Barrier(block(-1.75), block(-1.75), this.width + block(3.5), block(1)),
+            new Barrier(block(-1.75), this.height + block(.75), this.width + block(3.5), block(1)),
+        );
         this.createMesh();
 
         this.tiles = this.tiles.filter((tile) => tile.type !== 'block');
 
-
-        //this.loadNearby();
     }
 
     update() {
         this.lightSources = [];
-        for (let tile of this.tiles) {
-            tile.update()
-            if (tile.type == 'L') this.lightSources.push(tile.light);
-        }
 
-
-        for (let npc of this.npcs) {
-            switch (npc.name) {
-                case 'spikeGuard':
-                    this.lightSources.push(npc.light);
-                    break;
-            }
-            npc.update();
-        }
+        for (let tile of this.tiles) tile.update()
+        for (let npc of this.npcs) npc.update();
 
         this.inRangeActors = this.npcs.filter((npc) => (
             //npc.type == "actor" &&
@@ -114,8 +109,6 @@ class World {
             player.posX < (npc.posX + npc.interactionRadius) &&
             player.posY > (npc.posY) &&
             player.posY < (npc.posY + npc.interactionRadius)));
-
-
     }
 
     createMesh() {
@@ -138,15 +131,13 @@ class World {
             } else nSeg.push(tile)
         }
 
-
-
         this.segments = nSeg.sort((a, b) => {
             if (browser == 'firefox') {
                 if (a.x < b.x) return 1
-                else return -1
+                return -1
             }
             if (a.x < b.x) return -1
-            else return 1
+            return 1
         });
 
         nSeg = [];
@@ -163,8 +154,8 @@ class World {
 
         this.segments = nSeg.sort((a, b) => {
             if (a.x < b.x) return -1;
-            else if (a.x == b.x) return 0;
-            else if (a.x > b.x) return 1;
+            if (a.x == b.x) return 0;
+            if (a.x > b.x) return 1;
         })
 
         this.buildTextures();
@@ -172,16 +163,24 @@ class World {
     }
 
     buildTextures() {
+        let blockSegments = this.segments.filter((seg) => seg.type == 'block')
 
-        for (let segment of this.segments.filter((seg) => seg.type == 'block')) {
+        blockSegments = blockSegments.sort((a, b) => {
+            if (a.y < b.y) return -1;
+        });
+
+        for (let segment of blockSegments) {
             let canvas = document.createElement('canvas')
             canvas.width = segment.width;
             canvas.height = segment.height;
             let ctx = canvas.getContext("2d")
             ctx.imageSmoothingEnabled = false;
             ctx.scale(2, 2);
+
             let sprite = sprites.tiles[segment.type][segment.style]
             let alteration = sprites.tiles[segment.type]['alt_' + segment.style]
+
+
             for (let y = 0; y < segment.height; y += 16) {
                 for (let x = 0; x < segment.width; x += 16) {
                     let dIndex = 0;
@@ -213,29 +212,30 @@ class World {
                         default: dIndex = 11;
                     } else dIndex = 0;
 
+
+
                     if (segment.width > 32 && x == 0 && segment.x == 0) dIndex++
                     if (segment.width > 32 && x == (segment.width / 2) - 16 && (segment.x + segment.width) == world.width) dIndex--;
                     if (segment.height > 32 && y == 0 && segment.y == 0) dIndex += 3;
                     if (segment.height > 32 && y == (segment.height / 2) - 16 && segment.y + segment.height == world.height) dIndex -= 3;
 
-                    ctx.drawImage(sprite[dIndex], x, y);
-                    try {
-                        if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
-                    } catch (error){
-                    }
+                    ctx.drawImage(sprite.source, sprite.sourceWidth * dIndex, 0, sprite.sourceWidth, sprite.sourceHeight, x, y, 16, 16);
+                    if ((Math.random() * 20) < 1) ctx.drawImage(alteration[dIndex], x, y);
                 }
             }
             try {
-                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.sprite = map[0]);
+                Promise.all([createImageBitmap(canvas, 0, 0, segment.width, segment.height)]).then((map) => segment.bitmap = map[0]);
             } catch (error) {
-                console.log("Failed to call createImageBitmap() - Fallback to canvas.toDataURL()");
-                segment.sprite = new Image();
-                segment.sprite.src = canvas.toDataURL();
+                console.log(`Failed to call createImageBitmap() on ${sprite.type} - Fallback to canvas.toDataURL()`);
+                segment.bitmap = new Image();
+                segment.bitmap.src = canvas.toDataURL();
             }
-        }
-    }
 
+        }
+
+    }
 }
+
 
 
 const level = [
@@ -435,7 +435,7 @@ const level = [
             new Bogus(block(30), block(79), () => dialogue.playDialogue(bogusDialogues[0])), //block(20), block(20)),
             //new LaserTurret(block(20), block()),
             //new Roamer(block(40), block(81.5))
-            new SpikeGuard(block(50), block(76))
+            new SpikeGuard(block(50), block(76)),
         ]
     }, {
         name: "GA-19",
@@ -457,7 +457,7 @@ const level = [
             "X                                  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "X        @                         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "XXXXXXXXXXXXXXXXXXXX    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            "XXXXXXXXXXXXXXXXXXXXMMMMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
         ],
         advancedLayer: [
             {
@@ -478,6 +478,7 @@ const level = [
         name: "MNKO Swinging Course - Hall",
         layout: [
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "X                               XXX                                                             XXX",
             "X                               XXX                                                             XXX",
             "X            G                  XXX                                                             XXX",
@@ -494,13 +495,13 @@ const level = [
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
             "XXXX                   XXXXXX         XXXXXX                                        XXX            ",
-            "XXXX                   XXXXXX         XXXXXX                                        XXXXXXXXXXXXXXX",
+            "XXXXMMMMMMMMMMMMMMMMMMMXXXXXXMMMMMMMMMXXXXXXMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMXXXXXXXXXXXXXXX",
         ],
         advancedLayer: [
             {
                 type: "door",
                 x: block(0),
-                y: block(10),
+                y: block(11),
                 width: block(0),
                 height: block(2),
                 exit: 1,
@@ -509,8 +510,8 @@ const level = [
                 draw: () => { }
             }, {
                 type: "door",
-                x: block(99.5),
-                y: block(14),
+                x: block(99),
+                y: block(15),
                 width: block(0),
                 height: block(3),
                 exit: 4,
@@ -645,6 +646,8 @@ const level = [
             "XXX                                    XXX",
             "XXX                                    XXX",
             "XXX                                    XXX",
+            "XXX                                    XXX",
+            "XXX                                    XXX",
             "XXX   XXX                        XXX   XXX",
             "XXX   XXX       XXX     XXX      XXX   XXX",
             "X                                       @ ",
@@ -653,7 +656,7 @@ const level = [
         advancedLayer: [{
             type: "door",
             x: block(42.5),
-            y: block(6),
+            y: block(8),
             width: block(0),
             height: block(1),
             exit: 1,
@@ -661,7 +664,10 @@ const level = [
             exitY: block(5.5),
             draw: () => { }
         }],
-        npcs: []
+        npcs: [
+            new SpikeGuard(block(21.5), block(10)),
+
+        ]
     }, {
         name: "Adv Layer Testing",
         layout: [
@@ -713,30 +719,36 @@ const level = [
     }, {
         name: "Outside Hall of Ween",
         layout: [
-            "X                             XXXXXXXXX",
-            "X                             XXXXXXXXX",
-            "X                             XXXXXXXXX",
-            "X                             XXXXXXXXX",
-            "X                             XXXXXXXXX",
-            "X                             XXXXXXXXX",
-            "X                               XXXXXXX",
-            "X                               XXXXXXX",
-            "X                                      ",
-            "X                                      ",
-            "X                          XXXXXXXXXXXX",
-            "X                          XXXXXXXXXXXX",
-            "X                        XXXXXXXXXXXXXX",
-            "X                        XXXXXXXXXXXXXX",
-            "X                      XXXXXXXXXXXXXXXX",
-            "X                @     XXXXXXXXXXXXXXXX",
-            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
-            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                               XXXXXXXXX",
+            "                                 XXXXXXX",
+            "                                 XXXXXXX",
+            "                                        ",
+            "                                        ",
+            "                            XXXXXXXXXXXX",
+            "                            XXXXXXXXXXXX",
+            "                          XXXXXXXXXXXXXX",
+            "                          XXXXXXXXXXXXXX",
+            "                        XXXXXXXXXXXXXXXX",
+            "                  @     XXXXXXXXXXXXXXXX",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
+            "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",
         ],
         advancedLayer: [
             {
                 type: "door",
-                x: block(39.5),
-                y: block(8),
+                x: block(40.5),
+                y: block(13),
                 width: block(0),
                 height: block(2),
                 exit: 10,
@@ -777,8 +789,8 @@ const level = [
                 width: block(0),
                 height: block(2),
                 exit: 9,
-                exitX: block(39),
-                exitY: block(9.5),
+                exitX: block(40),
+                exitY: block(14.5),
                 draw: () => { }
             },
             {

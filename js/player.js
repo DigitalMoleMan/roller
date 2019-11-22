@@ -13,21 +13,20 @@ class Player {
             paddingX: 16,
             paddingY: 16,
             x: {
-                left: () => Math.round((this.posX - this.hitbox.paddingX) + this.velX),
-                right: () => Math.round((this.posX + this.hitbox.paddingX) + this.velX),
+                left: () => Math.round((this.posX - this.hitbox.paddingX) + (this.velX * deltaTime)),
+                right: () => Math.round((this.posX + this.hitbox.paddingX) + (this.velX * deltaTime)),
                 top: () => Math.round(this.posY - (this.hitbox.paddingY / 2)),
                 bottom: () => Math.round(this.posY + this.hitbox.paddingY)
             },
             y: {
                 left: () => Math.round(this.posX - this.hitbox.paddingX),
                 right: () => Math.round(this.posX + this.hitbox.paddingX),
-                top: () => Math.round((this.posY - this.hitbox.paddingY / 2) + this.velY),
-                bottom: () => Math.round((this.posY + this.hitbox.paddingY) + this.velY)
+                top: () => Math.round((this.posY - this.hitbox.paddingY / 2) + (this.velY * deltaTime)),
+                bottom: () => Math.round((this.posY + this.hitbox.paddingY) + (this.velY * deltaTime))
             }
         }
         this.acc = .4;
         this.dec = .93;
-
 
         this.jumpHeight = 0;
         this.midJump = false;
@@ -35,8 +34,6 @@ class Player {
         this.colX = false;
         this.colY = false;
 
-
-        this.bandVel = 0;
         this.look = 6;
         this.band = 0;
 
@@ -45,23 +42,17 @@ class Player {
 
         this.activeItem = new Hookshot() //new Booster()
 
-        this.sprite = () => sprites.player;
-        this.sfx = () => sfx.player;
-
-
+        this.sprite = sprites.player;
+        this.sfx = sfx.player;
     }
 
     readInput(input) {
-        var key = input.keys;
-        var bind = input.binds.game;
+        let key = input.keys;
+        let bind = input.binds.game;
 
         if (key[bind.left]) this.moveLeft();
         if (key[bind.right]) this.moveRight();
 
-
-        //if (input.keys[input.binds.jump]) this.jump();
-
-        // if (input.keys[input.binds.use]) this.use();
     }
 
     update() {
@@ -75,107 +66,64 @@ class Player {
             this.posY -= this.velY * .5;
         }
 
-        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
-
-        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2));
-
-
-        (!this.colX) ? this.posX += Math.cos(rotation) * dist : this.velX = 0;
-
+        //decrease deceleration when in the air
         this.colY ? (this.velX *= this.dec) : (this.velX *= (this.dec + .01));
 
-        if (!this.colY) {
-            this.posY += Math.sin(rotation) * dist;//this.velY;
-            (this.velY < 0) ? this.velY += .3 : this.velY += .4;
-        } else {
-            if (this.velY > .1) this.velY *= .1;
-            if (this.velY < 0) this.velY *= .1;
-            if (this.velY < .1 && this.velY > -.1) this.velY = Math.round(this.velY * 100) / 100
-            //this.posY = Math.round(this.posY)
-        }
-
         if (this.colY && this.velY > 0) {
-            if (this.midJump) {
-                for (let i = 0; i < 25; i++) {
-                    let colVal = 192 + Math.random() * 64;
-                    render.pe.addParticle({
-                        x: player.posX + ((Math.random() - .5) * 16),
-                        y: (player.posY + 18),
-                        velX: (Math.random() - .5) * 2.5,
-                        velY: (Math.random()) / 5,
-                        lifetime: (Math.random() * 25),
-                        size: 1 + (Math.random() * 3),
-                        color: `rgba(${colVal},${colVal},${colVal},128)`
-                    })
-                }
-
+            if (this.velY > 24) {
+                for (let i = 0; i < this.velY; i++) new MeteorParticle(
+                    this.posX + ((Math.random() - .5) * 32),
+                    this.hitbox.x.bottom(),
+                    (Math.random() - .5) * 2.5,
+                    (Math.random() - 1) * .5,
+                );
+            } else if (this.velY > 1) for (let i = 0; i < this.velY; i++) {
+                new DustParticle(this.posX + pRandom(32), this.hitbox.x.bottom(), pRandom(this.velY / 5), -Math.random() / 5)
             }
             this.midJump = false;
-            //this.velY -= .1;
-
         }
 
+        //extend jump if player is holding the jump button
         if (this.velY < 0 && this.midJump && !(input.keys[input.binds.game.jump])) this.velY *= .9;
 
-        this.jumpHeight = Math.round((-9 - ((Math.abs(this.velX) * .1))) * 100) / 100;
-
-
-        this.band += this.velX;
-        if (this.velX > 32) this.velX = 32;
-        if (this.velX < -32) this.velX = -32;
-        if (this.velY > 24) this.velY = 24;
-        if (this.velY < -32) this.velY = -32;
-
-
-        if (this.band < 0) this.band = sprites.player.bands.length * 100;
-        if (this.posY >= world.height + 128) this.kill();
-
-        if (this.invsFrames > 0) this.invsFrames--;
-
+        //decrease the amount of frames until the player can take damage again.
+        if (this.invsFrames) this.setInvsFrames(this.invsFrames - 1);
 
         //case handling
         if (this.velX < .01 && this.velX > -.01) this.velX = 0;
 
+        //set player velocity to 0 on collision
+        if (this.colX) this.velX = 0;
 
+        this.updateSprite();
+
+        this.updatePosition();
     }
 
     moveLeft() {
-
         this.velX -= this.acc;
-        if (this.look > 0) this.look--;
     }
 
     moveRight() {
         this.velX += this.acc;
-        if (this.look < 12) this.look++;
     }
 
     jump() {
         if (!this.midJump) {
-            (this.velY > 0) ? this.velY = this.jumpHeight : this.velY += this.jumpHeight;
+            this.jumpHeight = this.calculateJumpHeight();
+
+            (this.velY > 0) ? this.velY = -this.jumpHeight : this.velY -= this.jumpHeight;
             this.midJump = true;
 
-            for (let i = 0; i < 50; i++) {
-                let colVal = 192 + Math.random() * 64;
-                render.pe.addParticle({
-                    x: player.posX + Math.random(),
-                    y: (player.posY + 12),
-                    velX: (Math.random() - .5) * 1.5,
-                    velY: (Math.random() - .5) / 4,
-                    lifetime: (Math.random() * 20),
-                    size: 1 + (Math.random() * 3),
-                    color: `rgba(${colVal},${colVal},${colVal},128)`
-                })
-            }
+            for (let i = 0; i < 10; i++) new DustParticle(this.posX + pRandom(32), this.hitbox.x.bottom(), pRandom(this.velY / 8), -Math.random() / 2);
             //playSound(this.sfx().jump);
         }
     }
 
     damage(amount) {
         if (this.invsFrames <= 0) {
-            this.invsFrames = 60;
+            this.setInvsFrames(60)
             this.hp -= amount;
-
             // playSound(this.sfx().hurt);
             if (this.hp <= 0) this.kill();
         }
@@ -187,7 +135,6 @@ class Player {
         this.posY = world.spawn.y;
         this.velX = 0;
         this.velY = 0;
-
         this.hp = this.maxHp;
         this.invsFrames = 0;
         camera.x = world.spawn.x - render.canvas.width / 2;
@@ -197,25 +144,27 @@ class Player {
     }
 
     collision(axis) {
-        for (let tile of nearPlayer) {
+        for (let tile of onScreenSegs.filter((tile) => (
+            this.hitbox[axis].left() < tile.x + tile.width &&
+            this.hitbox[axis].right() > tile.x &&
+            this.hitbox[axis].top() < tile.y + tile.height &&
+            this.hitbox[axis].bottom() > tile.y
+        ))) {
             if (this.hitbox[axis].left() < tile.x + tile.width &&
                 this.hitbox[axis].right() > tile.x &&
                 this.hitbox[axis].top() < tile.y + tile.height &&
                 this.hitbox[axis].bottom() > tile.y) {
-                // console.log(tile.constructor.name)
-                //console.log(tile)
                 switch (tile.type) {
-                    case 'block':
-                        return true;
+                    case 'barrier': return true;
+                    case 'block': return true;
                     case 'platform':
                         if (this.hitbox.x.bottom() <= tile.y) return true;
                         else break;
                     case 'elevator':
                         if (this.hitbox.x.bottom() <= tile.y - tile.velY) {
-                            this.posY += tile.velY;
-                            this.posX += tile.velX;
-                            if (this.hitbox.x.bottom() <= tile.y)
-                                return true;
+                            this.posY += tile.velY * deltaTime;
+                            this.posX += tile.velX * deltaTime;
+                            if (this.hitbox.x.bottom() <= tile.y) return true;
                         }
                         break;
                     case 'pumpkin':
@@ -238,26 +187,70 @@ class Player {
         return false;
     };
 
+    updatePosition() {
 
+        let rotation = Math.atan2((this.posY + this.velY) - this.posY, (this.posX + this.velX) - this.posX);
+
+        let dist = Math.sqrt(Math.pow(this.velX, 2) + Math.pow(this.velY, 2)) * deltaTime;
+
+
+        this.posX += (Math.cos(rotation) * dist)
+
+        if (!this.colY) {
+            this.posY += (Math.sin(rotation) * dist);//this.velY;
+            (this.velY < 0) ? this.velY += .3 * deltaTime : this.velY += .4 * deltaTime;
+        } else {
+            if (this.velY > .1 || this.velY < 0) this.velY *= .1;
+            if (this.velY < .1 && this.velY > -.1) this.velY = (Math.round(this.velY * 100) / 100);
+            //this.posY = Math.round(this.posY)
+        }
+    }
+
+    setInvsFrames(amount) {
+        this.invsFrames = amount;
+    }
+
+    calculateJumpHeight() {
+        let jh = Math.round((9 + (Math.abs(this.velX) * .1)) * 100) / 100;
+        return jh
+    }
+
+    updateSprite() {
+        if (this.velX > 0 && this.look < 12) this.look++;
+        if (this.velX < 0 && this.look > 0) this.look--;
+        this.band += this.velX * deltaTime;
+
+        if (this.band < 0) this.band += 8;
+    }
 
     draw() {
 
         this.activeItem.draw();
         if (!(this.invsFrames % 3)) {
 
+            render.drawSprite(this.sprite.body, this.look, (this.posX - 16), (this.posY - 16), 1, 1);
 
-            render.img(this.sprite().body[this.look], (this.posX - 16), (this.posY - 16), 1);
-
-
-
-            if (this.midJump) render.img(this.sprite().bandsJump[Math.floor(this.band) % this.sprite().bandsJump.length], (this.posX - 16), (this.posY - 16) + 2);
-            else render.img(this.sprite().bands[Math.floor((this.band) % this.sprite().bands.length)], (this.posX - 16), (this.posY - 16));
-
-
-            if (settings.misc.debugMode) {
-                render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
-                render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
+            if (this.velY < -1) render.drawSprite(this.sprite.bandsJump, Math.round(this.band), this.posX - 16, this.posY - 14, 1, 1);
+            if (this.velY > 1) render.drawSprite(this.sprite.bandsFall, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+            if (this.velY > 20) {
+                for (let i = 0; i < this.velY; i++) new MeteorParticle(
+                    this.posX,
+                    this.posY,
+                    (Math.random() - .5) * 5,
+                    -this.velY / 5
+                );
             }
+        }
+        if (this.velY > 24) {
+            render.ctx.globalCompositeOperation = "hard-light";
+            render.drawSprite(this.sprite.bandsMeteor, Math.round(gameClock), this.posX - 32, this.posY - 32, 2, 1);
+            render.ctx.globalCompositeOperation = "source-over";
+        }
+        if (this.velY > -1 && this.velY < 1) render.drawSprite(this.sprite.bands, Math.round(this.band), this.posX - 16, this.posY - 16, 1, 1);
+
+        if (settings.misc.debugMode) {
+            render.line(this.posX - 8, this.posY, this.posX + 8, this.posY, "#fff");
+            render.line(this.posX, this.posY - 8, this.posX, this.posY + 8, "#fff");
         }
     }
 }
@@ -278,6 +271,8 @@ class Hookshot extends Item {
         this.returnSpeed = 32;
         this.state = "retracted";
 
+        this.timeInAir = 0;
+
         this.minLength = 32;
         this.maxLength = 256;
         this.length = 0;
@@ -289,9 +284,8 @@ class Hookshot extends Item {
         this.target;
 
         this.inputBuffer = 0;
-        this.sprite = () => sprites.items.hookshot;
-        this.sound = () => sfx.items.hookshot;
-
+        this.sprite = sprites.items.hookshot;
+        this.sfx = sfx.items.hookshot;
 
     }
 
@@ -327,6 +321,8 @@ class Hookshot extends Item {
                 this.posY = Math.round(player.posY);
                 this.length = 0;
 
+                this.timeInAir = 0;
+
                 this.target = this.getClosest();
 
                 if (this.inputBuffer > 0) {
@@ -334,53 +330,51 @@ class Hookshot extends Item {
                     if (this.target !== undefined) {
                         this.inputBuffer = 0;
                         this.state = "shooting";
-                        this.sound().shoot.volume = .2
-                        playSound(this.sound().shoot);
+
+                        playSound(this.sfx.shoot);
                     } else this.inputBuffer--;
                 }
                 break;
             case "shooting":
 
                 if (input.keys[input.binds.game.use]) {
-                    try {
-                        if (this.posX > this.target.x &&
-                            this.posX < (this.target.x + this.target.width) &&
-                            this.posY > this.target.y &&
-                            this.posY < (this.target.y + this.target.height)) {
-                                this.sound().hook.volume = .1
-                            playSound(this.sound().hook);
-                            player.midJump = false;
-                            this.state = "hooked";
+                    if (this.posX > this.target.x &&
+                        this.posX < (this.target.x + this.target.width) &&
+                        this.posY > this.target.y &&
+                        this.posY < (this.target.y + this.target.height)) {
 
-                            this.posX = (this.target.x + (this.target.width / 2))
-                            this.posY = (this.target.y + (this.target.height / 2))
+                        playSound(this.sfx.hook, .2);
+                        player.midJump = false;
+                        this.state = "hooked";
 
-                            this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
+                        this.posX = (this.target.x + (this.target.width / 2))
+                        this.posY = (this.target.y + (this.target.height / 2))
 
-                            for (let i = 0; i < 10; i++) {
-                                let colVal = (Math.random() * 255);
-                                render.pe.addParticle({
-                                    x: this.posX + (Math.random() - .5) * 12,
-                                    y: this.posY + (Math.random() - .5) * 12,
-                                    velX: (Math.random() - .5) * 3,
-                                    velY: (Math.random() - .5) * 3,
-                                    lifetime: 5 + (Math.random() * 10),
-                                    size: 2 + (Math.random() - .5) * 2,
-                                    color: `rgba(255,${colVal},0,255)`,
-                                    glow: true
-                                })
+                        this.length = Math.round(Math.sqrt(Math.pow(player.posX - this.posX, 2) + Math.pow(player.posY - this.posY, 2)));
 
-                            }
+                        for (let i = 0; i < 10; i++) {
+                            let colVal = (Math.random() * 255);
+                            render.particleEngine.addParticle({
+                                x: this.posX + (Math.random() - .5) * 12,
+                                y: this.posY + (Math.random() - .5) * 12,
+                                velX: (Math.random() - .5) * 3,
+                                velY: (Math.random() - .5) * 3,
+                                lifetime: 5 + (Math.random() * 10),
+                                size: 2 + (Math.random() - .5) * 2,
+                                color: `rgba(255,${colVal},0,255)`,
+                                glow: true
+                            })
 
-
-                        } else {
-                            let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
-
-                            this.posX += Math.cos(rotation) * this.speed
-                            this.posY += Math.sin(rotation) * this.speed
                         }
-                    } catch (error) {
-                        this.state = "retracting";
+
+
+                    } else {
+                        let rotation = Math.atan2((this.target.y + (this.target.height / 2)) - this.posY, (this.target.x + (this.target.width / 2)) - this.posX);
+
+                        this.posX += (Math.cos(rotation) * (this.speed)) * deltaTime
+                        this.posY += (Math.sin(rotation) * (this.speed)) * deltaTime
+
+                        this.timeInAir++;
                     }
                 } else {
                     this.state = "retracting";
@@ -389,12 +383,13 @@ class Hookshot extends Item {
 
             case "hooked": {
 
+                this.timeInAir = 0;
                 if (player.midJump) this.state = "retracting";
 
                 if (input.keys[input.binds.game.use]) {
 
-                    if ((input.keys[input.binds.game.up] || this.length > this.maxLength) && this.length > this.minLength ) this.length -= 2
-                    if ((input.keys[input.binds.game.down] || this.length < this.minLength) && this.length < this.maxLength ) this.length += 2
+                    if ((input.keys[input.binds.game.up] || this.length > this.maxLength) && this.length > this.minLength) this.length -= 2
+                    if ((input.keys[input.binds.game.down] || this.length < this.minLength) && this.length < this.maxLength) this.length += 2
 
 
 
@@ -405,7 +400,6 @@ class Hookshot extends Item {
 
                         player.velX += (Math.cos(rotation) * this.stiffness);
                         player.velY += (Math.sin(rotation) * this.stiffness);
-
                     }
                     if (this.target.fromPlayer <= this.length + 8 && this.target.fromPlayer >= this.length - 32) {
                         player.dec = .96;
@@ -417,20 +411,22 @@ class Hookshot extends Item {
 
                 } else {
                     player.dec = .93;
+
                     player.midJump = true;
                     this.state = "retracting";
                 }
             }
                 break;
             case "retracting":
+                this.timeInAir = 0;
                 player.dec = .93;
                 this.length = 0;
 
                 let rotation = Math.atan2(player.posY - this.posY, player.posX - this.posX);
 
 
-                this.posX += Math.cos(rotation) * (this.returnSpeed);
-                this.posY += Math.sin(rotation) * (this.returnSpeed);
+                this.posX += Math.cos(rotation) * (this.returnSpeed) * deltaTime;
+                this.posY += Math.sin(rotation) * (this.returnSpeed) * deltaTime;
 
                 if (this.posX > player.posX - 16 && this.posX < (player.posX + 16) && this.posY > player.posY - 16 && this.posY < (player.posY + 16)) this.state = "retracted";
 
@@ -442,12 +438,9 @@ class Hookshot extends Item {
 
     getClosest() {
 
-        let hookpoints = world.tiles.filter((tile) => (tile.type == 'hookpoint'));
+        let hookpoints = onScreen.filter((tile) => (tile.type == 'hookpoint'));
         hookpoints = hookpoints.filter((point) => point.fromPlayer < this.maxLength);
-        for (let point of hookpoints) {
-
-            point.blocked = this.checkPointBlocked(point)
-        }
+        for (let point of hookpoints) point.blocked = this.checkPointBlocked(point)
         hookpoints = hookpoints.filter((point) => (point.blocked == false));
 
 
@@ -488,11 +481,11 @@ class Hookshot extends Item {
         //hook
         if (this.state !== "retracted") {
             render.line(player.posX, player.posY, this.posX, this.posY, "#fff")
-            render.img(this.sprite().hook[this.angle], this.posX - 6, this.posY - 6);
+            render.img(this.sprite.hook[this.angle], this.posX - 6, this.posY - 6);
         }
 
         //recticle
-        if (this.target !== undefined) render.img(this.sprite().recticle, this.target.x - block(.25), this.target.y - block(.25))
+        if (this.target !== undefined) render.img(this.sprite.recticle, this.target.x - 8, this.target.y - 8)
 
         if (settings.misc.debugMode) {
             try { render.rectStroke(this.target.x - 4, this.target.y - 4, 24, 24, "#fff") }
@@ -512,7 +505,7 @@ class Booster extends Item {
 
         this.fuel = 20;
 
-        this.sprite = () => sprites.items.booster[this.state];
+        this.sprite = sprites.items.booster[this.state];
         this.dir = () => ((player.look - 6) / 6);
 
     }
@@ -559,12 +552,12 @@ class Booster extends Item {
 
             case "active":
 
-                render.img(this.sprite()[Math.round(gameClock / 4) % this.sprite().length], -(player.look * 2), player.posY - 4);
+                render.img(this.sprite[Math.round(gameClock / 4) % this.sprite.length], -(player.look * 2), player.posY - 4);
 
                 var colVal = () => (Math.random() * 128);
 
                 for (var i = 0; i < 1; i++) {
-                    render.pe.addParticle({
+                    render.particleEngine.addParticle({
                         x: (player.posX - (22 * this.dir())) + (Math.random() - .5) * 4,
                         y: (player.posY + 3) + (Math.random() - .5) * 4,
                         velX: (Math.random()) * (-this.dir()),
@@ -576,7 +569,7 @@ class Booster extends Item {
                 }
 
                 break;
-            default: render.img(this.sprite(), -(player.look * 2), player.posY - 4);
+            default: render.img(this.sprite, -(player.look * 2), player.posY - 4);
                 break;
         }
         render.ctx.restore();

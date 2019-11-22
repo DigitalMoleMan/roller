@@ -12,42 +12,30 @@ class Renderer {
         });
 
         this.ctx.imageSmoothingEnabled = false;
+
         //text
         //this.ctx.font = "8px Roboto Mono;";
         this.ctx.textBaseline = "top";
 
         document.body.appendChild(this.canvas);
 
-        this.pe = new ParticleEngine();
+        this.particleEngine = new ParticleEngine();
     }
 
-    /**
-     * imports an image.
-     * @param {String} path directory of the image.
-     */
-    importImage(path) {
-        let img = new Image;
-        img.src = path;
-        return (img);
+    renewCanvas() {
+        this.canvas.remove();
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = canvasWidth;
+        this.canvas.height = canvasHeight;
+        this.ctx = this.canvas.getContext('2d', {
+            alpha: false
+        });
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.textBaseline = "top";
+        document.body.appendChild(this.canvas);
     }
 
-    /**
-     * imports a series of images as a sprite
-     * @param {String} path directory of the sprite.
-     * @param {Number} length The number of frames the sprite has.
-     * @returns {Array} returns an array where each index represents a frame.
-     */
-    importSprite(path, length) {
 
-        let sprite = new Array;
-
-        for (let i = 0; i < length; i++) {
-            let img = this.importImage(path + '_' + i + '.png');
-            sprite.push(img);
-        }
-
-        return sprite
-    }
 
     attatchCamera(camera) {
         this.camera = camera;
@@ -78,19 +66,6 @@ class Renderer {
         this.ctx.fillRect(x - (this.camera.x * scrollFactor), y - (this.camera.y * scrollFactor), width, height);
     }
 
-    /**
-     * 
-     * @param {Number} x 
-     * @param {Number} y 
-     * @param {Number} width 
-     * @param {Number} height 
-     * @param {String} color 
-     */
-    rectStatic(x, y, width, height, color) {
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(x, y, width, height);
-    }
-
     rectStroke(x, y, width, height, color, lineWidth = 1, scrollFactor = 1) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = lineWidth;
@@ -115,38 +90,51 @@ class Renderer {
     img(src, x, y, scrollFactor = 1, scale = 1) {
         let usesScale = (scale !== 1);
 
-        if (usesScale) {
-            render.ctx.save();
-            render.ctx.scale(scale, scale);
+
+        this.ctx.drawImage(src,
+            (x - (this.camera.x * scrollFactor)),
+            (y - (this.camera.y * scrollFactor)),
+            src.width * scale,
+            src.height * scale
+        );
+    }
+
+    drawSprite(spriteSheet, celIndex, x, y, scale, scrollFactor) {
+
+        let sourceX = (spriteSheet.sourceWidth * Math.abs(celIndex)) % spriteSheet.source.width;
+        this.ctx.drawImage(
+            //source
+            spriteSheet.source,
+            sourceX,
+            0,
+            spriteSheet.sourceWidth,
+            spriteSheet.sourceHeight,
+
+            //destination
+            (x - (this.camera.x * scrollFactor)),
+            (y - (this.camera.y * scrollFactor)),
+            spriteSheet.sourceWidth * scale,
+            spriteSheet.sourceHeight * scale
+        )
+    }
+
+    /**
+     * 
+     * @param {String} text 
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} size 
+     * @param {Number} scrollFactor 
+     */
+    text(text, x, y, size = 2, scrollFactor = 0) {
+        for (let i = 0; i < text.length; i++) {
+            let dx = x + (i * (fontFile.sourceWidth * size));
+            this.drawSprite(fontFile, text.charCodeAt(i), dx, y, size, scrollFactor);
         }
-        this.ctx.drawImage(src, (x - (this.camera.x * scrollFactor)) / scale, (y - (this.camera.y * scrollFactor)) / scale);
-
-        if (usesScale) render.ctx.restore();
     }
 
-    text(text, x, y, size = 1, color, scrollFactor = 0) {
-        for (let i in text){
-
-            let sx = (8 * text.charCodeAt(i))
-            let sy = 0
-            let sw = 8
-            let sh = 8
-
-            let dx = x + (i * (16 * size)) - (this.camera.x * scrollFactor)
-            let dy = y - (this.camera.y * scrollFactor)
-            let dw = 16 * size
-            let dh = 16 * size
-         this.ctx.drawImage(fontFile, sx, sy, sw, sh, dx, dy, dw, dh);
-        }
-    }
-
-
-    rotate(originX, originY, angle) {
-        this.ctx.save();
-        this.ctx.translate(originX, originY);
-        this.ctx.rotate(angle);
-    }
 }
+
 
 class Camera {
     constructor(startX = 0, startY = 0, xSpeed = 15, ySpeed = 10) {
@@ -210,11 +198,13 @@ class LightingEngine {
 
     update() {
         if (settings.graphics.enableLighting) {
-            this.sources = onScreenLights.concat(this.tempSources);
 
-            this.tempSources.forEach(source => source.lifetime--);
-
-            this.tempSources = this.tempSources.filter(source => source.lifetime > 0);
+            this.sources = world.lightSources.filter((tile) => (
+                (camera.x - (canvasWidth)) < tile.x + tile.radius &&
+                (camera.x + canvasWidth + (canvasWidth)) > tile.x - tile.radius &&
+                (camera.y - (canvasHeight)) < tile.y + tile.radius &&
+                (camera.y + canvasHeight + (canvasHeight)) > tile.y - tile.radius
+            ));
 
             let playerPoints = [{
                 x: player.posX - 3,
@@ -263,8 +253,8 @@ class LightingEngine {
 
             this.segments = this.toSegments(playerPoints)
 
-            onScreenSegs.forEach(seg => {
-                var segPoints = [{
+            for (let seg of onScreenSegs) {
+                let segPoints = [{
                     x: seg.x,
                     y: seg.y
                 }, {
@@ -278,11 +268,11 @@ class LightingEngine {
                     y: seg.y + seg.height
                 }]
                 this.segments.push(...this.toSegments(segPoints))
-            })
+            }
 
 
             this.polygons = [];
-            this.sources.forEach(source => this.polygons.push(this.getSightPolygon(source.x, source.y, source.radiusBorder())));
+            for (let source of this.sources) this.polygons.push(this.getSightPolygon(source.x, source.y, source.radiusBorder()));
 
         }
     }
@@ -327,9 +317,7 @@ class LightingEngine {
 
         let points = ((segments) => {
             let a = [];
-            segments.forEach((seg) => {
-                a.push(seg.a, seg.b);
-            });
+            for (let seg of segments) a.push(seg.a, seg.b);
             return a;
         })(segmentsBorder);
 
@@ -375,8 +363,8 @@ class LightingEngine {
             };
 
             let closestIntersect = null;
-            for (let i = 0; i < segmentsBorder.length; i++) {
-                let intersect = this.getIntersection(ray, segmentsBorder[i]);
+            for (let point of segmentsBorder) {
+                let intersect = this.getIntersection(ray, point);
                 if (!intersect) continue;
                 if (!closestIntersect || intersect.param < closestIntersect.param) {
                     closestIntersect = intersect;
@@ -410,9 +398,7 @@ class LightingEngine {
 
         let r_mag = Math.sqrt(r_dx * r_dx + r_dy * r_dy);
         let s_mag = Math.sqrt(s_dx * s_dx + s_dy * s_dy);
-        if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag) {
-            return null;
-        }
+        if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag) return null;
 
         let T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
         let T1 = (s_px + s_dx * T2 - r_px) / r_dx;
@@ -430,36 +416,27 @@ class LightingEngine {
     draw() {
         if (settings.graphics.enableLighting) {
 
+            render.ctx.save();
 
             render.ctx.globalCompositeOperation = "lighter";
+            render.ctx.filter = 'blur(6px)';
 
+            for (let i = 0; i < this.polygons.length; i++) this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
 
-            for (let i = 0; i < this.polygons.length; i++) {
-                this.drawPolygon(this.polygons[i], render.ctx, this.sources[i].gradient());
-            }
+            render.ctx.restore();
 
-
-            //render.rect(0,0,canvasWidth, canvasHeight, "#000000")
-
-            render.ctx.globalCompositeOperation = "source-over";
 
             if (settings.misc.debugMode) {
-                for (let i = 0; i < this.polygons.length; i++) {
-                    let polygon = this.polygons[i];
+                for (let polygon of this.polygons) {
                     render.ctx.strokeStyle = "#fff";
                     render.ctx.moveTo(polygon[0].x - camera.x, polygon[0].y - camera.y);
                     for (let i = 1; i < polygon.length; i++) {
                         let intersect = polygon[i];
-
                         render.ctx.lineTo(intersect.x - camera.x, intersect.y - camera.y);
                     }
                 }
                 render.ctx.stroke();
-                this.segments.forEach(seg => {
-                    render.line(seg.a.x, seg.a.y, seg.b.x, seg.b.y, "#f00");
-                    //render.rect(seg.a.x - 2, seg.a.y - 2, 4, 4, "#fff");
-                    //render.rect(seg.b.x - 2, seg.b.y - 2, 4, 4, "#fff");
-                })
+                for (let seg of this.segments) render.line(seg.a.x, seg.a.y, seg.b.x, seg.b.y, "#f00");
             }
         }
     }
@@ -541,14 +518,18 @@ class ParticleEngine {
         this.particles = [];
     }
 
-    tick() {
+    update() {
 
         this.particles.forEach((particle, index) => {
-            render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
-            particle.x += particle.velX;
-            particle.y += particle.velY;
-            particle.size -= .05;
-            (particle.lifetime > 0) ? particle.lifetime-- : this.particles.splice(index, 1);
+            if (particle.lifetime > 0) {
+                particle.lifetime -= deltaTime
+                render.rect(particle.x - (particle.size / 2), particle.y - (particle.size / 2), particle.size, particle.size, particle.color);
+                particle.x += particle.velX * deltaTime;
+                particle.y += particle.velY * deltaTime;
+                particle.size -= .05;
+            } else {
+                this.particles.splice(index, 1);
+            }
 
         })
 
@@ -572,3 +553,41 @@ class ParticleEngine {
     }
 }
 
+let pRandom = (n = 1) => (Math.random() - .5) * n;
+
+class Particle {
+    constructor(params) {
+        for (let param in params) this[param] = params[param];
+        render.particleEngine.particles.push(this);
+    }
+}
+
+class DustParticle extends Particle {
+    constructor(x, y, velX = 0, velY = 0) {
+        let colorVal = 192 + Math.random() * 64;
+        super({
+            x: x,
+            y: y,
+            lifetime: (Math.random() * 25),
+            velX: velX,
+            velY: velY,
+            size: 1 + (Math.random() * 3),
+            color: `rgba(${colorVal},${colorVal},${colorVal},128)`
+        })
+    }
+}
+
+class MeteorParticle extends Particle {
+    constructor(x, y, velX, velY) {
+        let colorVal = 192 + Math.random() * 64;
+        super({
+            x: x + ((Math.random() - .5) * 32),
+            y: y + ((Math.random() - .5) * 32),
+            lifetime: (Math.random() * 25),
+            velX: velX,
+            velY: velY,
+            size: 1 + (Math.random() * 1),
+            color: `rgba(${colorVal},${colorVal / 2},0,128)`
+        })
+    }
+}

@@ -8,56 +8,56 @@ class Input {
         game: [
             {
                 bind: "left",
-                x: block(0),
-                y: block(2),
-                width: block(5),
-                height: canvasHeight - block(2)
+                x: () => 0,
+                y: () => block(2),
+                width: () => canvasWidth / 5,
+                height: () => canvasHeight - block(2)
             },
             {
                 bind: "right",
-                x: block(5),
-                y: block(2),
-                width: block(5),
-                height: canvasHeight - block(2)
+                x: () => canvasWidth / 5,
+                y: () => block(2),
+                width: () => canvasWidth / 5,
+                height: () => canvasHeight - block(2)
             },
             {
                 bind: "jump",
-                x: canvasWidth - block(5),
-                y: block(0),
-                width: block(5),
-                height: canvasHeight
+                x: () => canvasWidth - (canvasWidth / 5),
+                y: () => 0,
+                width: () => (canvasWidth / 5),
+                height: () => canvasHeight
             },
             {
                 bind: "use",
-                x: canvasWidth - block(10),
-                y: block(0),
-                width: block(5),
-                height: canvasHeight
+                x: () => canvasWidth - ((canvasWidth / 5) * 2),
+                y: () => 0,
+                width: () => (canvasWidth / 5),
+                height: () => canvasHeight
             },
             {
                 bind: "togglePause",
-                x: block(1),
-                y: block(0),
-                width: block(2),
-                height: block(2)
+                x: () => block(1),
+                y: () => block(0),
+                width: () => block(2),
+                height: () => block(2)
             }
         ],
         gameDialogue: [
             {
                 bind: "next",
-                x: block(0),
-                y: block(0),
-                width: canvasWidth,
-                height: canvasHeight
+                x: () => block(0),
+                y: () => block(0),
+                width: () => canvasWidth,
+                height: () => canvasHeight
             }
         ],
         pauseMenu: [
             {
                 bind: "togglePause",
-                x: block(1),
-                y: block(0),
-                width: block(2),
-                height: block(2)
+                x: () => block(1),
+                y: () => block(0),
+                width: () => block(2),
+                height: () => block(2)
             }
         ]
     }
@@ -70,10 +70,10 @@ class Input {
             document.addEventListener('keydown', (e) => {
                 var pressedKey = e.code;
                 if (!this.keys[pressedKey]) document.dispatchEvent(new Event(pressedKey))
-               // console.log(pressedKey);
-               
+                // console.log(pressedKey);
+
                 this.keys[pressedKey] = true;
-               // console.log(input.keys[input.binds.game.use]);
+                // console.log(input.keys[input.binds.game.use]);
             }, { passive: true });
             document.addEventListener('keyup', (e) => {
                 var releasedKey = e.code;
@@ -98,10 +98,10 @@ class Input {
         for (let targetTouch of this.targetTouches) touches.push(targetTouch);
 
         this.touchAreas[activeScene].forEach(area => {
-            if (touches.filter((t) => (t.clientX >= area.x
-                && t.clientX <= area.x + area.width
-                && t.clientY >= area.y
-                && t.clientY <= area.y + area.height)).length > 0) {
+            if (touches.filter((t) => (t.clientX >= area.x()
+                && t.clientX <= area.x() + area.width()
+                && t.clientY >= area.y()
+                && t.clientY <= area.y() + area.height())).length > 0) {
                 if (!this.keys[this.binds[activeScene][area.bind]]) document.dispatchEvent(new Event(this.binds[activeScene][area.bind]));
                 this.keys[this.binds[activeScene][area.bind]] = true;
             } else this.keys[this.binds[activeScene][area.bind]] = false;
