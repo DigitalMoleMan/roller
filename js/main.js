@@ -41,9 +41,12 @@ let onMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 lastIndex = (array) => array.length - 1;
 
 randomIndex = (array) => array[Math.round(Math.random() * lastIndex(array))];
-
-let canvasWidth = window.innerWidth;
-let canvasHeight = window.innerHeight;
+let canvasWidth = 1024;
+let canvasHeight = 576;
+if (onMobile) {
+    canvasWidth = window.innerWidth;
+    canvasHeight = window.innerHeight;
+}
 
 let render = new Renderer(canvasWidth, canvasHeight);
 
@@ -214,9 +217,11 @@ function loop(time) {
 }
 
 window.onresize = () => {
-    canvasWidth = window.innerWidth;
-    canvasHeight = window.innerHeight;
-    render.renewCanvas();
+    if (onMobile) {
+        canvasWidth = window.innerWidth;
+        canvasHeight = window.innerHeight;
+        render.renewCanvas();
+    }
 }
 
 class Background {
